@@ -53,7 +53,14 @@ namespace polymesh {
 
     export class ctc { constructor(public x: number, public y: number, public z: number, public c: number) { } }
 
-    export class cmesh { public v: mesh }
+    export class cmesh {
+        v: mesh
+
+        constructor() {
+            this.v.cts = [{indices: [0,0,0], color: 0}]
+            this.v.cvs = [{x: 0, y: 0, z: 0}]
+        }
+    }
 
     let axchange = 0
     let azchange = 0
@@ -410,6 +417,5 @@ namespace polymesh {
     }
 
 }
-
 
 
