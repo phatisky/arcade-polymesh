@@ -54,7 +54,7 @@ namespace polymesh {
     export class ctc { constructor(public x: number, public y: number, public z: number, public c: number) { } }
 
     export class cmesh {
-        v: mesh
+        public v: mesh
 
         constructor() {
             this.v.cts = [{indices: [0,0,0], color: 0}]
