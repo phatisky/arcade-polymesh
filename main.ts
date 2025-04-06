@@ -40,7 +40,7 @@ namespace polymesh {
     }
 
     export interface ct {
-        indices: [number, number, number]
+        indices: number[]
         color: number
     }
 
