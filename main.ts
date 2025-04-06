@@ -60,13 +60,13 @@ namespace polymesh {
         return new cmesh()
     }
 
-    //% blockid=poly_clsvertice
+    //% blockid=poly_cls_vertice
     //% block="vertice of x $x y $y z $z"
     export function clsvertice(x: number, y: number, z: number): cvc {
         return new cvc(x, y, z)
     }
 
-    //% blockid=poly_clstriangle
+    //% blockid=poly_cls_triangle
     //% block="triangle of idc1 $x idc2 $y idc3 $z color $col"
     export function clstriangle(i1: number, i2: number, i3: number, col: number): ctc {
         return new ctc(i1, i2, i3, col)
@@ -83,7 +83,7 @@ namespace polymesh {
         //% blockid=poly_class_addvertice
         //% block=" $this add vertice by $ccv|| at $idx"
         //% this.defl=myMesh
-        //% ccv.shadow=poly_clsvertice
+        //% ccv.shadow=poly_cls_vertice
         public addvertice(ccv: cvc, idx: number = -1) {
             if (idx < 0) {
                 this.v.cvs.insertAt(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
@@ -95,7 +95,7 @@ namespace polymesh {
         //% blockid=poly_class_addtriangle
         //% block=" $this add triangle by $cct|| at $idx"
         //% this.defl=myMesh
-        //% cct.shadow=poly_clstriangle
+        //% cct.shadow=poly_cls_triangle
         public addtriangle(cct: ctc, idx: number = -1) {
             if (idx < 0) {
                 this.v.cts.insertAt(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
@@ -107,7 +107,7 @@ namespace polymesh {
         //% blockid=poly_class_addvertice
         //% block=" $this set vertice at $idx by $ccv"
         //% this.defl=myMesh
-        //% ccv.shadow=poly_clsvertice
+        //% ccv.shadow=poly_cls_vertice
         public setvertice(idx: number, ccv: cvc) {
             this.v.cvs.set(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
         }
@@ -115,7 +115,7 @@ namespace polymesh {
         //% blockid=poly_class_addtriangle
         //% block=" $this set triangle at $idx by $cct"
         //% this.defl=myMesh
-        //% cct.shadow=poly_clstriangle
+        //% cct.shadow=poly_cls_triangle
         public settriangle(idx: number, cct: ctc) {
             this.v.cts.set(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
         }
@@ -144,26 +144,6 @@ namespace polymesh {
     let sizechange = 0
     let aychange = 0
     let sort = 2
-
-    //% blockid=poly_setvertice
-    //% block=" $mymesh set vertice array by $ccv"
-    //% mymesh.shadow=variables_get mymesh.defl=myMesh
-    //% ccv.shadow=lists_create_with
-    //% ccv.defl=poly_clsvertice
-    export function setvertice(mymesh: cmesh, ccv: cvc[]) {
-        mymesh.v.cvs = []
-        for (let clsv of ccv) mymesh.v.cvs.push({ x: clsv.x, y: clsv.y, z: clsv.z })
-    }
-
-    //% blockid=poly_settriangle
-    //% block=" $mymesh set triangle array by $cct"
-    //% mymesh.shadow=variables_get mymesh.defl=myMesh
-    //% cct.shadow=lists_create_with
-    //% cct.defl=poly_clstriangle
-    export function settriangle(mymesh: cmesh, cct: ctc[]) {
-        mymesh.v.cts = []
-        for (let clsv of cct) mymesh.v.cts.push({ indices: [clsv.i1, clsv.i2, clsv.i3], color: clsv.c })
-    }
 
     //% blockid=poly_rendermesh
     //% block=" $mymesh render to $image"
@@ -336,9 +316,6 @@ namespace polymesh {
                 return z;
             }
 
-
-
-
             if (sort === 0) {
                 triangles.sort((b, a) => {
                     let zA = (rotatedVertices[a.indices[0]].z + rotatedVertices[a.indices[1]].z + rotatedVertices[a.indices[2]].z) / 3;
@@ -352,8 +329,6 @@ namespace polymesh {
                 quicksort2(triangles, 0, triangles.length - 1, rotatedVertices);
 
             }
-
-
 
             for (let i = 0; i < triangles.length; i++) {
                 let triangle = triangles[i];
@@ -389,10 +364,10 @@ namespace polymesh {
     }
 
     //% blockid=poly_gettriangle
-    //% block="get triangle indice 1 $x indice 2 $y indice 3 $z color $col"
-    export function gettriangle(x: number, y: number, z: number, col: number): ct {
+    //% block="get triangle indice 1 $i1 indice 2 $i2 indice 3 $i3 color $col"
+    export function gettriangle(i1: number, i2: number, i3: number, col: number): ct {
         return {
-            indices: [x, y, z,], color: col
+            indices: [i1, i2, i3], color: col
         }
     }
 
