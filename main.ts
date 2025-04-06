@@ -50,26 +50,31 @@ namespace polymesh {
     }
 
     export class cvc { constructor(public x: number, public y: number, public z: number) { } }
-
-    export class ctc { constructor(public i1: number, public i2: number, public i3: number, public c: number) { } }
-
-    //% blockid=poly_newmesh
-    //% block="create new mesh"
-    //% blockSetVariable=myMenu
-    export function newmesh() {
-        return new cmesh()
-    }
-
     //% blockid=poly_clsvertice
     //% block="vertice of x $x y $y z $z"
+    //% x.defl=0
+    //% y.defl=0
+    //% z.defl=0
     export function clsvertice(x: number, y: number, z: number): cvc {
         return new cvc(x, y, z)
     }
 
+    export class ctc { constructor(public i1: number, public i2: number, public i3: number, public c: number) { } }
     //% blockid=poly_clstriangle
     //% block="triangle of idc1 $i1 idc2 $i2 idc3 $i3 color $col"
+    //% i1.defl=0
+    //% i2.defl=0
+    //% i3.defl=0
+    //% col.shadow=colorindexpicker
     export function clstriangle(i1: number, i2: number, i3: number, col: number): ctc {
         return new ctc(i1, i2, i3, col)
+    }
+
+    //% blockid=poly_newmesh
+    //% block="create new mesh"
+    //% blockSetVariable=myMesh
+    export function newmesh() {
+        return new cmesh()
     }
 
     export class cmesh {
