@@ -79,62 +79,63 @@ namespace polymesh {
             this.v.cts = [{indices: [0,0,0], color: 0}]
             this.v.cvs = [{x: 0, y: 0, z: 0}]
         }
-
-        //% blockid=poly_class_addvertice
-        //% block=" $this add vertice by $ccv|| at $idx"
-        //% this.defl=myMesh
-        //% ccv.shadow=poly_clsvertice
-        public addvertice(ccv: cvc, idx: number = -1) {
-            if (idx < 0) {
-                this.v.cvs.insertAt(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
-                return
-            }
-            this.v.cvs.push({ x: ccv.x, y: ccv.y, z: ccv.z })
-        }
-
-        //% blockid=poly_class_addtriangle
-        //% block=" $this add triangle by $cct|| at $idx"
-        //% this.defl=myMesh
-        //% cct.shadow=poly_clstriangle
-        public addtriangle(cct: ctc, idx: number = -1) {
-            if (idx < 0) {
-                this.v.cts.insertAt(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
-                return
-            }
-            this.v.cts.push({ indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
-        }
-
-        //% blockid=poly_class_addvertice
-        //% block=" $this set vertice at $idx by $ccv"
-        //% this.defl=myMesh
-        //% ccv.shadow=poly_clsvertice
-        public setvertice(idx: number, ccv: cvc) {
-            this.v.cvs.set(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
-        }
-
-        //% blockid=poly_class_addtriangle
-        //% block=" $this set triangle at $idx by $cct"
-        //% this.defl=myMesh
-        //% cct.shadow=poly_clstriangle
-        public settriangle(idx: number, cct: ctc) {
-            this.v.cts.set(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
-        }
-
-        //% blockid=poly_class_delvertice
-        //% block=" $this remove vertice at $idx"
-        //% this.defl=myMesh
-        public delvertice(idx: number) {
-            this.v.cvs.removeAt(idx)
-        }
-
-        //% blockid=poly_class_deltriangle
-        //% block=" $this remove triangle at $idx"
-        //% this.defl=myMesh
-        public deltriangle(idx: number) {
-            this.v.cts.removeAt(idx)
-        }
-
     }
+
+
+    //% blockid=poly_class_addvertice
+    //% block=" $from add vertice by $ccv|| at $idx"
+    //% from.shadow=variables_get from.defl=myMesh
+    //% ccv.shadow=poly_clsvertice
+    export function addvertice(from: cmesh, ccv: cvc, idx: number = -1) {
+        if (idx < 0) {
+            from.v.cvs.insertAt(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
+            return
+        }
+        from.v.cvs.push({ x: ccv.x, y: ccv.y, z: ccv.z })
+    }
+
+    //% blockid=poly_class_addtriangle
+    //% block=" $from add triangle by $cct|| at $idx"
+    //% from.shadow=variables_get from.defl=myMesh
+    //% cct.shadow=poly_clstriangle
+    export function addtriangle(from: cmesh, cct: ctc, idx: number = -1) {
+        if (idx < 0) {
+            from.v.cts.insertAt(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
+            return
+        }
+        from.v.cts.push({ indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
+    }
+
+    //% blockid=poly_class_addvertice
+    //% block=" $from set vertice at $idx by $ccv"
+    //% from.shadow=variables_get from.defl=myMesh
+    //% ccv.shadow=poly_clsvertice
+    export function setvertice(from: cmesh, idx: number, ccv: cvc) {
+        from.v.cvs.set(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
+    }
+
+    //% blockid=poly_class_addtriangle
+    //% block=" $from set triangle at $idx by $cct"
+    //% from.shadow=variables_get from.defl=myMesh
+    //% cct.shadow=poly_clstriangle
+    export function settriangle(from: cmesh, idx: number, cct: ctc) {
+        from.v.cts.set(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
+    }
+
+    //% blockid=poly_class_delvertice
+    //% block=" $from remove vertice at $idx"
+    //% from.shadow=variables_get from.defl=myMesh
+    export function delvertice(from: cmesh, idx: number) {
+        from.v.cvs.removeAt(idx)
+    }
+
+    //% blockid=poly_class_deltriangle
+    //% block=" $from remove triangle at $idx"
+    //% from.shadow=variables_get from.defl=myMesh
+    export function deltriangle(from: cmesh, idx: number) {
+        from.v.cts.removeAt(idx)
+    }
+
 
     let axchange = 0
     let azchange = 0
