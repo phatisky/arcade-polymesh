@@ -3,19 +3,19 @@
 namespace polymesh {
 
     export enum Angles {
-        //% block="angle x"
+        //% block="x"
         Angle_X,
-        //% block="angle y"
+        //% block="y"
         Angle_Y,
-        //% block="angle z"
+        //% block="z"
         Angle_Z,
     }
     export enum Cameras {
-        //% block="cam x"
+        //% block="x"
         Cam_x,
-        //% block="cam y"
+        //% block="y"
         Cam_y,
-        //% block="cam z"
+        //% block="z"
         Cam_z,
     }
     export enum MeshType {
@@ -50,97 +50,105 @@ namespace polymesh {
     }
 
     export class cvc { constructor(public x: number, public y: number, public z: number) { } }
-    //% blockid=poly_clsvertice
+    //% blockid=poly_shadow_vertice
     //% block="vertice of x $x y $y z $z"
     //% x.defl=0
     //% y.defl=0
     //% z.defl=0
-    export function clsvertice(x: number, y: number, z: number): cvc {
+    export function clsvertice(x: number, y: number, z: number) {
         return new cvc(x, y, z)
     }
 
     export class ctc { constructor(public i1: number, public i2: number, public i3: number, public c: number) { } }
-    //% blockid=poly_clstriangle
+    //% blockid=poly_shadow_triangle
     //% block="triangle of idc1 $i1 idc2 $i2 idc3 $i3 color $col"
     //% i1.defl=0
     //% i2.defl=0
     //% i3.defl=0
     //% col.shadow=colorindexpicker
-    export function clstriangle(i1: number, i2: number, i3: number, col: number): ctc {
+    export function clstriangle(i1: number, i2: number, i3: number, col: number) {
         return new ctc(i1, i2, i3, col)
     }
 
     //% blockid=poly_newmesh
     //% block="create new mesh"
     //% blockSetVariable=myMesh
+    //% weight=100
     export function newmesh() {
         return new cmesh()
     }
 
     export class cmesh {
-        v: mesh
+        public v: mesh
 
         constructor() {
             this.v.cts = [{indices: [0,0,0], color: 0}]
             this.v.cvs = [{x: 0, y: 0, z: 0}]
         }
-    }
 
-
-    //% blockid=poly_class_addvertice
-    //% block=" $from add vertice by $ccv|| at $idx"
-    //% from.shadow=variables_get from.defl=myMesh
-    //% ccv.shadow=poly_clsvertice
-    export function addvertice(from: cmesh, ccv: cvc, idx: number = -1) {
-        if (idx < 0) {
-            from.v.cvs.insertAt(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
-            return
+        //% blockid=poly_addvertice
+        //% block=" $this add vertice by x: $x y: $y z: $z|| at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% ccv.shadow=poly_shadow_vertice
+        //% weight=90
+        public addvertice(x: number, y: number, z: number, idx: number = -1) {
+            if (idx < 0) {
+                this.v.cvs.insertAt(idx, { x: x, y: y, z: z })
+                return
+            }
+            this.v.cvs.push({ x: x, y: y, z: z })
         }
-        from.v.cvs.push({ x: ccv.x, y: ccv.y, z: ccv.z })
-    }
-
-    //% blockid=poly_class_addtriangle
-    //% block=" $from add triangle by $cct|| at $idx"
-    //% from.shadow=variables_get from.defl=myMesh
-    //% cct.shadow=poly_clstriangle
-    export function addtriangle(from: cmesh, cct: ctc, idx: number = -1) {
-        if (idx < 0) {
-            from.v.cts.insertAt(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
-            return
+    
+        //% blockid=poly_addtriangle
+        //% block=" $this add triangle by idc1 $i1 idc2 $i2 idc3 $i3 color $c|| at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% c.shadow=colorindexpicker
+        //% cct.shadow=poly_shadow_triangle
+        //% weight=89
+        public addtriangle(i1: number, i2: number, i3: number, c: number, idx: number = -1) {
+            if (idx < 0) {
+                this.v.cts.insertAt(idx, { indices: [i1, i2, i3], color: c })
+                return
+            }
+            this.v.cts.push({ indices: [i1, i2, i3], color: c })
         }
-        from.v.cts.push({ indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
-    }
+    
+        //% blockid=poly_addvertice
+        //% block=" $this set vertice at $idx by x: $x y: $y z: $z"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% ccv.shadow=poly_shadow_vertice
+        //% weight=88
+        public setvertice(idx: number, x: number, y: number, z: number) {
+            this.v.cvs[idx] = { x: x, y: y, z: z }
+        }
+    
+        //% blockid=poly_addtriangle
+        //% block=" $this set triangle at $idx by idc1 $i1 idc2 $i2 idc3 $i3 color $c"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% cct.shadow=poly_shadow_triangle
+        //% c.shadow=colorindexpicker
+        //% weight=87
+        public settriangle(idx: number, i1: number, i2: number, i3: number, c: number) {
+            this.v.cts[idx] = { indices: [i1, i2, i3], color: c }
+        }
+    
+        //% blockid=poly_delvertice
+        //% block=" $this remove vertice at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% weight=86
+        public delvertice(idx: number) {
+            this.v.cvs.removeAt(idx)
+        }
+    
+        //% blockid=poly_deltriangle
+        //% block=" $this remove triangle at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% weight=85
+        public deltriangle(idx: number) {
+            this.v.cts.removeAt(idx)
+        }
 
-    //% blockid=poly_class_addvertice
-    //% block=" $from set vertice at $idx by $ccv"
-    //% from.shadow=variables_get from.defl=myMesh
-    //% ccv.shadow=poly_clsvertice
-    export function setvertice(from: cmesh, idx: number, ccv: cvc) {
-        from.v.cvs.set(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
     }
-
-    //% blockid=poly_class_addtriangle
-    //% block=" $from set triangle at $idx by $cct"
-    //% from.shadow=variables_get from.defl=myMesh
-    //% cct.shadow=poly_clstriangle
-    export function settriangle(from: cmesh, idx: number, cct: ctc) {
-        from.v.cts.set(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
-    }
-
-    //% blockid=poly_class_delvertice
-    //% block=" $from remove vertice at $idx"
-    //% from.shadow=variables_get from.defl=myMesh
-    export function delvertice(from: cmesh, idx: number) {
-        from.v.cvs.removeAt(idx)
-    }
-
-    //% blockid=poly_class_deltriangle
-    //% block=" $from remove triangle at $idx"
-    //% from.shadow=variables_get from.defl=myMesh
-    export function deltriangle(from: cmesh, idx: number) {
-        from.v.cts.removeAt(idx)
-    }
-
 
     let axchange = 0
     let azchange = 0
@@ -155,6 +163,7 @@ namespace polymesh {
     //% block=" $mymesh render to $image"
     //% mymesh.shadow=variables_get mymesh.defl=myMesh
     //% image.shadow=screen_image_picker
+    //% weight=80
     export function render(mymesh: cmesh, image: Image) {
         function updateCube() {
             let bg = image;
@@ -364,6 +373,7 @@ namespace polymesh {
     //% blockHidden
     //% blockid=poly_getvertice
     //% block="get vertice x $x y $y z $z" 
+    //% weight=70
     export function getvertice(x: number, y: number, z: number): cv {
         return {
             x, y, z,
@@ -373,6 +383,7 @@ namespace polymesh {
     //% blockHidden
     //% blockid=poly_gettriangle
     //% block="get triangle indice 1 $i1 indice 2 $i2 indice 3 $i3 color $col"
+    //% weight=69
     export function gettriangle(i1: number, i2: number, i3: number, col: number): ct {
         return {
             indices: [i1, i2, i3], color: col
@@ -380,7 +391,8 @@ namespace polymesh {
     }
 
     //% blockid=poly_angle_change
-    //% block="change $choice by $x"
+    //% block="change angle $choice by $x"
+    //% weight=60
     export function change(choice: Angles, x: number) {
         if (choice === 0) {
             axchange += x
@@ -391,7 +403,8 @@ namespace polymesh {
         }
     }
     //% blockid=poly_camera_change
-    //% block="change $choice by $x"
+    //% block="change camera $choice by $x"
+    //% weight=59
     export function changecam(choice: Cameras, x: number) {
         if (choice === 0) {
             camx += x
@@ -403,6 +416,7 @@ namespace polymesh {
     }
     //% blockid=poly_angle_set
     //% block="set $choice to $x"
+    //% weight=58
     export function setangle(choice: Angles, x: number) {
         if (choice === 0) {
             axchange = x
@@ -414,12 +428,14 @@ namespace polymesh {
     }
     //% blockid=poly_size
     //% block="set size to $x"
+    //% weight=50
     export function setsize(x: number) {
         sizechange = x
     }
 
     //% blockid=poly_sorttype
     //% block="set sorting method to $method"
+    //% weight=49
     export function sortingmethod(method: SortingMethods) {
         if (method === 0) {
             sort = 0
@@ -432,22 +448,26 @@ namespace polymesh {
 
     //% blockid=poly_angle_x
     //% block="angle x"
+    //% weight=40
     export function anglex() {
         return axchange
     }
     //% blockid=poly_angle_y
     //% block="angle y"
+    //% weight=39
     export function angley() {
         return aychange
     }
     //% blockid=poly_angle_z
     //% block="angle z"
+    //% weight=38
     export function anglez() {
         return azchange
     }
 
     //% blockid=poly_camera_set
     //% block="set camera position to x: $x y: $y z: $z"
+    //% weight=48
     export function setcampos(x: number, y: number, z: number) {
         camx = x
         camy = y
