@@ -67,7 +67,7 @@ namespace polymesh {
     }
 
     //% blockid=poly_clstriangle
-    //% block="triangle of idc1 $x idc2 $y idc3 $z color $col"
+    //% block="triangle of idc1 $i1 idc2 $i2 idc3 $i3 color $col"
     export function clstriangle(i1: number, i2: number, i3: number, col: number): ctc {
         return new ctc(i1, i2, i3, col)
     }
