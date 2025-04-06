@@ -60,13 +60,13 @@ namespace polymesh {
         return new cmesh()
     }
 
-    //% blockid=poly_cls_vertice
+    //% blockid=poly_clsvertice
     //% block="vertice of x $x y $y z $z"
     export function clsvertice(x: number, y: number, z: number): cvc {
         return new cvc(x, y, z)
     }
 
-    //% blockid=poly_cls_triangle
+    //% blockid=poly_clstriangle
     //% block="triangle of idc1 $x idc2 $y idc3 $z color $col"
     export function clstriangle(i1: number, i2: number, i3: number, col: number): ctc {
         return new ctc(i1, i2, i3, col)
@@ -83,7 +83,7 @@ namespace polymesh {
         //% blockid=poly_class_addvertice
         //% block=" $this add vertice by $ccv|| at $idx"
         //% this.defl=myMesh
-        //% ccv.shadow=poly_cls_vertice
+        //% ccv.shadow=poly_clsvertice
         public addvertice(ccv: cvc, idx: number = -1) {
             if (idx < 0) {
                 this.v.cvs.insertAt(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
@@ -95,7 +95,7 @@ namespace polymesh {
         //% blockid=poly_class_addtriangle
         //% block=" $this add triangle by $cct|| at $idx"
         //% this.defl=myMesh
-        //% cct.shadow=poly_cls_triangle
+        //% cct.shadow=poly_clstriangle
         public addtriangle(cct: ctc, idx: number = -1) {
             if (idx < 0) {
                 this.v.cts.insertAt(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
@@ -107,7 +107,7 @@ namespace polymesh {
         //% blockid=poly_class_addvertice
         //% block=" $this set vertice at $idx by $ccv"
         //% this.defl=myMesh
-        //% ccv.shadow=poly_cls_vertice
+        //% ccv.shadow=poly_clsvertice
         public setvertice(idx: number, ccv: cvc) {
             this.v.cvs.set(idx, { x: ccv.x, y: ccv.y, z: ccv.z })
         }
@@ -115,7 +115,7 @@ namespace polymesh {
         //% blockid=poly_class_addtriangle
         //% block=" $this set triangle at $idx by $cct"
         //% this.defl=myMesh
-        //% cct.shadow=poly_cls_triangle
+        //% cct.shadow=poly_clstriangle
         public settriangle(idx: number, cct: ctc) {
             this.v.cts.set(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
         }
@@ -355,6 +355,7 @@ namespace polymesh {
 
     }
 
+    //% blockHidden
     //% blockid=poly_getvertice
     //% block="get vertice x $x y $y z $z" 
     export function getvertice(x: number, y: number, z: number): cv {
@@ -363,6 +364,7 @@ namespace polymesh {
         };
     }
 
+    //% blockHidden
     //% blockid=poly_gettriangle
     //% block="get triangle indice 1 $i1 indice 2 $i2 indice 3 $i3 color $col"
     export function gettriangle(i1: number, i2: number, i3: number, col: number): ct {
