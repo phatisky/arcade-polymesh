@@ -114,7 +114,7 @@ namespace polymesh {
 
         //% blockid=poly_class_addtriangle
         //% block=" $this set triangle at $idx by $cct"
-        //% this.deflmyMesh
+        //% this.defl=myMesh
         //% cct.shadow=poly_clstriangle
         public settriangle(idx: number, cct: ctc) {
             this.v.cts.set(idx, { indices: [cct.i1, cct.i2, cct.i3], color: cct.c })
@@ -129,7 +129,7 @@ namespace polymesh {
 
         //% blockid=poly_class_deltriangle
         //% block=" $this remove triangle at $idx"
-        //% this.deflmyMesh
+        //% this.defl=myMesh
         public deltriangle(idx: number) {
             this.v.cts.removeAt(idx)
         }
