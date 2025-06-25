@@ -229,7 +229,7 @@ namespace Polymesh {
                 const x3 = posXYZ[ind[2]].x, y3 = posXYZ[ind[2]].y
                 let x4: number, y4: number
                 if (ind[3]) x4 = posXYZ[ind[3]].x, y4 = posXYZ[ind[3]].y
-                const stayInScreen = function(x: number, y: number) { return (x && y? (x < 0 && x >= image.width) && (y < 0 && y >= image.height): true) }
+                const stayInScreen = function(x: number, y: number) { return (x && y? (x < 0 || x >= image.width) && (y < 0 || y >= image.height): true) }
                 if (x4 && y4) return !(stayInScreen(x1, y1) || stayInScreen(x2, y2) || stayInScreen(x3, y3) || stayInScreen(x4, x4))
                 return !(stayInScreen(x1, y1) || stayInScreen(x2, y2) || stayInScreen(x3, y3))
             }
