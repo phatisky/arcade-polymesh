@@ -78,11 +78,11 @@ namespace Polymesh {
     let sizechange = 0, sort = 2
 
     //% blockid=poly_rendermesh
-    //% block=" $mymesh render to $image"
+    //% block=" $mymesh render to $image|| as inner? $innered"
     //% mymesh.shadow=variables_get mymesh.defl=myMesh
     //% image.shadow=screen_image_picker
     //% weight=80
-    export function render(mymesh: mesh, image: Image) {
+    export function render(mymesh: mesh, image: Image, innered?: boolean) {
         function update() {
             let bg = image, bgsave = bg.clone()
             let angleX = axchange
@@ -92,6 +92,7 @@ namespace Polymesh {
             let size = 1 + sizechange
 
             let vertices = mymesh.cvs, triangles = mymesh.cts;
+            vertices = vertices.map((vertex) => { return {x: vertex.x*size, y: vertex.y*size, z: vertex.z*size}})
             let zerosArray: number[] = [];
             for (let i = 0; i < vertices.length; i++) zerosArray.push(0);
             let cosX = Math.cos(angleX), sinX = Math.sin(angleX);
@@ -215,6 +216,13 @@ namespace Polymesh {
                 break;
             }
 
+            function distranceCulling(posXYZs: {x: number, y: number, z: number}[], posXYZ: {x: number, y: number, z: number}, inner?: boolean) {
+                for (const pos of posXYZs) {
+                    if ((!inner && pos.z > posXYZ.z) || (inner && pos.z < posXYZ.z)) return true
+                }
+                return false
+            }
+
             function isStayInScreen (posXYZ: {x: number, y: number, z: number}[], ind: number[]) {
                 const x1 = posXYZ[ind[0]].x, y1 = posXYZ[ind[0]].y
                 const x2 = posXYZ[ind[1]].x, y2 = posXYZ[ind[1]].y
@@ -229,19 +237,23 @@ namespace Polymesh {
             function distortImage(Input: Image, Output: Image, X1: number, Y1: number, X2: number, Y2: number, X3: number, Y3: number, X4: number, Y4: number) {
                 for (let y = 0; y < Input.height; y++) {
                     for (let x = 0; x < Input.width; x++) {
-                        const xi = (Math.trunc((1 - y / Input.height) * (X1 + x / Input.width * (X2 - X1)) + y / Input.height * (X3 + x / Input.width * (X4 - X3))))
-                        const yi = Math.trunc((1 - x / Input.width) * (Y1 + y / Input.height * (Y3 - Y1)) + x / Input.width * (Y2 + y / Input.height * (Y4 - Y2)))
-                        const col = Input.getPixel(x, y)
+                        const sizei = Math.max(1, size), xi = x, yi = y
+                        const x0 = Math.trunc((1 - (yi) / Input.height) * (X1 + (xi) / Input.width * (X2 - X1)) + (yi) / Input.height * (X3 + (xi) / Input.width * (X4 - X3))) - Math.floor(sizei / 2)
+                        const y0 = Math.trunc((1 - (xi) / Input.width) * (Y1 + (yi) / Input.height * (Y3 - Y1)) + (xi) / Input.width * (Y2 + (yi) / Input.height * (Y4 - Y2))) - Math.floor(sizei / 2)
+                        const x1 = Math.trunc((1 - (yi + sizei / 2) / Input.height) * (X1 + (xi + size / 2) / Input.width * (X2 - X1)) + (yi + sizei / 2) / Input.height * (X3 + (xi + size / 2) / Input.width * (X4 - X3))) - Math.floor(sizei / 2)
+                        const y1 = Math.trunc((1 - (xi + size / 2) / Input.width) * (Y1 + (yi + sizei / 2) / Input.height * (Y3 - Y1)) + (xi + size / 2) / Input.width * (Y2 + (yi + sizei / 2) / Input.height * (Y4 - Y2))) - Math.floor(sizei / 2)
+                        const col = Input.getPixel( Input.width - x - 1, Input.height - y - 1)
                         if (col > 0) {
-                            Output.setPixel(xi - 1, yi - 1, col)
-                            Output.setPixel(xi - 1, yi + 1, col)
-                            Output.setPixel(xi + 1, yi + 1, col)
-                            Output.setPixel(xi + 1, yi - 1, col)
-                            Output.setPixel(xi - 1, yi, col)
-                            Output.setPixel(xi + 1, yi, col)
-                            Output.setPixel(xi, yi - 1, col)
-                            Output.setPixel(xi, yi + 1, col)
-                            Output.setPixel(xi, yi, col)
+                            //Output.setPixel(xi - 1, yi - 1, col)
+                            //Output.setPixel(xi - 1, yi + 1, col)
+                            //Output.setPixel(xi + 1, yi + 1, col)
+                            //Output.setPixel(xi + 1, yi - 1, col)
+                            //Output.setPixel(xi - 1, yi, col)
+                            //Output.setPixel(xi + 1, yi, col)
+                            //Output.setPixel(xi, yi - 1, col)
+                            //Output.setPixel(xi, yi + 1, col)
+                            //Output.setPixel(xi, yi, col)
+                            helpers.imageFillPolygon4(Output, x0, y0, x1, y0, x1, y1, x0, y1, col)
                         }
                     }
                 }
@@ -250,9 +262,11 @@ namespace Polymesh {
             for (let i = 0; i < triangles.length; i++) {
                 let triangle = triangles[i], indices = triangle.indices, color = triangle.color;
                 if (zerosArray[indices[0]] < 1 && zerosArray[indices[1]] < 1 && zerosArray[indices[2]] < 1 && (indices[3]?zerosArray[indices[3]] < 1:true)) {
+                    if (distranceCulling(rotatedVertices, rotatedVertices[indices[0]], innered) && distranceCulling(rotatedVertices, rotatedVertices[indices[1]], innered) && distranceCulling(rotatedVertices, rotatedVertices[indices[2]], innered) && (indices[3]?distranceCulling(rotatedVertices, rotatedVertices[indices[3]], innered):true))
                     if (isStayInScreen(rotatedVertices, indices)) {
                         if (indices.length === 3) helpers.imageFillTriangle(bg, rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, color)
-                        else if (indices.length === 4) { helpers.imageFillPolygon4(bg, rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, rotatedVertices[indices[3]].x, rotatedVertices[indices[3]].y, color)
+                        else if (indices.length === 4) { helpers.imageFillTriangle(bg, rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, color)
+                            helpers.imageFillTriangle(bg, rotatedVertices[indices[3]].x, rotatedVertices[indices[3]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, color)
                         if (triangle.img) distortImage(triangle.img, bg, rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, rotatedVertices[indices[3]].x, rotatedVertices[indices[3]].y) }
                     }
                 }
