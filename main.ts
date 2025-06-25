@@ -218,7 +218,7 @@ namespace Polymesh {
 
             function distranceCulling(posXYZs: {x: number, y: number, z: number}[], posXYZ: {x: number, y: number, z: number}, inner?: boolean) {
                 for (const pos of posXYZs) {
-                    if ((!inner && pos.z > posXYZ.z) || (inner && pos.z < posXYZ.z)) return true
+                    if ((!inner && pos.z > posXYZ.z) || (inner && pos.z < posXYZ.z) || (pos.z == posXYZ.z)) return true
                 }
                 return false
             }
