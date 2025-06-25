@@ -31,27 +31,21 @@ namespace Polymesh {
     //% block="create new mesh"
     //% blockSetVariable=myMesh
     //% weight=100
-    export function newmesh() {
-        return new mesh()
-    }
+    export function newmesh() { return new mesh() }
 
     export class mesh {
         cts: {indices: number[], color: number, img?: Image}[]
         cvs: {x: number, y: number, z: number}[]
 
-        constructor() {
-            this.cts = [{indices: [0,0,0], color: 0, img: null}]
-            this.cvs = [{x: 0, y: 0, z: 0}]
-        }
+        constructor() { this.cts = [{indices: [0,0,0], color: 0, img: null}]
+        this.cvs = [{x: 0, y: 0, z: 0}] }
     
         //% blockid=poly_addvertice
         //% block=" $this set vertice at $idx by x: $x y: $y z: $z"
         //% this.shadow=variables_get this.defl=myMesh
         //% ccv.shadow=poly_shadow_vertice
         //% weight=88
-        public setvertice(idx: number, x: number, y: number, z: number) {
-            this.cvs[idx] = { x: x, y: y, z: z }
-        }
+        public setvertice(idx: number, x: number, y: number, z: number) { this.cvs[idx] = { x: x, y: y, z: z } }
     
         //% blockid=poly_addtriangle
         //% block=" $this set triangle in color $c at $idx by idc1 $i1 idc2 $i2 idc3 $i3|| idc4 $i4 and texture $img"
@@ -60,9 +54,8 @@ namespace Polymesh {
         //% c.shadow=colorindexpicker
         //% weight=87
         public settriangle(idx: number, c: number, i1: number, i2: number, i3: number, i4?: number, img?: Image) {
-            if (i4) {
-                if (img) this.cts[idx] = { indices: [i1, i2, i3, i4], color: c, img: img }
-                else this.cts[idx] = { indices: [i1, i2, i3, i4], color: c }
+            if (i4) { if (img) this.cts[idx] = { indices: [i1, i2, i3, i4], color: c, img: img }
+            else this.cts[idx] = { indices: [i1, i2, i3, i4], color: c }
             } else this.cts[idx] = { indices: [i1, i2, i3], color: c }
         }
     
@@ -70,17 +63,13 @@ namespace Polymesh {
         //% block=" $this remove vertice at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% weight=86
-        public delvertice(idx: number) {
-            this.cvs.removeAt(idx)
-        }
+        public delvertice(idx: number) { this.cvs.removeAt(idx) }
     
         //% blockid=poly_deltriangle
         //% block=" $this remove triangle at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% weight=85
-        public deltriangle(idx: number) {
-            this.cts.removeAt(idx)
-        }
+        public deltriangle(idx: number) { this.cts.removeAt(idx) }
 
     }
 
@@ -94,7 +83,7 @@ namespace Polymesh {
     //% image.shadow=screen_image_picker
     //% weight=80
     export function render(mymesh: mesh, image: Image) {
-        function updateCube() {
+        function update() {
             let bg = image, bgsave = bg.clone()
             let angleX = axchange
             let angleY = aychange
@@ -274,9 +263,7 @@ namespace Polymesh {
             console.log(zerosArray)
 
         }
-        updateCube()
-
-
+        update()
     }
 
     //% blockid=poly_angle_change
