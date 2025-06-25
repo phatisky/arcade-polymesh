@@ -36,35 +36,12 @@ namespace Polymesh {
     }
 
     export class mesh {
-        cts: {indices: number[], color: number}[]
+        cts: {indices: number[], color: number, img?: Image}[]
         cvs: {x: number, y: number, z: number}[]
 
         constructor() {
-            this.cts = [{indices: [0,0,0], color: 0}]
+            this.cts = [{indices: [0,0,0], color: 0, img: null}]
             this.cvs = [{x: 0, y: 0, z: 0}]
-        }
-
-        //% blockid=poly_addvertice
-        //% block=" $this add vertice by x: $x y: $y z: $z|| at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% ccv.shadow=poly_shadow_vertice
-        //% weight=90
-        public addvertice(x: number, y: number, z: number, idx?: number) {
-            if (idx) { this.cvs.insertAt(idx, { x: x, y: y, z: z })
-                return; }
-            this.cvs.push({ x: x, y: y, z: z })
-        }
-    
-        //% blockid=poly_addtriangle
-        //% block=" $this add triangle by idc1 $i1 idc2 $i2 idc3 $i3 color $c|| at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% c.shadow=colorindexpicker
-        //% cct.shadow=poly_shadow_triangle
-        //% weight=89
-        public addtriangle(i1: number, i2: number, i3: number, c: number, idx?: number) {
-            if (idx) { this.cts.insertAt(idx, { indices: [i1, i2, i3], color: c })
-                return; }
-            this.cts.push({ indices: [i1, i2, i3], color: c })
         }
     
         //% blockid=poly_addvertice
@@ -77,13 +54,16 @@ namespace Polymesh {
         }
     
         //% blockid=poly_addtriangle
-        //% block=" $this set triangle at $idx by idc1 $i1 idc2 $i2 idc3 $i3 color $c"
+        //% block=" $this set triangle in color $c at $idx by idc1 $i1 idc2 $i2 idc3 $i3|| idc4 $i4 and texture $img"
         //% this.shadow=variables_get this.defl=myMesh
         //% cct.shadow=poly_shadow_triangle
         //% c.shadow=colorindexpicker
         //% weight=87
-        public settriangle(idx: number, i1: number, i2: number, i3: number, c: number) {
-            this.cts[idx] = { indices: [i1, i2, i3], color: c }
+        public settriangle(idx: number, c: number, i1: number, i2: number, i3: number, i4?: number, img?: Image) {
+            if (i4) {
+                if (img) this.cts[idx] = { indices: [i1, i2, i3, i4], color: c, img: img }
+                else this.cts[idx] = { indices: [i1, i2, i3, i4], color: c }
+            } else this.cts[idx] = { indices: [i1, i2, i3], color: c }
         }
     
         //% blockid=poly_delvertice
@@ -104,14 +84,9 @@ namespace Polymesh {
 
     }
 
-    let axchange = 0
-    let azchange = 0
-    let camx = 0
-    let camy = 0
-    let camz = 0
-    let sizechange = 0
-    let aychange = 0
-    let sort = 2
+    let axchange = 0, azchange = 0, aychange = 0
+    let camx = 0, camy = 0, camz = 0
+    let sizechange = 0, sort = 2
 
     //% blockid=poly_rendermesh
     //% block=" $mymesh render to $image"
@@ -195,7 +170,9 @@ namespace Polymesh {
             }
 
             function averageZ(rotatedVertices: any[], indices: number[]): number {
-                return (rotatedVertices[indices[0]].z + rotatedVertices[indices[1]].z + rotatedVertices[indices[2]].z) / 3;
+                let z = 0
+                for (const ind of indices) z += rotatedVertices[ind].z
+                return z / indices.length
             }
 
             function quicksort2(triangles: any[], low: number, high: number, rotatedVertices: any[]) {
@@ -228,15 +205,19 @@ namespace Polymesh {
             }
 
             function calculateAverageZ2(triangle: { indices: number[] }, rotatedVertices: { z: number }[]) {
-                let z = (rotatedVertices[triangle.indices[0]].z + rotatedVertices[triangle.indices[1]].z + rotatedVertices[triangle.indices[2]].z) / 3;
-                return z;
+                let z = 0
+                for (const ind of triangle.indices) z += rotatedVertices[ind].z
+                return z / triangle.indices.length;
             }
 
             switch (sort) {
                 case 0:
                 triangles.sort((b, a) => {
-                    let zA = (rotatedVertices[a.indices[0]].z + rotatedVertices[a.indices[1]].z + rotatedVertices[a.indices[2]].z) / 3, zB = (rotatedVertices[b.indices[0]].z + rotatedVertices[b.indices[1]].z + rotatedVertices[b.indices[2]].z) / 3;
-                    return zA - zB;
+                    let zA = 0
+                    for (const ind of a.indices) zA += rotatedVertices[ind].z
+                    let zB = 0
+                    for (const ind of b.indices) zB += rotatedVertices[ind].z
+                    return (zA / a.indices.length) - (zB / b.indices.length);
                 });
                 break; case 1:
                 quicksort(triangles, 0, triangles.length - 1, rotatedVertices);
@@ -249,17 +230,41 @@ namespace Polymesh {
                 const x1 = posXYZ[ind[0]].x, y1 = posXYZ[ind[0]].y
                 const x2 = posXYZ[ind[1]].x, y2 = posXYZ[ind[1]].y
                 const x3 = posXYZ[ind[2]].x, y3 = posXYZ[ind[2]].y
-                const stayInScreen = function(x: number, y: number) { return (x < 0 && x >= image.width) && (y < 0 && y >= image.height) }
+                let x4: number, y4: number
+                if (ind[3]) x4 = posXYZ[ind[3]].x, y4 = posXYZ[ind[3]].y
+                const stayInScreen = function(x: number, y: number) { return (x && y? (x < 0 && x >= image.width) && (y < 0 && y >= image.height): true) }
+                if (x4 && y4) return !(stayInScreen(x1, y1) || stayInScreen(x2, y2) || stayInScreen(x3, y3) || stayInScreen(x4, x4))
                 return !(stayInScreen(x1, y1) || stayInScreen(x2, y2) || stayInScreen(x3, y3))
+            }
+
+            function distortImage(Input: Image, Output: Image, X1: number, Y1: number, X2: number, Y2: number, X3: number, Y3: number, X4: number, Y4: number) {
+                for (let y = 0; y < Input.height; y++) {
+                    for (let x = 0; x < Input.width; x++) {
+                        const xi = (Math.trunc((1 - y / Input.height) * (X1 + x / Input.width * (X2 - X1)) + y / Input.height * (X3 + x / Input.width * (X4 - X3))))
+                        const yi = Math.trunc((1 - x / Input.width) * (Y1 + y / Input.height * (Y3 - Y1)) + x / Input.width * (Y2 + y / Input.height * (Y4 - Y2)))
+                        const col = Input.getPixel(x, y)
+                        if (col > 0) {
+                            Output.setPixel(xi - 1, yi - 1, col)
+                            Output.setPixel(xi - 1, yi + 1, col)
+                            Output.setPixel(xi + 1, yi + 1, col)
+                            Output.setPixel(xi + 1, yi - 1, col)
+                            Output.setPixel(xi - 1, yi, col)
+                            Output.setPixel(xi + 1, yi, col)
+                            Output.setPixel(xi, yi - 1, col)
+                            Output.setPixel(xi, yi + 1, col)
+                            Output.setPixel(xi, yi, col)
+                        }
+                    }
+                }
             }
 
             for (let i = 0; i < triangles.length; i++) {
                 let triangle = triangles[i], indices = triangle.indices, color = triangle.color;
-                if (!(zerosArray[indices[0]] === 1)) {
-                    if (!(zerosArray[indices[1]] === 1)) {
-                        if (!(zerosArray[indices[2]] === 1)) {
-                            if (isStayInScreen(rotatedVertices, indices)) helpers.imageFillTriangle(bg, rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, color)
-                        }
+                if (zerosArray[indices[0]] < 1 && zerosArray[indices[1]] < 1 && zerosArray[indices[2]] < 1 && (indices[3]?zerosArray[indices[3]] < 1:true)) {
+                    if (isStayInScreen(rotatedVertices, indices)) {
+                        if (indices.length === 3) helpers.imageFillTriangle(bg, rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, color)
+                        else if (indices.length === 4) { helpers.imageFillPolygon4(bg, rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, rotatedVertices[indices[3]].x, rotatedVertices[indices[3]].y, color)
+                        if (triangle.img) distortImage(triangle.img, bg, rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, rotatedVertices[indices[3]].x, rotatedVertices[indices[3]].y) }
                     }
                 }
                 //scene.backgroundImage().fillTriangle(rotatedVertices[indices[0]].x, rotatedVertices[indices[0]].y, rotatedVertices[indices[1]].x, rotatedVertices[indices[1]].y, rotatedVertices[indices[2]].x, rotatedVertices[indices[2]].y, color);
