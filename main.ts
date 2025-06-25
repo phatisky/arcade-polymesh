@@ -353,7 +353,7 @@ namespace Polymesh {
         return azchange
     }
 
-    //% blockid=poly_camera_set
+    //% blockid=poly_camera_setpos
     //% block="set camera position to x: $x y: $y z: $z"
     //% weight=48
     export function setcCampos(x: number, y: number, z: number) {
