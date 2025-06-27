@@ -64,7 +64,7 @@ namespace Polymesh {
         public setVertice(idx: number, x: number, y: number, z: number) { this.cvs[idx] = { x: x, y: y, z: z } }
 
         //% blockid=poly_addtriangle
-        //% block=" $this set triangle in color $c at $idx by idc1 $i1 idc2 $i2 idc3 $i3|| idc4 $i4 and texture $img=screen_image_picker"
+        //% block=" $this set triangle in color $c=colorindexpicker at $idx by idc1 $i1 idc2 $i2 idc3 $i3|| idc4 $i4 and texture $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=9
@@ -176,20 +176,21 @@ namespace Polymesh {
     let zoom = 1, sort = 0
 
     //% blockid=poly_rendermesh
-    //% block=" $mymesh render to $image|| as inner? $inner and debug color? $debug"
+    //% block=" $mymesh render to $image=screen_image_picker|| as inner? $inner=toggleYesNo and debug color? $debug=colorindexpicker"
     //% mymesh.shadow=variables_get mymesh.defl=myMesh
-    //% image.shadow=screen_image_picker
-    //% inner.shadow=toggleYesNo
-    //% debug.shadow=colorindexpicker
     //% group="render"
     //% weight=10
     export function render(mymesh: mesh, image: Image, inner?: boolean, debug?: number) {
         const centerX = image.width >> 1;
         const centerY = image.height >> 1;
 
-        const cox = Math.cos(ax), sinX = Math.sin(ax);
-        const coy = Math.cos(ay), sinY = Math.sin(ay);
+        const cosX = Math.cos(ax), sinX = Math.sin(ax);
+        const cosY = Math.cos(ay), sinY = Math.sin(ay);
         const cosZ = Math.cos(az), sinZ = Math.sin(az);
+
+        const crx = Math.cos(mymesh.rot.rx), srx = Math.sin(mymesh.rot.rx);
+        const cry = Math.cos(mymesh.rot.ry), sry = Math.sin(mymesh.rot.ry);
+        const crz = Math.cos(mymesh.rot.rz), srz = Math.sin(mymesh.rot.rz);
 
         // Transform vertices
         const rotated = mymesh.cvs.map(v => {
@@ -199,20 +200,16 @@ namespace Polymesh {
             let z = v.z - camz - mymesh.pivot.oz;
 
             // rotated camera
-            let tx = x * coy + z * sinY;
-            z = -x * sinY + z * coy, x = tx;
+            let tx = x * cosY + z * sinY;
+            z = -x * sinY + z * cosY, x = tx;
 
-            let ty = y * cox - z * sinX;
-            z = y * sinX + z * cox, y = ty;
+            let ty = y * cosX - z * sinX;
+            z = y * sinX + z * cosX, y = ty;
 
             tx = x * cosZ - y * sinZ;
             y = x * sinZ + y * cosZ, x = tx;
 
             // rotated mesh
-            const crx = Math.cos(mymesh.rot.rx), srx = Math.sin(mymesh.rot.rx);
-            const cry = Math.cos(mymesh.rot.ry), sry = Math.sin(mymesh.rot.ry);
-            const crz = Math.cos(mymesh.rot.rz), srz = Math.sin(mymesh.rot.rz);
-
             tx = x * cry + z * sry;
             z = -x * sry + z * cry, x = tx;
 
