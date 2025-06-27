@@ -194,30 +194,40 @@ namespace Polymesh {
 
         // Transform vertices
         const rotated = mymesh.cvs.map(v => {
-            // camera offset
-            let x = v.x - camx - mymesh.pivot.ox;
-            let y = v.y - camy - mymesh.pivot.oy;
-            let z = v.z - camz - mymesh.pivot.oz;
+            // กล้อง offset
+            let x = v.x - camx;
+            let y = v.y - camy;
+            let z = v.z - camz;
 
-            // rotated camera
+            // rotate camera
             let tx = x * cosY + z * sinY;
-            z = -x * sinY + z * cosY, x = tx;
+            z = -x * sinY + z * cosY;
+            x = tx;
 
             let ty = y * cosX - z * sinX;
-            z = y * sinX + z * cosX, y = ty;
+            z = y * sinX + z * cosX;
+            y = ty;
 
             tx = x * cosZ - y * sinZ;
-            y = x * sinZ + y * cosZ, x = tx;
+            y = x * sinZ + y * cosZ;
+            x = tx;
 
-            // rotated mesh
+            x -= mymesh.pivot.ox;
+            y -= mymesh.pivot.oy;
+            z -= mymesh.pivot.oz;
+
+            // rotate mymesh
             tx = x * cry + z * sry;
-            z = -x * sry + z * cry, x = tx;
+            z = -x * sry + z * cry;
+            x = tx;
 
             ty = y * crx - z * srx;
-            z = y * srx + z * crx, y = ty;
+            z = y * srx + z * crx;
+            y = ty;
 
             tx = x * crz - y * srz;
-            y = x * srz + y * crz, x = tx;
+            y = x * srz + y * crz;
+            x = tx;
 
             // Perspective
             const dist = 150;
@@ -227,7 +237,7 @@ namespace Polymesh {
                 y: centerY + y * scale * zoom,
                 z: z
             };
-        });
+        })
 
         // Sort triangles
         const tris = mymesh.cts.slice();
