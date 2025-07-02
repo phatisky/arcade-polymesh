@@ -275,11 +275,7 @@ namespace Polymesh {
 
             // Draw texture over
             if (t.img && inds.length === 4) {
-                if (!pic || !pic.equals(t.img)) {
-                    pic = t.img.clone()
-                    pici = scaleXn(pic.clone(), zoom)
-                }
-                distortImage(pici, image,
+                distortImage(t.img.clone(), image,
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
@@ -299,14 +295,6 @@ namespace Polymesh {
                 helpers.imageDrawLine(image, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, debug);
             } else helpers.imageDrawLine(image, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, debug);
         }
-    }
-
-    export function scaleXn(original: Image, sc: number): Image {
-        // Double the size of the original.
-        const scale = Math.ceil(Math.max(1, sc) * 1.2), toReturn: Image = image.create(original.width * scale, original.height * scale);
-
-        for (let x: number = 0; x < original.width; x++) for (let y: number = 0; y < original.height; y++) helpers.imageFillRect(toReturn, x * scale, y * scale, scale, scale, original.getPixel(x, y))
-        return toReturn;
     }
 
     function quickSort(arr: { indices: number[] }[], left: number, right: number, rot: { z: number }[]) {
@@ -343,7 +331,11 @@ namespace Polymesh {
         for (let y = 0; y < src.height; y++) {
             for (let x = 0; x < src.width; x++) {
                 const col = src.getPixel(src.width - x, src.height - y);
-                if (col && col > 0) dest.setPixel(Math.trunc((1 - y / src.height) * (X1 + x / src.width * (X2 - X1)) + y / src.height * (X3 + x / src.width * (X4 - X3))), Math.trunc((1 - x / src.width) * (Y1 + y / src.height * (Y3 - Y1)) + x / src.width * (Y2 + y / src.height * (Y4 - Y2))), col);
+                if (col && col > 0) {
+                    const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0)) / (src.height * s)) * (X1 + ((x * s) + (m ? s : 0)) / (src.width * s) * (X2 - X1)) + ((y * s) + (m ? s : 0)) / (src.height * s) * (X3 + ((x * s) + (m ? s : 0)) / (src.width * s) * (X4 - X3)))
+                    const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0)) / (src.width * s)) * (Y1 + ((y * s) + (m ? s : 0)) / (src.height * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0)) / (src.width * s) * (Y2 + ((y * s) + (m ? s : 0))  / (src.height * s) * (Y4 - Y2)))
+                    helpers.imageFillPolygon4(dest, sx(zoom), sy(zoom), sx(zoom, true), sy(zoom), sx(zoom), sy(zoom, true), sx(zoom, true), sy(zoom, true), col)
+                }
             }
         }
     }
