@@ -243,7 +243,7 @@ namespace Polymesh {
         const tris = mymesh.cts.slice();
         switch (sort) {
             case 0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-            case 1: default: quickSort(tris, 0, tris.length - 1, rotated); break
+            case 1: default: introSort(tris, rotated); break
         }
         // Render
         let pic: Image, pici: Image
@@ -252,7 +252,7 @@ namespace Polymesh {
             if (inds.some(i => rotated[i].z < -150)) continue;
             if (inds.every(i => (rotated[i].x < 0 || rotated[i].x >= image.width) || (rotated[i].y < 0 || rotated[i].y >= image.height))) continue;
 
-            const depthCheck = rotated.some((ro) => ((inner ? inds.every(i => rotated[i].z > ro.z) : inds.every(i => rotated[i].z < ro.z)) || inds.every(i => rotated[i].z == ro.z)))
+            const depthCheck = rotated.some((ro) => ((inner ? inds.every(i => rotated[i].z > ro.z) : inds.every(i => rotated[i].z < ro.z)) || inds.every(i => Math.round(rotated[i].z) == Math.round(ro.z))))
             if (!depthCheck) continue;
 
             // Draw solid
@@ -297,16 +297,76 @@ namespace Polymesh {
         }
     }
 
-    function quickSort(arr: { indices: number[] }[], left: number, right: number, rot: { z: number }[]) {
-        if (left >= right) return;
-        const pivotIndex = left + ((right - left) >> 1);
-        const pivotValue = avgZ(rot, arr[pivotIndex].indices);
-        const index = partition(arr, left, right, pivotValue, rot);
-        quickSort(arr, left, index - 1, rot);
-        quickSort(arr, index, right, rot);
+    function introSort(arr: { indices: number[] }[], rot: { z: number }[]) {
+        const maxDepth = 2 * Math.ceil(Math.log(arr.length) / Math.log(2));
+        introsortUtil(arr, 0, arr.length - 1, maxDepth, rot);
     }
 
-    function partition(arr: { indices: number[] }[], left: number, right: number, pivot: number, rot: { z: number }[]) {
+    function introsortUtil(arr: { indices: number[] }[], start: number, end: number, depthLimit: number, rot: { z: number }[]) {
+        const size = end - start + 1;
+
+        if (size < 16) {
+            insertionSort(arr, start, end, rot);
+            return;
+        }
+
+        if (depthLimit === 0) {
+            heapSort(arr, start, end, rot);
+            return;
+        }
+
+        const pivot = partitionIntro(arr, start, end, avgZ(rot, arr[start + ((end - start) >> 1)].indices), rot);
+        introsortUtil(arr, start, pivot - 1, depthLimit - 1, rot);
+        introsortUtil(arr, pivot, end, depthLimit - 1, rot);
+    }
+
+    function insertionSort(arr: { indices: number[] }[], start: number, end: number, rot: { z: number }[]) {
+        for (let i = start + 1; i <= end; i++) {
+            const key = arr[i];
+            let j = i - 1;
+            while (j >= start && avgZ(rot, arr[j].indices) < avgZ(rot, key.indices)) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = key;
+        }
+    }
+
+    function heapSort(arr: { indices: number[] }[], start: number, end: number, rot: { z: number }[]) {
+        const heapSize = end - start + 1;
+
+        for (let i = Math.floor(heapSize / 2) - 1; i >= 0; i--) {
+            heapify(arr, heapSize, i, start, rot);
+        }
+
+        for (let i = heapSize - 1; i > 0; i--) {
+            const tmp = arr[start];
+            arr[start] = arr[start + i];
+            arr[start + i] = tmp;
+            heapify(arr, i, 0, start, rot);
+        }
+    }
+
+    function heapify(arr: { indices: number[] }[], size: number, root: number, offset: number, rot: { z: number }[]) {
+        let largest = root;
+        const left = 2 * root + 1;
+        const right = 2 * root + 2;
+
+        if (left < size && avgZ(rot, arr[offset + left].indices) > avgZ(rot, arr[offset + largest].indices)) {
+            largest = left;
+        }
+        if (right < size && avgZ(rot, arr[offset + right].indices) > avgZ(rot, arr[offset + largest].indices)) {
+            largest = right;
+        }
+        if (largest !== root) {
+            const tmp = arr[offset + root];
+            arr[offset + root] = arr[offset + largest];
+            arr[offset + largest] = tmp;
+            heapify(arr, size, largest, offset, rot);
+        }
+    }
+
+    function partitionIntro(arr: { indices: number[] }[], left: number, right: number, pivot: number, rot: { z: number }[]) {
         while (left <= right) {
             while (avgZ(rot, arr[left].indices) > pivot) left++;
             while (avgZ(rot, arr[right].indices) < pivot) right--;
@@ -332,8 +392,8 @@ namespace Polymesh {
             for (let x = 0; x < src.width; x++) {
                 const col = src.getPixel(src.width - x, src.height - y);
                 if (col && col > 0) {
-                    const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0)) / (src.height * s)) * (X1 + ((x * s) + (m ? s : 0)) / (src.width * s) * (X2 - X1)) + ((y * s) + (m ? s : 0)) / (src.height * s) * (X3 + ((x * s) + (m ? s : 0)) / (src.width * s) * (X4 - X3)))
-                    const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0)) / (src.width * s)) * (Y1 + ((y * s) + (m ? s : 0)) / (src.height * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0)) / (src.width * s) * (Y2 + ((y * s) + (m ? s : 0))  / (src.height * s) * (Y4 - Y2)))
+                    const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (X4 - X3)))
+                    const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2))  / (src.height * s) * (Y4 - Y2)))
                     helpers.imageFillPolygon4(dest, sx(zoom), sy(zoom), sx(zoom, true), sy(zoom), sx(zoom), sy(zoom, true), sx(zoom, true), sy(zoom, true), col)
                 }
             }
@@ -360,7 +420,7 @@ namespace Polymesh {
             case 0: camx += x; break
             case 1: camy += x; break
             case 2: camz += x; break
-            case 3: zoom += x; break
+            case 3: default: zoom += x; break
         }
     }
     //% blockid=poly_angle_set
@@ -383,7 +443,7 @@ namespace Polymesh {
             case 0: camx = x; break
             case 1: camy = x; break
             case 2: camz = x; break
-            case 3: zoom = x; break
+            case 3: default: zoom = x; break
         }
     }
 
@@ -417,7 +477,7 @@ namespace Polymesh {
             case 0: return camx
             case 1: return camy
             case 2: return camz
-            case 3: return zoom
+            case 3: default: return zoom
         }
         return 0
     }
@@ -427,9 +487,7 @@ namespace Polymesh {
     //% group="main camera"
     //% weight=3
     export function setcCampos(x: number, y: number, z: number) {
-        camx = x
-        camy = y
-        camz = z
+        camx = x, camy = y, camz = z
     }
 
 }
