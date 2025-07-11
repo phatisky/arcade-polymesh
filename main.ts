@@ -43,16 +43,16 @@ namespace Polymesh {
     export function newmesh() { return new mesh() }
 
     export class mesh {
-        cts: { indices: number[], color: number, img?: Image }[]
-        cvs: { x: number, y: number, z: number }[]
-        pivot: { ox: number, oy: number, oz: number}
-        rot: { rx: number, ry: number, rz: number }
+        faces: { indices: number[], color: number, img?: Image }[]
+        points: { x: number, y: number, z: number }[]
+        pivot: { x: number, y: number, z: number}
+        rot: { x: number, y: number, z: number }
 
         constructor() {
-            this.cts = [{ indices: [0, 0, 0], color: 0, img: null }]
-            this.cvs = [{ x: 0, y: 0, z: 0 }]
-            this.pivot = { ox: 0, oy: 0, oz: 0 }
-            this.rot = { rx: 0, ry: 0, rz: 0 }
+            this.faces = [{ indices: [0, 0, 0], color: 0, img: null }]
+            this.points = [{ x: 0, y: 0, z: 0 }]
+            this.pivot = { x: 0, y: 0, z: 0 }
+            this.rot = { x: 0, y: 0, z: 0 }
         }
 
         //% blockid=poly_addvertice
@@ -61,18 +61,20 @@ namespace Polymesh {
         //% ccv.shadow=poly_shadow_vertice
         //% group="mesh property"
         //% weight=10
-        public setVertice(idx: number, x: number, y: number, z: number) { this.cvs[idx] = { x: x, y: y, z: z } }
+        public setVertice(idx: number, x: number, y: number, z: number) { this.points[idx] = { x: x, y: y, z: z } }
 
-        //% blockid=poly_addtriangle
-        //% block=" $this set triangle in color $c=colorindexpicker at $idx by idc1 $i1 idc2 $i2 idc3 $i3|| idc4 $i4 and texture $img=screen_image_picker"
+        //% blockid=poly_setface
+        //% block=" $this set face in color $c=colorindexpicker at $idx by idc1 $i1 idc2 $i2|| idc3 $i3 idc4 $i4 and texture $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=9
-        public setTriangle(idx: number, c: number, i1: number, i2: number, i3: number, i4?: number, img?: Image) {
-            let indice = [i1, i2, i3]
+        public setFace(idx: number, c: number, i1: number, i2: number, i3?: number, i4?: number, img?: Image) {
+            let indice = [i1, i2]
+            if (i3) indice.push(i3)
             if (i4) indice.push(i4)
-            if (i4 && img) this.cts[idx] = { indices: indice, color: c, img: img }
-            else this.cts[idx] = { indices: indice, color: c }
+
+            if (indice.length > 3 && img) this.faces[idx] = { indices: indice, color: c, img: img }
+            else this.faces[idx] = { indices: indice, color: c }
         }
 
         //% blockid=poly_delvertice
@@ -80,14 +82,14 @@ namespace Polymesh {
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh remover"
         //% weight=8
-        public delVertice(idx: number) { this.cvs.removeAt(idx) }
+        public delVertice(idx: number) { this.points.removeAt(idx) }
 
-        //% blockid=poly_deltriangle
-        //% block=" $this remove triangle at $idx"
+        //% blockid=poly_delface
+        //% block=" $this remove face at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh remover"
         //% weight=7
-        public delTriangle(idx: number) { this.cts.removeAt(idx) }
+        public delFace(idx: number) { this.faces.removeAt(idx) }
 
         //% blockid=poly_mesh_pos_set
         //% block=" $this set $choice to $x"
@@ -96,9 +98,9 @@ namespace Polymesh {
         //% weight=10
         public setPivot(choice: PivotPos, x: number) {
             switch(choice) {
-                case 0: this.pivot.ox = x; break
-                case 1: this.pivot.oy = x; break
-                case 2: this.pivot.oz = x; break
+                case 0: this.pivot.x = x; break
+                case 1: this.pivot.y = x; break
+                case 2: this.pivot.z = x; break
             }
         }
 
@@ -109,9 +111,9 @@ namespace Polymesh {
         //% weight=5
         public changePivot(choice: PivotPos, x: number) {
             switch (choice) {
-                case 0: this.pivot.ox += x; break
-                case 1: this.pivot.oy += x; break
-                case 2: this.pivot.oz += x; break
+                case 0: this.pivot.x += x; break
+                case 1: this.pivot.y += x; break
+                case 2: this.pivot.z += x; break
             }
         }
 
@@ -122,9 +124,9 @@ namespace Polymesh {
         //% weight=4
         public getPivot(choice: PivotPos) {
             switch (choice) {
-                case 0: return this.pivot.ox
-                case 1: return this.pivot.oy
-                case 2: return this.pivot.oz
+                case 0: return this.pivot.x
+                case 1: return this.pivot.y
+                case 2: return this.pivot.z
             }
             return 0
         }
@@ -136,9 +138,9 @@ namespace Polymesh {
         //% weight=100
         public setAngle(choice: Angles, x: number) {
             switch (choice) {
-                case 0: this.rot.rx = x; break
-                case 1: this.rot.ry = x; break
-                case 2: this.rot.rz = x; break
+                case 0: this.rot.x = x; break
+                case 1: this.rot.y = x; break
+                case 2: this.rot.z = x; break
             }
         }
 
@@ -149,9 +151,9 @@ namespace Polymesh {
         //% weight=5
         public changeAngle(choice: Angles, x: number) {
             switch (choice) {
-                case 0: this.rot.rx += x; break
-                case 1: this.rot.ry += x; break
-                case 2: this.rot.rz += x; break
+                case 0: this.rot.x += x; break
+                case 1: this.rot.y += x; break
+                case 2: this.rot.z += x; break
             }
         }
 
@@ -162,9 +164,9 @@ namespace Polymesh {
         //% weight=4
         public getAngle(choice: Angles) {
             switch (choice) {
-                case 0: return this.rot.rx
-                case 1: return this.rot.ry
-                case 2: return this.rot.rz
+                case 0: return this.rot.x
+                case 1: return this.rot.y
+                case 2: return this.rot.z
             }
             return 0
         }
@@ -175,12 +177,45 @@ namespace Polymesh {
     let camx = 0, camy = 0, camz = 0
     let zoom = 1, sort = 0
 
+    function rotatePoint3D(point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) {
+
+        // move point with pivot to 1st place
+        let dx = point.x - pivot.x;
+        let dy = point.y - pivot.y;
+        let dz = point.z - pivot.z;
+
+        // --- rotate around x ---
+        let dy1 = dy * Math.cos(angle.x) - dz * Math.sin(angle.x);
+        let dz1 = dy * Math.sin(angle.x) + dz * Math.cos(angle.x);
+        dy = dy1;
+        dz = dz1;
+
+        // --- rotate around y ---
+        let dx1 = dx * Math.cos(angle.y) + dz * Math.sin(angle.y);
+        dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
+        dx = dx1;
+        dz = dz1;
+
+        // --- rotate around z ---
+        dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
+        dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
+        dx = dx1;
+        dy = dy1;
+
+        // move back to real position
+        return {
+            x: dx + pivot.x,
+            y: dy + pivot.y,
+            z: dz + pivot.z
+        };
+    }
+
     //% blockid=poly_rendermesh
-    //% block=" $mymesh render to $image=screen_image_picker|| as inner? $inner=toggleYesNo and debug color? $debug=colorindexpicker"
-    //% mymesh.shadow=variables_get mymesh.defl=myMesh
+    //% block=" $plm render to $image=screen_image_picker|| as inner? $inner=toggleYesNo or fullrender? $fullren=toggleYesNo and line render color? $lineren=colorindexpicker"
+    //% plm.shadow=variables_get plm.defl=myMesh
     //% group="render"
     //% weight=10
-    export function render(mymesh: mesh, image: Image, inner?: boolean, debug?: number) {
+    export function render(plm: mesh, image: Image, inner?: boolean, fullren?: boolean, lineren?: number) {
         const centerX = image.width >> 1;
         const centerY = image.height >> 1;
 
@@ -188,16 +223,13 @@ namespace Polymesh {
         const cosY = Math.cos(ay), sinY = Math.sin(ay);
         const cosZ = Math.cos(az), sinZ = Math.sin(az);
 
-        const crx = Math.cos(mymesh.rot.rx), srx = Math.sin(mymesh.rot.rx);
-        const cry = Math.cos(mymesh.rot.ry), sry = Math.sin(mymesh.rot.ry);
-        const crz = Math.cos(mymesh.rot.rz), srz = Math.sin(mymesh.rot.rz);
-
         // Transform vertices
-        const rotated = mymesh.cvs.map(v => {
-            // กล้อง offset
-            let x = v.x - camx;
-            let y = v.y - camy;
-            let z = v.z - camz;
+        const rotated = plm.points.map(v => {
+            const vpos: {x: number, y: number, z: number} = rotatePoint3D(v, plm.pivot, plm.rot)
+            // camera offset
+            let x = vpos.x - camx;
+            let y = vpos.y - camy;
+            let z = vpos.z - camz;
 
             // rotate camera
             let tx = x * cosY + z * sinY;
@@ -212,23 +244,6 @@ namespace Polymesh {
             y = x * sinZ + y * cosZ;
             x = tx;
 
-            x -= mymesh.pivot.ox;
-            y -= mymesh.pivot.oy;
-            z -= mymesh.pivot.oz;
-
-            // rotate mymesh
-            tx = x * cry + z * sry;
-            z = -x * sry + z * cry;
-            x = tx;
-
-            ty = y * crx - z * srx;
-            z = y * srx + z * crx;
-            y = ty;
-
-            tx = x * crz - y * srz;
-            y = x * srz + y * crz;
-            x = tx;
-
             // Perspective
             const dist = 150;
             const scale = dist / (dist + z);
@@ -240,29 +255,47 @@ namespace Polymesh {
         })
 
         // Sort triangles
-        const tris = mymesh.cts.slice();
+        const tris = plm.faces.slice();
         switch (sort) {
             case 0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
             case 1: default: introSort(tris, rotated); break
         }
+        
         // Render
-        let pic: Image, pici: Image
         for (const t of tris) {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -150)) continue;
             if (inds.every(i => (rotated[i].x < 0 || rotated[i].x >= image.width) || (rotated[i].y < 0 || rotated[i].y >= image.height))) continue;
-
-            const depthCheck = rotated.some((ro) => ((inner ? inds.every(i => rotated[i].z > ro.z) : inds.every(i => rotated[i].z < ro.z)) || inds.every(i => Math.round(rotated[i].z) == Math.round(ro.z))))
-            if (!depthCheck) continue;
-
-            // Draw solid
-            helpers.imageFillTriangle(
+            
+            if (!fullren) if (!rotated.some((ro) => (inds.every(i => inner ? rotated[i].z > ro.z : rotated[i].z < ro.z)))) continue;
+            
+            // Draw line canvas when have line color index
+            if (lineren && lineren > 0) {
+                helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, lineren);
+                if (inds.length < 3) continue;
+                helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, lineren);
+                if (inds.length > 3) helpers.imageDrawLine(image, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, lineren), helpers.imageDrawLine(image, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, lineren);
+                else helpers.imageDrawLine(image, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, lineren);
+                continue;
+            }
+            
+            // Draw line when no shape
+            helpers.imageDrawLine(
                 image,
                 rotated[inds[0]].x, rotated[inds[0]].y,
                 rotated[inds[1]].x, rotated[inds[1]].y,
-                rotated[inds[2]].x, rotated[inds[2]].y,
                 t.color
             );
+            // Draw solid when is vertice shape
+            if (inds.length > 2) {
+                helpers.imageFillTriangle(
+                    image,
+                    rotated[inds[0]].x, rotated[inds[0]].y,
+                    rotated[inds[1]].x, rotated[inds[1]].y,
+                    rotated[inds[2]].x, rotated[inds[2]].y,
+                    t.color
+                );
+            }
             if (inds.length > 3) {
                 helpers.imageFillTriangle(
                     image,
@@ -282,19 +315,9 @@ namespace Polymesh {
                     rotated[inds[3]].x, rotated[inds[3]].y
                 );
             }
+
         }
-        // Draw debug canvas
-        if (debug && debug > 0) {
-            for (const t of tris) {
-                const inds = t.indices;
-                helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, debug);
-                helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, debug);
-                helpers.imageDrawLine(image, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, debug);
-                if (inds.length < 4) continue;
-                helpers.imageDrawLine(image, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, debug);
-                helpers.imageDrawLine(image, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, debug);
-            }
-        }
+        
     }
 
     function introSort(arr: { indices: number[] }[], rot: { z: number }[]) {
@@ -491,3 +514,4 @@ namespace Polymesh {
     }
 
 }
+
