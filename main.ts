@@ -82,7 +82,7 @@ namespace Polymesh {
         }
 
         //% blockid=poly_addvertice
-        //% block=" $this set vertice at $idx by x: $x y: $y z: $z"
+        //% block=" $this set vertice at $idx to x: $x y: $y z: $z"
         //% this.shadow=variables_get this.defl=myMesh
         //% ccv.shadow=poly_shadow_vertice
         //% group="mesh property"
@@ -90,7 +90,7 @@ namespace Polymesh {
         public setVertice(idx: number, x: number, y: number, z: number) { this.points[idx] = { x: x, y: y, z: z } }
 
         //% blockid=poly_setface
-        //% block=" $this set face in color $c=colorindexpicker at $idx by idc1 $i1 idc2 $i2|| idc3 $i3 idc4 $i4 and texture $img=screen_image_picker"
+        //% block=" $this set face at $idx to color $c=colorindexpicker and idc1 $i1 idc2 $i2|| idc3 $i3 idc4 $i4 and texture $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=9
@@ -101,6 +101,36 @@ namespace Polymesh {
 
             if (indice.length > 3 && img) this.faces[idx] = { indices: indice, color: c, img: img }
             else this.faces[idx] = { indices: indice, color: c }
+        }
+
+        //% blockid=poly_setfacecolor
+        //% block=" $this set face color at $idx to $c=colorindexpicker"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh property"
+        //% weight=8
+        public setFaceColor(idx: number, c: number) {
+            if (this.faces[idx].color === c) return;
+            this.faces[idx].color = c
+        }
+
+        //% blockid=poly_setfaceimage
+        //% block=" $this set face image at $idx to $img=screen_image_picker"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh property"
+        //% weight=7
+        public setFaceImage(idx: number, img: Image) {
+            if (this.faces[idx].img.equals(img)) return;
+            this.faces[idx].img = img
+        }
+
+        //% blockid=poly_clearfaceimage
+        //% block=" $this clear face image at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh property"
+        //% weight=6
+        public clearFaceImage(idx: number) {
+            if (!this.faces[idx].img) return;
+            delete this.faces[idx].img
         }
 
         //% blockid=poly_delvertice
@@ -200,7 +230,7 @@ namespace Polymesh {
         //% blockid=poly_mesh_pos_set
         //% block=" $this set $choice to $x"
         //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh pos"
+        //% group="mesh position property"
         //% weight=10
         public setPos(choice: PointProp, x: number) {
             switch (choice) {
@@ -216,8 +246,8 @@ namespace Polymesh {
         //% blockid=poly_mesh_pos_change
         //% block=" $this change $choice by $x"
         //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh pos"
-        //% weight=10
+        //% group="mesh position property"
+        //% weight=9
         public changePos(choice: PointProp, x: number) {
             switch (choice) {
                 case 0: this.pos.x += x; break
@@ -232,8 +262,8 @@ namespace Polymesh {
         //% blockid=poly_mesh_pos_get
         //% block=" $this get $choice"
         //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh pos"
-        //% weight=10
+        //% group="mesh position property"
+        //% weight=8
         public getPos(choice: PointProp) {
             switch (choice) {
                 case 0: return this.pos.x
