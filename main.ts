@@ -299,10 +299,9 @@ namespace Polymesh {
 
         // Transform vertices
         const rotated = plm.points.map(v => {
-            let vpoint: { point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }}
-                vpoint.point = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z}
-                vpoint.pivot = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
-            const vpos: {x: number, y: number, z: number} = rotatePoint3D(vpoint.point, vpoint.pivot, plm.rot)
+            const vpoint: { x: number, y: number, z: number } = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z}
+            const vpivot: { x: number, y: number, z: number } = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
+            const vpos: {x: number, y: number, z: number} = rotatePoint3D(vpoint, vpivot, plm.rot)
             // camera offset
             let x = vpos.x - camx;
             let y = vpos.y - camy;
