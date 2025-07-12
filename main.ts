@@ -20,6 +20,20 @@ namespace Polymesh {
         //% block="Camera zoom"
         Zoom = 3,
     }
+    export enum PointProp {
+        //% block="x"
+        x = 0,
+        //% block="y"
+        y = 1,
+        //% block="z"
+        z = 2,
+        //% block="vx"
+        vx = 3,
+        //% block="vy"
+        vy = 4,
+        //% block="vz"
+        vz = 5,
+    }
     export enum PivotPos {
         //% block="Pivot x"
         PivotX = 0,
@@ -47,12 +61,23 @@ namespace Polymesh {
         points: { x: number, y: number, z: number }[]
         pivot: { x: number, y: number, z: number}
         rot: { x: number, y: number, z: number }
+        pos: {x: number, y: number, z: number, vx: number, vy: number, vz: number}
+        
+        home() {
+            forever( function() {
+                const deltaT = game.currentScene().eventContext.deltaTimeMillis
+                if (this.pos.vx !== 0) this.pos.x += this.pos.vx * deltaT
+                if (this.pos.vy !== 0) this.pos.y += this.pos.vy * deltaT
+                if (this.pos.vz !== 0) this.pos.z += this.pos.vz * deltaT
+            })
+        }
 
         constructor() {
             this.faces = [{ indices: [0, 0, 0], color: 0, img: null }]
             this.points = [{ x: 0, y: 0, z: 0 }]
             this.pivot = { x: 0, y: 0, z: 0 }
             this.rot = { x: 0, y: 0, z: 0 }
+            this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
         }
 
         //% blockid=poly_addvertice
@@ -91,7 +116,7 @@ namespace Polymesh {
         //% weight=7
         public delFace(idx: number) { this.faces.removeAt(idx) }
 
-        //% blockid=poly_mesh_pos_set
+        //% blockid=poly_mesh_pivot_set
         //% block=" $this set $choice to $x"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh pivot"
@@ -104,7 +129,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_mesh_pos_change
+        //% blockid=poly_mesh_pivot_change
         //% block=" $this change $choice by $x"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh pivot"
@@ -117,7 +142,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_mesh_pos_get
+        //% blockid=poly_mesh_pivot_get
         //% block=" $this get $choice"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh pivot"
@@ -128,7 +153,7 @@ namespace Polymesh {
                 case 1: return this.pivot.y
                 case 2: return this.pivot.z
             }
-            return 0
+            return NaN
         }
 
         //% blockid=poly_mesh_rot_set
@@ -168,7 +193,56 @@ namespace Polymesh {
                 case 1: return this.rot.y
                 case 2: return this.rot.z
             }
-            return 0
+            return NaN
+        }
+
+        //% blockid=poly_mesh_pos_set
+        //% block=" $this set $choice to $x"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh pos"
+        //% weight=10
+        public setPos(choice: PointProp, x: number) {
+            switch (choice) {
+                case 0: this.pos.x = x; break
+                case 1: this.pos.y = x; break
+                case 2: this.pos.z = x; break
+                case 3: this.pos.vx = x; break
+                case 4: this.pos.vy = x; break
+                case 5: this.pos.vz = x; break
+            }
+        }
+
+        //% blockid=poly_mesh_pos_change
+        //% block=" $this change $choice by $x"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh pos"
+        //% weight=10
+        public changePos(choice: PointProp, x: number) {
+            switch (choice) {
+                case 0: this.pos.x += x; break
+                case 1: this.pos.y += x; break
+                case 2: this.pos.z += x; break
+                case 3: this.pos.vx += x; break
+                case 4: this.pos.vy += x; break
+                case 5: this.pos.vz += x; break
+            }
+        }
+
+        //% blockid=poly_mesh_pos_get
+        //% block=" $this get $choice"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh pos"
+        //% weight=10
+        public getPos(choice: PointProp) {
+            switch (choice) {
+                case 0: return this.pos.x
+                case 1: return this.pos.y
+                case 2: return this.pos.z
+                case 3: return this.pos.vx
+                case 4: return this.pos.vy
+                case 5: return this.pos.vz
+            }
+            return NaN
         }
 
     }
@@ -225,7 +299,10 @@ namespace Polymesh {
 
         // Transform vertices
         const rotated = plm.points.map(v => {
-            const vpos: {x: number, y: number, z: number} = rotatePoint3D(v, plm.pivot, plm.rot)
+            let vpoint: { point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }}
+                vpoint.point = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z}
+                vpoint.pivot = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
+            const vpos: {x: number, y: number, z: number} = rotatePoint3D(vpoint.point, vpoint.pivot, plm.rot)
             // camera offset
             let x = vpos.x - camx;
             let y = vpos.y - camy;
@@ -489,7 +566,7 @@ namespace Polymesh {
             case 1: return ay
             case 2: return az
         }
-        return 0
+        return NaN
     }
 
     //% blockid=poly_camera_get
@@ -503,7 +580,7 @@ namespace Polymesh {
             case 2: return camz
             case 3: default: return zoom
         }
-        return 0
+        return NaN
     }
 
     //% blockid=poly_camera_setpos
