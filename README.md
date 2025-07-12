@@ -1,6 +1,8 @@
  
 
 
+> Download this extension [here](https://github.com/phattisu/arcade-polymesh/raw/refs/heads/master/arcade-polymesh.uf2)
+
 > Open this page at [https://phatisena.github.io/arcade-polymesh/](https://phatisena.github.io/arcade-polymesh/)
 
 ## Use as Extension
