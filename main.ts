@@ -49,6 +49,14 @@ namespace Polymesh {
         Fast = 1,
     }
 
+    //% blockid=poly_sorttype
+    //% block="set sorting method to $method"
+    //% group="sorting"
+    //% weight=10
+    export function sortingMethod(method: SortingMethods) {
+        sort = method
+    }
+
     //% blockid=poly_newmesh
     //% block="create new mesh"
     //% blockSetVariable=myMesh
@@ -61,14 +69,14 @@ namespace Polymesh {
         points: { x: number, y: number, z: number }[]
         pivot: { x: number, y: number, z: number}
         rot: { x: number, y: number, z: number }
-        pos: {x: number, y: number, z: number, vx: number, vy: number, vz: number}
+        pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
         
         protected home() {
             forever( function() {
                 const deltaT = game.currentScene().eventContext.deltaTimeMillis
-                if (this.pos.vx !== 0) this.pos.x += this.pos.vx * deltaT
-                if (this.pos.vy !== 0) this.pos.y += this.pos.vy * deltaT
-                if (this.pos.vz !== 0) this.pos.z += this.pos.vz * deltaT
+                if (this.pos.vx !== 0) this.pos.x += this.pos.vx * deltaT;
+                if (this.pos.vy !== 0) this.pos.y += this.pos.vy * deltaT;
+                if (this.pos.vz !== 0) this.pos.z += this.pos.vz * deltaT;
             })
         }
 
@@ -95,19 +103,59 @@ namespace Polymesh {
         //% group="mesh property"
         //% weight=9
         public setFace(idx: number, c: number, i1: number, i2: number, i3?: number, i4?: number, img?: Image) {
-            let indice = [i1, i2]
-            if (i3) indice.push(i3)
-            if (i4) indice.push(i4)
+            const indice = [i1, i2]
+            if (i3) indice.push(i3);
+            if (i4) indice.push(i4);
+            if (indice.length > 3 && img) this.faces[idx] = { indices: indice, color: c, img: img };
+            else this.faces[idx] = { indices: indice, color: c };
+        }
 
-            if (indice.length > 3 && img) this.faces[idx] = { indices: indice, color: c, img: img }
-            else this.faces[idx] = { indices: indice, color: c }
+        //% blockid=poly_addvertice
+        //% block=" $this add vertice to x: $x y: $y z: $z"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% ccv.shadow=poly_shadow_vertice
+        //% group="mesh property"
+        //% weight=8
+        public addVertice(x: number, y: number, z: number) { this.points.push({ x: x, y: y, z: z }) }
+
+        //% blockid=poly_setface
+        //% block=" $this add face to color $c=colorindexpicker and idc1 $i1 idc2 $i2|| idc3 $i3 idc4 $i4 and texture $img=screen_image_picker"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh property"
+        //% weight=7
+        public addFace(c: number, i1: number, i2: number, i3?: number, i4?: number, img?: Image) {
+            const indice = [i1, i2]
+            if (i3) indice.push(i3);
+            if (i4) indice.push(i4);
+            if (indice.length > 3 && img) this.faces.push({ indices: indice, color: c, img: img });
+            else this.faces.push({ indices: indice, color: c });
+        }
+
+        //% blockid=poly_delvertice
+        //% block=" $this remove vertice|| at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh remover"
+        //% weight=10
+        public delVertice(idx?: number) {
+            if (idx) this.points.removeAt(idx);
+            else this.points.pop();
+        }
+
+        //% blockid=poly_delface
+        //% block=" $this remove face|| at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh remover"
+        //% weight=9
+        public delFace(idx?: number) {
+            if (idx) this.faces.removeAt(idx);
+            else this.faces.pop();
         }
 
         //% blockid=poly_setfacecolor
         //% block=" $this set face color at $idx to $c=colorindexpicker"
         //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh property"
-        //% weight=8
+        //% group="mesh face property"
+        //% weight=10
         public setFaceColor(idx: number, c: number) {
             if (this.faces[idx].color === c) return;
             this.faces[idx].color = c
@@ -116,8 +164,8 @@ namespace Polymesh {
         //% blockid=poly_setfaceimage
         //% block=" $this set face image at $idx to $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh property"
-        //% weight=7
+        //% group="mesh face property"
+        //% weight=9
         public setFaceImage(idx: number, img: Image) {
             if (this.faces[idx].img.equals(img)) return;
             this.faces[idx].img = img
@@ -126,26 +174,12 @@ namespace Polymesh {
         //% blockid=poly_clearfaceimage
         //% block=" $this clear face image at $idx"
         //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh property"
-        //% weight=6
+        //% group="mesh face property"
+        //% weight=8
         public clearFaceImage(idx: number) {
             if (!this.faces[idx].img) return;
             delete this.faces[idx].img
         }
-
-        //% blockid=poly_delvertice
-        //% block=" $this remove vertice at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh remover"
-        //% weight=8
-        public delVertice(idx: number) { this.points.removeAt(idx) }
-
-        //% blockid=poly_delface
-        //% block=" $this remove face at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh remover"
-        //% weight=7
-        public delFace(idx: number) { this.faces.removeAt(idx) }
 
         //% blockid=poly_mesh_pivot_set
         //% block=" $this set $choice to $x"
@@ -578,14 +612,6 @@ namespace Polymesh {
         }
     }
 
-    //% blockid=poly_sorttype
-    //% block="set sorting method to $method"
-    //% group="sorting"
-    //% weight=10
-    export function sortingMethod(method: SortingMethods) {
-        sort = method
-    }
-
     //% blockid=poly_angle_get
     //% block="$choice"
     //% group="main angle"
@@ -617,7 +643,7 @@ namespace Polymesh {
     //% block="set camera position to x: $x y: $y z: $z"
     //% group="main camera"
     //% weight=3
-    export function setcCampos(x: number, y: number, z: number) {
+    export function setCamPosition(x: number, y: number, z: number) {
         camx = x, camy = y, camz = z
     }
 
