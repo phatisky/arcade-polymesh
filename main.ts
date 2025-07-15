@@ -349,6 +349,21 @@ namespace Polymesh {
         };
     }
 
+    //% blockid=poly_rendermesh_all
+    //% block=" $plms render all meshes to $image=screen_image_picker|| as inner? $inner=toggleYesNo or fullrender? $fullren=toggleYesNo and line render color? $lineren=colorindexpicker"
+    //% plms.shadow=variables_get plms.defl=myMeshes
+    //% group="render"
+    //% weight=9
+    export function renderAll(plms: mesh[], image: Image, inner?: boolean, fullren?: boolean, lineren?: number) {
+        const sorted = plms.slice()
+        sorted.sort((a, b) => averageMeshZ(b) - averageMeshZ(a))
+        for (const m of sorted) render(m, image, inner, fullren, lineren);
+    }
+
+    function averageMeshZ(m: mesh): number {
+        return m.points.reduce((s, p) => s + p.z + m.pos.z, 0) / m.points.length;
+    }
+
     //% blockid=poly_rendermesh
     //% block=" $plm render to $image=screen_image_picker|| as inner? $inner=toggleYesNo or fullrender? $fullren=toggleYesNo and line render color? $lineren=colorindexpicker"
     //% plm.shadow=variables_get plm.defl=myMesh
@@ -516,12 +531,8 @@ namespace Polymesh {
         const left = 2 * root + 1;
         const right = 2 * root + 2;
 
-        if (left < size && avgZ(rot, arr[offset + left].indices) > avgZ(rot, arr[offset + largest].indices)) {
-            largest = left;
-        }
-        if (right < size && avgZ(rot, arr[offset + right].indices) > avgZ(rot, arr[offset + largest].indices)) {
-            largest = right;
-        }
+        if (left < size && avgZ(rot, arr[offset + left].indices) > avgZ(rot, arr[offset + largest].indices)) largest = left;
+        if (right < size && avgZ(rot, arr[offset + right].indices) > avgZ(rot, arr[offset + largest].indices)) largest = right;
         if (largest !== root) {
             const tmp = arr[offset + root];
             arr[offset + root] = arr[offset + largest];
