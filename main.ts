@@ -72,22 +72,23 @@ namespace Polymesh {
         pivot: { x: number, y: number, z: number}
         rot: { x: number, y: number, z: number }
         pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
-        protected home: () => void
-
-        constructor() {
-            this.faces = []
-            this.points = []
-            this.pivot = { x: 0, y: 0, z: 0 }
-            this.rot = { x: 0, y: 0, z: 0 }
-            this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
-            
-            this.home = () => {
+        protected home() {
+            forever(() => {
                 const delta = game.currentScene().eventContext.deltaTimeMillis
                 if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
                 if (this.pos.vy !== 0) this.pos.y += this.pos.vy * delta;
                 if (this.pos.vz !== 0) this.pos.z += this.pos.vz * delta;
-            }
-            forever(this.home)
+            })
+        }
+
+        constructor() {
+            this.faces = [{indices: [0], color: 0, img: null}]
+            this.points = [{x: 0, y: 0, z: 0}]
+            this.pivot = { x: 0, y: 0, z: 0 }
+            this.rot = { x: 0, y: 0, z: 0 }
+            this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
+            
+            this.home()
         }
 
         //% blockid=poly_addvertice
