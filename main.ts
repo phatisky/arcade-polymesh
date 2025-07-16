@@ -360,6 +360,7 @@ namespace Polymesh {
         if (plms.length <= 0) return;
         const sorted = plms.slice()
         sorted.sort((a, b) => avgMeshZ(b) - avgMeshZ(a))
+        sorted.reverse()
         for (const m of sorted) render(m, image, inner, nocull, linecolor);
     }
 
