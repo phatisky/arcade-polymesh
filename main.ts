@@ -82,8 +82,8 @@ namespace Polymesh {
         }
 
         constructor() {
-            this.faces = [{indices: [0], color: 0, img: null}]
-            this.points = [{x: 0, y: 0, z: 0}]
+            this.faces = []
+            this.points = []
             this.pivot = { x: 0, y: 0, z: 0 }
             this.rot = { x: 0, y: 0, z: 0 }
             this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
@@ -357,6 +357,7 @@ namespace Polymesh {
     //% group="render"
     //% weight=9
     export function renderAll(plms: mesh[], image: Image, inner?: boolean, nocull?: boolean, linecolor?: number) {
+        if (plms.length <= 0) return;
         const sorted = plms.slice()
         sorted.sort((a, b) => avgMeshZ(b) - avgMeshZ(a))
         for (const m of sorted) render(m, image, inner, nocull, linecolor);
@@ -372,6 +373,8 @@ namespace Polymesh {
     //% group="render"
     //% weight=10
     export function render(plm: mesh, image: Image, inner?: boolean, nocull?: boolean, linecolor?: number) {
+        if (plm.points.length <= 0 || plm.faces.length <= 0) return;
+        
         const centerX = image.width >> 1;
         const centerY = image.height >> 1;
 
