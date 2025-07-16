@@ -72,7 +72,7 @@ namespace Polymesh {
         pivot: { x: number, y: number, z: number}
         rot: { x: number, y: number, z: number }
         pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
-        protected home() {
+        __home__() {
             forever(() => {
                 const delta = game.currentScene().eventContext.deltaTimeMillis
                 if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
@@ -88,7 +88,7 @@ namespace Polymesh {
             this.rot = { x: 0, y: 0, z: 0 }
             this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
             
-            this.home()
+            this.__home__()
         }
 
         //% blockid=poly_addvertice
