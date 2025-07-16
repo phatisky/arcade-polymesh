@@ -1,6 +1,6 @@
 {
     "name": "arcade-polymesh - Copy",
-    "version": "0.6.12",
+    "version": "0.7.0",
     "description": "basic 3d render like polygon and mesh",
     "dependencies": {
         "device": "*"
