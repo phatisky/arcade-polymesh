@@ -352,14 +352,14 @@ namespace Polymesh {
     }
 
     //% blockid=poly_rendermesh_all
-    //% block=" $plms render all meshes to $image=screen_image_picker|| as inner? $inner=toggleYesNo and no culling? $nocull=toggleYesNo and line render color? $lineren=colorindexpicker"
+    //% block=" $plms render all meshes to $image=screen_image_picker|| as inner? $inner=toggleYesNo and no culling? $nocull=toggleYesNo and line render color? $linecolor=colorindexpicker"
     //% plms.shadow=variables_get plms.defl=myMeshes
     //% group="render"
     //% weight=9
-    export function renderAll(plms: mesh[], image: Image, inner?: boolean, nocull?: boolean, lineren?: number) {
+    export function renderAll(plms: mesh[], image: Image, inner?: boolean, nocull?: boolean, linecolor?: number) {
         const sorted = plms.slice()
         sorted.sort((a, b) => avgMeshZ(b) - avgMeshZ(a))
-        for (const m of sorted) render(m, image, inner, nocull, lineren);
+        for (const m of sorted) render(m, image, inner, nocull, linecolor);
     }
 
     function avgMeshZ(m: mesh): number {
@@ -367,11 +367,11 @@ namespace Polymesh {
     }
 
     //% blockid=poly_rendermesh
-    //% block=" $plm render to $image=screen_image_picker|| as inner? $inner=toggleYesNo and no culling? $nocull=toggleYesNo and line render color? $lineren=colorindexpicker"
+    //% block=" $plm render to $image=screen_image_picker|| as inner? $inner=toggleYesNo and no culling? $nocull=toggleYesNo and line render color? $linecolor=colorindexpicker"
     //% plm.shadow=variables_get plm.defl=myMesh
     //% group="render"
     //% weight=10
-    export function render(plm: mesh, image: Image, inner?: boolean, nocull?: boolean, lineren?: number) {
+    export function render(plm: mesh, image: Image, inner?: boolean, nocull?: boolean, linecolor?: number) {
         const centerX = image.width >> 1;
         const centerY = image.height >> 1;
 
@@ -421,13 +421,13 @@ namespace Polymesh {
         // Render
         for (const t of tris) {
             const inds = t.indices;
-            if (inds.some(i => i >= rotated.length || rotated[i].z < 0 - Math.abs(dist))) continue;
+            if (inds.some(i => rotated[i].z < 0 - Math.abs(dist))) continue;
             if (inds.every(i => (rotated[i].x < 0 || rotated[i].x >= image.width) || (rotated[i].y < 0 || rotated[i].y >= image.height))) continue;
 
             if (!nocull) if (!rotated.some((ro) => (inds.every(i => inner ? rotated[i].z > ro.z : rotated[i].z < ro.z)))) continue;
             
             // Draw line canvas when have line color index
-            if (lineren && lineren > 0) {
+            if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, lineren);
                 if (inds.length < 3) continue;
                 helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, lineren);
