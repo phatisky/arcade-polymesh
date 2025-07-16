@@ -19,6 +19,8 @@ namespace Polymesh {
         CamZ = 2,
         //% block="Camera zoom"
         Zoom = 3,
+        //% block="Camera distance"
+        Dist = 4,
     }
     export enum PointProp {
         //% block="x"
@@ -70,23 +72,22 @@ namespace Polymesh {
         pivot: { x: number, y: number, z: number}
         rot: { x: number, y: number, z: number }
         pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
-        
-        protected home() {
-            forever( function() {
-                const deltaT = game.currentScene().eventContext.deltaTimeMillis
-                if (this.pos.vx !== 0) this.pos.x += this.pos.vx * deltaT;
-                if (this.pos.vy !== 0) this.pos.y += this.pos.vy * deltaT;
-                if (this.pos.vz !== 0) this.pos.z += this.pos.vz * deltaT;
-            })
-        }
+        protected home: () => void
 
         constructor() {
-            this.faces = [{ indices: [0, 0, 0], color: 0, img: null }]
-            this.points = [{ x: 0, y: 0, z: 0 }]
+            this.faces = []
+            this.points = []
             this.pivot = { x: 0, y: 0, z: 0 }
             this.rot = { x: 0, y: 0, z: 0 }
             this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
-            this.home()
+            
+            this.home = () => {
+                const delta = game.currentScene().eventContext.deltaTimeMillis
+                if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
+                if (this.pos.vy !== 0) this.pos.y += this.pos.vy * delta;
+                if (this.pos.vz !== 0) this.pos.z += this.pos.vz * delta;
+            }
+            forever(this.home)
         }
 
         //% blockid=poly_addvertice
@@ -312,9 +313,9 @@ namespace Polymesh {
 
     }
 
-    let ax = 0, az = 0, ay = 0
-    let camx = 0, camy = 0, camz = 0
-    let zoom = 1, sort = 0
+    let [ax, az, ay] = [0, 0, 0]
+    let [camx, camy, camz] = [0, 0, 0]
+    let [zoom, sort, dist] = [1, 0, 150]
 
     function rotatePoint3D(point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) {
 
@@ -356,11 +357,11 @@ namespace Polymesh {
     //% weight=9
     export function renderAll(plms: mesh[], image: Image, inner?: boolean, nocull?: boolean, lineren?: number) {
         const sorted = plms.slice()
-        sorted.sort((a, b) => averageMeshZ(b) - averageMeshZ(a))
+        sorted.sort((a, b) => avgMeshZ(b) - avgMeshZ(a))
         for (const m of sorted) render(m, image, inner, nocull, lineren);
     }
 
-    function averageMeshZ(m: mesh): number {
+    function avgMeshZ(m: mesh): number {
         return m.points.reduce((s, p) => s + p.z + m.pos.z, 0) / m.points.length;
     }
 
@@ -401,8 +402,7 @@ namespace Polymesh {
             x = tx;
 
             // Perspective
-            const dist = 150;
-            const scale = dist / (dist + z);
+            const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
                 x: centerX + x * scale * zoom,
                 y: centerY + y * scale * zoom,
@@ -420,22 +420,10 @@ namespace Polymesh {
         // Render
         for (const t of tris) {
             const inds = t.indices;
-            if (inds.some(i => rotated[i].z < -150)) continue;
+            if (inds.some(i => i >= rotated.length || rotated[i].z < -Math.abs(dist))) continue;
+            if (inds.every(i => (rotated[i].x < 0 || rotated[i].x >= image.width) || (rotated[i].y < 0 || rotated[i].y >= image.height))) continue;
 
-            // Check if out of screen
-            if (inds.every(i =>
-                (rotated[i].x < 0 || rotated[i].x >= image.width) ||
-                (rotated[i].y < 0 || rotated[i].y >= image.height)
-            )) continue;
-
-            // Backface culling
-            if (!nocull && inds.length >= 3) {
-                const [v1, v2, v3, v4] = [rotated[inds[0]], rotated[inds[1]], rotated[inds[2]], rotated[inds[3]]]
-                let normal = (v2.x - v1.x) * (v3.y - v1.y) - (v2.y - v1.y) * (v3.x - v1.x)
-                if (v4) normal += (v2.x - v4.x) * (v3.y - v4.y) - (v2.y - v4.y) * (v3.x - v4.x)
-                if (inner && normal <= 0) continue;
-                else if (!inner && normal > 0) continue;
-            }
+            if (!nocull) if (!rotated.some((ro) => (inds.every(i => inner ? rotated[i].z > ro.z : rotated[i].z < ro.z)))) continue;
             
             // Draw line canvas when have line color index
             if (lineren && lineren > 0) {
@@ -609,6 +597,7 @@ namespace Polymesh {
             case 1: camy += x; break
             case 2: camz += x; break
             case 3: default: zoom += x; break
+            case 4: dist += x; break
         }
     }
     //% blockid=poly_angle_set
@@ -632,6 +621,7 @@ namespace Polymesh {
             case 1: camy = x; break
             case 2: camz = x; break
             case 3: default: zoom = x; break
+            case 4: dist = x; break
         }
     }
 
@@ -658,6 +648,7 @@ namespace Polymesh {
             case 1: return camy
             case 2: return camz
             case 3: default: return zoom
+            case 4: return dist
         }
         return NaN
     }
@@ -666,8 +657,6 @@ namespace Polymesh {
     //% block="set camera position to x: $x y: $y z: $z"
     //% group="main camera"
     //% weight=3
-    export function setCamPosition(x: number, y: number, z: number) {
-        camx = x, camy = y, camz = z
-    }
+    export function setCamPosition(x: number, y: number, z: number) { [camx, camy, camz] = [x, y, z] }
 
 }
