@@ -350,14 +350,14 @@ namespace Polymesh {
     }
 
     //% blockid=poly_rendermesh_all
-    //% block=" $plms render all meshes to $image=screen_image_picker|| as inner? $inner=toggleYesNo or fullrender? $fullren=toggleYesNo and line render color? $lineren=colorindexpicker"
+    //% block=" $plms render all meshes to $image=screen_image_picker|| as inner? $inner=toggleYesNo and no culling? $nocull=toggleYesNo and line render color? $lineren=colorindexpicker"
     //% plms.shadow=variables_get plms.defl=myMeshes
     //% group="render"
     //% weight=9
-    export function renderAll(plms: mesh[], image: Image, inner?: boolean, fullren?: boolean, lineren?: number) {
+    export function renderAll(plms: mesh[], image: Image, inner?: boolean, nocull?: boolean, lineren?: number) {
         const sorted = plms.slice()
         sorted.sort((a, b) => averageMeshZ(b) - averageMeshZ(a))
-        for (const m of sorted) render(m, image, inner, fullren, lineren);
+        for (const m of sorted) render(m, image, inner, nocull, lineren);
     }
 
     function averageMeshZ(m: mesh): number {
@@ -365,11 +365,11 @@ namespace Polymesh {
     }
 
     //% blockid=poly_rendermesh
-    //% block=" $plm render to $image=screen_image_picker|| as inner? $inner=toggleYesNo or fullrender? $fullren=toggleYesNo and line render color? $lineren=colorindexpicker"
+    //% block=" $plm render to $image=screen_image_picker|| as inner? $inner=toggleYesNo and no culling? $nocull=toggleYesNo and line render color? $lineren=colorindexpicker"
     //% plm.shadow=variables_get plm.defl=myMesh
     //% group="render"
     //% weight=10
-    export function render(plm: mesh, image: Image, inner?: boolean, fullren?: boolean, lineren?: number) {
+    export function render(plm: mesh, image: Image, inner?: boolean, nocull?: boolean, lineren?: number) {
         const centerX = image.width >> 1;
         const centerY = image.height >> 1;
 
@@ -421,9 +421,21 @@ namespace Polymesh {
         for (const t of tris) {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -150)) continue;
-            if (inds.every(i => (rotated[i].x < 0 || rotated[i].x >= image.width) || (rotated[i].y < 0 || rotated[i].y >= image.height))) continue;
-            
-            if (!fullren) if (!rotated.some((ro) => (inds.every(i => inner ? rotated[i].z > ro.z : rotated[i].z < ro.z)))) continue;
+
+            // Check if out of screen
+            if (inds.every(i =>
+                (rotated[i].x < 0 || rotated[i].x >= image.width) ||
+                (rotated[i].y < 0 || rotated[i].y >= image.height)
+            )) continue;
+
+            // Backface culling
+            if (!nocull && inds.length >= 3) {
+                const [v1, v2, v3, v4] = [rotated[inds[0]], rotated[inds[1]], rotated[inds[2]], rotated[inds[3]]]
+                let normal = (v2.x - v1.x) * (v3.y - v1.y) - (v2.y - v1.y) * (v3.x - v1.x)
+                if (v4) normal += (v2.x - v4.x) * (v3.y - v4.y) - (v2.y - v4.y) * (v3.x - v4.x)
+                if (inner && normal <= 0) continue;
+                else if (!inner && normal > 0) continue;
+            }
             
             // Draw line canvas when have line color index
             if (lineren && lineren > 0) {
