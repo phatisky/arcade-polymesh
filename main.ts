@@ -94,7 +94,6 @@ namespace Polymesh {
         //% blockid=poly_addvertice
         //% block=" $this set vertice at $idx to x: $x y: $y z: $z"
         //% this.shadow=variables_get this.defl=myMesh
-        //% ccv.shadow=poly_shadow_vertice
         //% group="mesh property"
         //% weight=10
         public setVertice(idx: number, x: number, y: number, z: number) { this.points[idx] = { x: x, y: y, z: z } }
@@ -115,7 +114,6 @@ namespace Polymesh {
         //% blockid=poly_addvertice
         //% block=" $this add vertice to x: $x y: $y z: $z"
         //% this.shadow=variables_get this.defl=myMesh
-        //% ccv.shadow=poly_shadow_vertice
         //% group="mesh property"
         //% weight=8
         public addVertice(x: number, y: number, z: number) { this.points.push({ x: x, y: y, z: z }) }
