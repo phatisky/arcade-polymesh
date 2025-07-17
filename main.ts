@@ -51,10 +51,6 @@ namespace Polymesh {
         Fast = 1,
     }
 
-    const mod = (a: number, b: number) => ((a % b) + b) % b
-    const rad2deg = (rad: number) => (rad * (180 / Math.PI))
-    const isHalf = (a: number, b: number) => Math.floor(mod(a, b) / (b/2)) > 0
-
     //% blockid=poly_sorttype
     //% block="set sorting method to $method"
     //% group="sorting"
@@ -361,52 +357,10 @@ namespace Polymesh {
     export function renderAll(plms: mesh[], image: Image, inner?: boolean, nocull?: boolean, linecolor?: number) {
         if (plms.length <= 0) return;
 
-        const centerX = image.width >> 1;
-        const centerY = image.height >> 1;
-
-        const cosX = Math.cos(ax), sinX = Math.sin(ax);
-        const cosY = Math.cos(ay), sinY = Math.sin(ay);
-        const cosZ = Math.cos(az), sinZ = Math.sin(az);
-
-        // Transform vertices
-        const rotateds = plms.map(plm => {
-            const vpos: { x: number, y: number, z: number } = plm.pos
-            // camera offset
-            let x = vpos.x - camx;
-            let y = vpos.y - camy;
-            let z = vpos.z - camz;
-
-            // rotate camera
-            let tx = x * cosY + z * sinY;
-            z = -x * sinY + z * cosY;
-            x = tx;
-
-            let ty = y * cosX - z * sinX;
-            z = y * sinX + z * cosX;
-            y = ty;
-
-            tx = x * cosZ - y * sinZ;
-            y = x * sinZ + y * cosZ;
-            x = tx;
-
-            // Perspective
-            const scale = Math.abs(dist) / (Math.abs(dist) + z);
-            return {
-                x: centerX + x * scale * zoom,
-                y: centerY + y * scale * zoom,
-                z: z
-            };
-        })
-
-        const sorted = plms.slice()
-
-        sorted.sort((a, b) => avgMeshZ(rotateds, b) - avgMeshZ(rotateds, a))
-        if (!(isHalf(rad2deg(ax), 360) || isHalf(rad2deg(ay), 360) || isHalf(rad2deg(az), 360))) sorted.reverse()
-        for (const m of sorted) render(m, image, inner, nocull, linecolor);
-    }
-
-    function avgMeshZ(rot: {z: number}[], m: mesh): number {
-        return rot.reduce((s, n) => s + n.z + m.pos.z, 0) / rot.length
+        const depths = plms.map(plm => meshDepthZ(plm));
+        const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
+        sorted.sort((a, b) => b.depth - a.depth);
+        for (const m of sorted) render(m.mesh, image, inner, nocull, linecolor);
     }
 
     //% blockid=poly_rendermesh
@@ -520,6 +474,27 @@ namespace Polymesh {
 
         }
         
+    }
+
+    function meshDepthZ(plm: mesh): number {
+        let x = plm.pos.x - camx;
+        let y = plm.pos.y - camy;
+        let z = plm.pos.z - camz;
+
+        // rotate camera
+        let tx = x * Math.cos(ay) + z * Math.sin(ay);
+        z = -x * Math.sin(ay) + z * Math.cos(ay);
+        x = tx;
+
+        let ty = y * Math.cos(ax) - z * Math.sin(ax);
+        z = y * Math.sin(ax) + z * Math.cos(ax);
+        y = ty;
+
+        tx = x * Math.cos(az) - y * Math.sin(az);
+        y = x * Math.sin(az) + y * Math.cos(az);
+        x = tx;
+
+        return z;
     }
 
     function introSort(arr: { indices: number[] }[], rot: { z: number }[]) {
