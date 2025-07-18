@@ -427,7 +427,7 @@ namespace Polymesh {
             if (!nocull && inds.length >= 3) {
                 const vers = inds.map((i) => rotated[i])
                 let normal = (vers[1].x - vers[0].x) * (vers[2].y - vers[0].y) - (vers[1].y - vers[0].y) * (vers[2].x - vers[0].x)
-                if (vers.length > 3) normal += (vers[1].x - vers[3].x) * (vers[2].y - vers[3].y) - (vers[1].y - vers[3].y) * (vers[2].x - vers[3].x)
+                if (vers.length > 3) normal -= (vers[1].x - vers[3].x) * (vers[2].y - vers[3].y) - (vers[1].y - vers[3].y) * (vers[2].x - vers[3].x)
                 if (inner ? normal <= 0 : normal > 0) continue;
             }
 
