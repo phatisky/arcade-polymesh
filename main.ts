@@ -422,9 +422,15 @@ namespace Polymesh {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist))) continue;
             if (inds.every(i => (rotated[i].x < 0 || rotated[i].x >= image.width) || (rotated[i].y < 0 || rotated[i].y >= image.height))) continue;
-
-            if (!nocull) if (!rotated.some((ro) => (inds.every(i => inner ? rotated[i].z > ro.z : rotated[i].z < ro.z)))) continue;
             
+            // Backface culling
+            if (!nocull && inds.length >= 3) {
+                const vers = inds.map((i) => rotated[i])
+                let normal = (vers[1].x - vers[0].x) * (vers[2].y - vers[0].y) - (vers[1].y - vers[0].y) * (vers[2].x - vers[0].x)
+                if (vers.length > 3) normal += (vers[1].x - vers[3].x) * (vers[2].y - vers[3].y) - (vers[1].y - vers[3].y) * (vers[2].x - vers[3].x)
+                if (inner ? normal <= 0 : normal > 0) continue;
+            }
+
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
