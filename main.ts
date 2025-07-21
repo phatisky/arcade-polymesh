@@ -78,7 +78,7 @@ namespace Polymesh {
         pivot: { x: number, y: number, z: number}
         rot: { x: number, y: number, z: number }
         pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
-        flag: { invisible?: boolean, noncull?: boolean}
+        flag: { invisible: boolean, noncull: boolean}
         __home__() {
             forever(() => {
                 const delta = game.currentScene().eventContext.deltaTimeMillis
@@ -94,7 +94,8 @@ namespace Polymesh {
             this.pivot = { x: 0, y: 0, z: 0 }
             this.rot = { x: 0, y: 0, z: 0 }
             this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
-            
+            this.flag = { invisible: false, noncull: false }
+
             this.__home__()
         }
 
