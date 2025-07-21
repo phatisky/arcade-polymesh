@@ -54,7 +54,9 @@ namespace Polymesh {
         //% block="Invisible"
         Invisible = 0,
         //% block="Non culling"
-        Noncull = 1,   
+        Noncull = 1,
+        //% block="Back face"
+        Backface = 2,
     }
 
     //% blockid=poly_sorttype
@@ -78,7 +80,7 @@ namespace Polymesh {
         pivot: { x: number, y: number, z: number}
         rot: { x: number, y: number, z: number }
         pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
-        flag: { invisible: boolean, noncull: boolean}
+        flag: { invisible: boolean, noncull: boolean, backface: boolean}
         __home__() {
             forever(() => {
                 const delta = game.currentScene().eventContext.deltaTimeMillis
@@ -94,7 +96,7 @@ namespace Polymesh {
             this.pivot = { x: 0, y: 0, z: 0 }
             this.rot = { x: 0, y: 0, z: 0 }
             this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
-            this.flag = { invisible: false, noncull: false }
+            this.flag = { invisible: false, noncull: false, backface: false }
 
             this.__home__()
         }
@@ -104,10 +106,11 @@ namespace Polymesh {
         //% this.shadow=variables_get this.defl=myMesh
         //% group="Flag mesh"
         //% weight=10
-        public setFlag(flag: MeshFlags, v: boolean) {
+        public setFlag(flag: MeshFlags, ok: boolean) {
             switch (flag) {
-                case 0: this.flag.invisible = v; break
-                case 1: this.flag.noncull = v; break
+                case 0: default: this.flag.invisible = ok; break
+                case 1: this.flag.noncull = ok; break
+                case 2: this.flag.backface = ok; break
             }
         }
 
@@ -120,6 +123,7 @@ namespace Polymesh {
             switch (flag) {
                 case 0: default: return this.flag.invisible;
                 case 1: return this.flag.noncull;
+                case 2: return this.flag.backface;
             }
             return false
         }
@@ -383,25 +387,25 @@ namespace Polymesh {
     }
 
     //% blockid=poly_rendermesh_all
-    //% block=" $plms render all meshes to $image=screen_image_picker|| as inner? $inner=toggleYesNo and line render color? $linecolor=colorindexpicker"
+    //% block=" $plms render all meshes to $image=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% plms.shadow=variables_get plms.defl=myMeshes
     //% group="render"
     //% weight=9
-    export function renderAll(plms: mesh[], image: Image, inner?: boolean, linecolor?: number) {
+    export function renderAll(plms: mesh[], image: Image, linecolor?: number) {
         if (!plms || !image || plms.length <= 0) return;
 
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
         sorted.sort((a, b) => b.depth - a.depth);
-        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, image, inner, linecolor);
+        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, image, linecolor);
     }
 
     //% blockid=poly_rendermesh
-    //% block=" $plm render to $image=screen_image_picker|| as inner? $inner=toggleYesNo and line render color? $linecolor=colorindexpicker"
+    //% block=" $plm render to $image=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% plm.shadow=variables_get plm.defl=myMesh
     //% group="render"
     //% weight=10
-    export function render(plm: mesh, image: Image, inner?: boolean, linecolor?: number) {
+    export function render(plm: mesh, image: Image, linecolor?: number) {
         if (!plm || !image || plm.points.length <= 0 || plm.faces.length <= 0) return;
         if (plm.flag.invisible) return;
 
@@ -458,7 +462,7 @@ namespace Polymesh {
             if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, image.width, image.height)))) continue;
             
             // Backface culling
-            if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, inner)) continue;
+            if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, plm.flag.backface)) continue;
 
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
