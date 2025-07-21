@@ -355,7 +355,7 @@ namespace Polymesh {
     //% group="render"
     //% weight=9
     export function renderAll(plms: mesh[], image: Image, inner?: boolean, nocull?: boolean, linecolor?: number) {
-        if (plms.length <= 0) return;
+        if (!plms || !image || plms.length <= 0) return;
 
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
@@ -369,7 +369,7 @@ namespace Polymesh {
     //% group="render"
     //% weight=10
     export function render(plm: mesh, image: Image, inner?: boolean, nocull?: boolean, linecolor?: number) {
-        if (plm.points.length <= 0 || plm.faces.length <= 0) return;
+        if (!plm || !image || plm.points.length <= 0 || plm.faces.length <= 0) return;
         
         const centerX = image.width >> 1;
         const centerY = image.height >> 1;
@@ -421,10 +421,10 @@ namespace Polymesh {
         for (const t of tris) {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist))) continue;
-            if (inds.every(i => (rotated[i].x < 0 || rotated[i].x >= image.width) || (rotated[i].y < 0 || rotated[i].y >= image.height))) continue;
+            if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, image.width, image.height)))) continue;
             
             // Backface culling
-            if (!nocull) if (!rotated.some((ro) => (inds.every(i => inner ? rotated[i].z > ro.z : rotated[i].z < ro.z)))) continue;
+            if (!nocull) if (isFaceVisible(rotated, inds, inner)) continue;
 
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
@@ -475,6 +475,31 @@ namespace Polymesh {
 
         }
         
+    }
+
+    function isOutOfArea(x: number, y: number, width: number, height: number) {
+        return isOutOfRange(x, width) || isOutOfRange(y, height)
+    }
+
+    function isOutOfRange(x: number, range: number) {
+        return x < 0 || x >= range
+    }
+
+    function isFaceVisible(rotated: { z: number }[], indices: number[], inner?: boolean): boolean {
+        // Simple normal calculation for culling
+        if (indices.length > 0) {
+            const zs = indices.map(ind => rotated[ind].z)
+
+            // Average depth comparison
+            const avgZ = zs.reduce((sum, z) => sum + z, 0) / zs.length;
+            const otherZs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(p => p.z);
+
+            if (otherZs.length > 0) {
+                const otherAvg = otherZs.reduce((sum, z) => sum + z, 0) / otherZs.length;
+                return inner ? avgZ > otherAvg : avgZ < otherAvg;
+            }
+        }
+        return true;
     }
 
     function meshDepthZ(plm: mesh): number {
@@ -584,16 +609,35 @@ namespace Polymesh {
 
     function distortImage(src: Image, dest: Image,
         X1: number, Y1: number, X2: number, Y2: number,
-        X3: number, Y3: number, X4: number, Y4: number) {
+        X3: number, Y3: number, X4: number, Y4: number): void {
+
+        // Optimized texture mapping for quadrilaterals
         for (let y = 0; y < src.height; y++) {
             for (let x = 0; x < src.width; x++) {
                 const col = src.getPixel(src.width - x, src.height - y);
-                if (!col || (col && col <= 0)) continue;
-                const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (X4 - X3)))
-                const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (Y4 - Y2)))
-                if ((sx(zoom, true) < 0 || sx(zoom) >= dest.width) || (sy(zoom, true) < 0 || sy(zoom) >= dest.height)) continue;
-                helpers.imageFillTriangle(dest, sx(zoom, true), sy(zoom), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
-                helpers.imageFillTriangle(dest, sx(zoom), sy(zoom, true), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
+                if (!col || col <= 0) continue;
+                let u: number, v: number
+
+                // Calculate destination coordinates with perspective correction
+                u = (x * zoom) / (src.width * zoom), v = (y * zoom) / (src.height * zoom);
+
+                // Bilinear interpolation
+                let topX: number, topY: number, bottomX: number, bottomY: number
+                
+                const destSetter = () => {
+                    topX = X1 + u * (X2 - X1), topY = Y1 + u * (Y2 - Y1);
+                    bottomX = X3 + u * (X4 - X3), bottomY = Y3 + u * (Y4 - Y3);
+                }
+
+                destSetter()
+                const destX0 = topX + v * (bottomX - topX), destY0 = topY + v * (bottomY - topY);
+ 
+                u = (x * zoom) + zoom / (src.width * zoom), v = (y * zoom) + zoom / (src.height * zoom);
+
+                destSetter()
+                const destX1 = topX + v * (bottomX - topX), destY1 = topY + v * (bottomX - topY);
+
+                if (!(isOutOfArea(destX0, destY0, dest.width, dest.height) && isOutOfArea(destX1, destY1, dest.width, dest.height))) helpers.imageFillTriangle(dest, destX0, destY0, destX1, destY0, destX0, destY1, col), helpers.imageFillTriangle(dest, destX1, destY1, destX1, destY0, destX0, destY1, col);
             }
         }
     }
