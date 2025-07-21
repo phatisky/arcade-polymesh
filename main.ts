@@ -102,7 +102,7 @@ namespace Polymesh {
         }
 
         //% blockid=poly_flag_set
-        //% block=" $this set flag of $flag to $v=toggleYesNo"
+        //% block=" $this set flag of $flag right? $ok=toggleYesNo"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="Flag mesh"
         //% weight=10
