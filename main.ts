@@ -529,7 +529,7 @@ namespace Polymesh {
 
             if (otherZs.length > 0) {
                 const otherAvg = otherZs.reduce((sum, z) => sum + z, 0) / otherZs.length;
-                return inner ? avgZ > otherAvg : avgZ < otherAvg;
+                return inner ? avgZ < otherAvg : avgZ > otherAvg;
             }
         }
         return true;
