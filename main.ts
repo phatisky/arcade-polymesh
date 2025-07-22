@@ -75,11 +75,11 @@ namespace Polymesh {
     export function newmesh() { return new mesh() }
 
     export class mesh {
-        faces: { indices: number[], color: number, img?: Image }[]
-        points: { x: number, y: number, z: number }[]
-        pivot: { x: number, y: number, z: number}
-        rot: { x: number, y: number, z: number }
-        pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
+        public faces: { indices: number[], color: number, img?: Image }[]
+        public points: { x: number, y: number, z: number }[]
+        public pivot: { x: number, y: number, z: number}
+        public rot: { x: number, y: number, z: number }
+        public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
         flag: { invisible: boolean, noncull: boolean, backface: boolean}
         __home__() {
             forever(() => {
