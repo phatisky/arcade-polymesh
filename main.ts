@@ -49,8 +49,6 @@ namespace Polymesh {
         Accurate = 0,
         //% block="fast"
         Fast = 1,
-        //% block="fast and accurate"
-        FastAndAccurate = 2,
     }
     export enum MeshFlags {
         //% block="Invisible"
@@ -398,7 +396,10 @@ namespace Polymesh {
 
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
-        sorted.sort((a, b) => b.depth - a.depth);
+        switch (sort) {
+            case 0: sorted.sort((a, b) => b.depth - a.depth); break
+            case 1: introSort(sorted, (a, b) => b.depth - a.depth); break
+        }
         for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, image, linecolor);
     }
 
@@ -454,8 +455,7 @@ namespace Polymesh {
         const tris = plm.faces.slice();
         switch (sort) {
             case 0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-            case 1: introSort(tris, rotated); break
-            case 2: default: introSort_cull(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            case 1: default: introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
         }
         
         // Render
@@ -564,15 +564,15 @@ namespace Polymesh {
         return z;
     }
 
-    export function introSort_cull<T>(
+    export function introSort<T>(
         arr: T[],
         compare: (a: T, b: T) => number
     ): void {
         const maxDepth = 2 * Math.floor(Math.log(arr.length) / Math.log(2));
-        introsortUtil_cull(arr, 0, arr.length - 1, maxDepth, compare);
+        introsortUtil(arr, 0, arr.length - 1, maxDepth, compare);
     }
 
-    function introsortUtil_cull<T>(
+    function introsortUtil<T>(
         arr: T[],
         start: number,
         end: number,
@@ -580,64 +580,48 @@ namespace Polymesh {
         compare: (a: T, b: T) => number
     ): void {
         const size = end - start + 1;
-        if (size <= 16) {
-            insertionSort_cull(arr, start, end, compare);
-            return;
-        }
+        if (size <= 16) { insertionSort(arr, start, end, compare);
+        return; }
 
-        if (depthLimit === 0) {
-            heapSort_cull(arr, start, end, compare);
-            return;
-        }
+        if (depthLimit === 0) { heapSort(arr, start, end, compare);
+        return; }
 
-        const pivot = medianOfThree_cull(arr, start, start + ((end - start) >> 1), end, compare);
-        const p = partition_cull(arr, start, end, pivot, compare);
-        introsortUtil_cull(arr, start, p - 1, depthLimit - 1, compare);
-        introsortUtil_cull(arr, p + 1, end, depthLimit - 1, compare);
+        const pivot = medianOfThree(arr, start, start + ((end - start) >> 1), end, compare);
+        const p = partition(arr, start, end, pivot, compare);
+        introsortUtil(arr, start, p - 1, depthLimit - 1, compare);
+        introsortUtil(arr, p + 1, end, depthLimit - 1, compare);
     }
 
-    function insertionSort_cull<T>(arr: T[], start: number, end: number, compare: (a: T, b: T) => number) {
+    function insertionSort<T>(arr: T[], start: number, end: number, compare: (a: T, b: T) => number) {
         for (let i = start + 1; i <= end; i++) {
             const key = arr[i];
             let j = i - 1;
-            while (j >= start && compare(arr[j], key) > 0) {
-                arr[j + 1] = arr[j];
-                j--;
-            }
+            while (j >= start && compare(arr[j], key) > 0) arr[j + 1] = arr[j], j--;
             arr[j + 1] = key;
         }
     }
 
-    function heapSort_cull<T>(arr: T[], start: number, end: number, compare: (a: T, b: T) => number) {
+    function heapSort<T>(arr: T[], start: number, end: number, compare: (a: T, b: T) => number) {
         const size = end - start + 1;
 
         function siftDown(i: number, max: number) {
             let largest = i;
-            const left = 2 * i + 1;
-            const right = 2 * i + 2;
-            if (left < max && compare(arr[start + left], arr[start + largest]) > 0) {
-                largest = left;
-            }
-            if (right < max && compare(arr[start + right], arr[start + largest]) > 0) {
-                largest = right;
-            }
-            if (largest !== i) {
-                [arr[start + i], arr[start + largest]] = [arr[start + largest], arr[start + i]];
-                siftDown(largest, max);
+            while (true) {
+                const left = 2 * i + 1, right = 2 * i + 2;
+                if (left < max && compare(arr[start + left], arr[start + largest]) > 0) largest = left;
+                if (right < max && compare(arr[start + right], arr[start + largest]) > 0) largest = right;
+                if (largest === i) break;
+                [arr[start + i], arr[start + largest]] = [arr[start + largest], arr[start + i]]
+                i = largest, largest = i;
             }
         }
 
-        for (let i = Math.floor(size / 2) - 1; i >= 0; i--) {
-            siftDown(i, size);
-        }
+        for (let i = Math.floor(size / 2) - 1; i >= 0; i--) siftDown(i, size);
 
-        for (let i = size - 1; i > 0; i--) {
-            [arr[start], arr[start + i]] = [arr[start + i], arr[start]];
-            siftDown(0, i);
-        }
+        for (let i = size - 1; i > 0; i--) [arr[start], arr[start + i]] = [arr[start + i], arr[start]], siftDown(0, i);
     }
 
-    function partition_cull<T>(
+    function partition<T>(
         arr: T[],
         low: number,
         high: number,
@@ -647,16 +631,12 @@ namespace Polymesh {
         while (low <= high) {
             while (compare(arr[low], pivot) < 0) low++;
             while (compare(arr[high], pivot) > 0) high--;
-            if (low <= high) {
-                [arr[low], arr[high]] = [arr[high], arr[low]];
-                low++;
-                high--;
-            }
+            if (low <= high) [arr[low], arr[high]] = [arr[high], arr[low]], low++, high--;
         }
         return low;
     }
 
-    function medianOfThree_cull<T>(
+    function medianOfThree<T>(
         arr: T[],
         a: number,
         b: number,
@@ -664,102 +644,14 @@ namespace Polymesh {
         compare: (a: T, b: T) => number
     ): T {
         if (compare(arr[a], arr[b]) < 0) {
-            if (compare(arr[b], arr[c]) < 0) {
-                return arr[b];
-            } else if (compare(arr[a], arr[c]) < 0) {
-                return arr[c];
-            } else {
-                return arr[a];
-            }
+            if (compare(arr[b], arr[c]) < 0) return arr[b];
+            else if (compare(arr[a], arr[c]) < 0) return arr[c];
+            else return arr[a];
         } else {
-            if (compare(arr[a], arr[c]) < 0) {
-                return arr[a];
-            } else if (compare(arr[b], arr[c]) < 0) {
-                return arr[c];
-            } else {
-                return arr[b];
-            }
+            if (compare(arr[a], arr[c]) < 0) return arr[a];
+            else if (compare(arr[b], arr[c]) < 0) return arr[c];
+            else return arr[b];
         }
-    }
-
-    function introSort(arr: { indices: number[] }[], rot: { z: number }[]) {
-        const maxDepth = 2 * Math.ceil(Math.log(arr.length) / Math.log(2));
-        introsortUtil(arr, 0, arr.length - 1, maxDepth, rot);
-    }
-
-    function introsortUtil(arr: { indices: number[] }[], start: number, end: number, depthLimit: number, rot: { z: number }[]) {
-        const size = end - start + 1;
-
-        if (size < 16) {
-            insertionSort(arr, start, end, rot);
-            return;
-        }
-
-        if (depthLimit === 0) {
-            heapSort(arr, start, end, rot);
-            return;
-        }
-
-        const pivot = partitionIntro(arr, start, end, avgZ(rot, arr[start + ((end - start) >> 1)].indices), rot);
-        introsortUtil(arr, start, pivot - 1, depthLimit - 1, rot);
-        introsortUtil(arr, pivot, end, depthLimit - 1, rot);
-    }
-
-    function insertionSort(arr: { indices: number[] }[], start: number, end: number, rot: { z: number }[]) {
-        for (let i = start + 1; i <= end; i++) {
-            const key = arr[i];
-            let j = i - 1;
-            while (j >= start && avgZ(rot, arr[j].indices) < avgZ(rot, key.indices)) {
-                arr[j + 1] = arr[j];
-                j--;
-            }
-            arr[j + 1] = key;
-        }
-    }
-
-    function heapSort(arr: { indices: number[] }[], start: number, end: number, rot: { z: number }[]) {
-        const heapSize = end - start + 1;
-
-        for (let i = Math.floor(heapSize / 2) - 1; i >= 0; i--) {
-            heapify(arr, heapSize, i, start, rot);
-        }
-
-        for (let i = heapSize - 1; i > 0; i--) {
-            const tmp = arr[start];
-            arr[start] = arr[start + i];
-            arr[start + i] = tmp;
-            heapify(arr, i, 0, start, rot);
-        }
-    }
-
-    function heapify(arr: { indices: number[] }[], size: number, root: number, offset: number, rot: { z: number }[]) {
-        let largest = root;
-        const left = 2 * root + 1;
-        const right = 2 * root + 2;
-
-        if (left < size && avgZ(rot, arr[offset + left].indices) > avgZ(rot, arr[offset + largest].indices)) largest = left;
-        if (right < size && avgZ(rot, arr[offset + right].indices) > avgZ(rot, arr[offset + largest].indices)) largest = right;
-        if (largest !== root) {
-            const tmp = arr[offset + root];
-            arr[offset + root] = arr[offset + largest];
-            arr[offset + largest] = tmp;
-            heapify(arr, size, largest, offset, rot);
-        }
-    }
-
-    function partitionIntro(arr: { indices: number[] }[], left: number, right: number, pivot: number, rot: { z: number }[]) {
-        while (left <= right) {
-            while (avgZ(rot, arr[left].indices) > pivot) left++;
-            while (avgZ(rot, arr[right].indices) < pivot) right--;
-            if (left <= right) {
-                const tmp = arr[left];
-                arr[left] = arr[right];
-                arr[right] = tmp;
-                left++;
-                right--;
-            }
-        }
-        return left;
     }
 
     function avgZ(rot: { z: number }[], inds: number[]): number {
