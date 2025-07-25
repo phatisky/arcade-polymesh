@@ -514,21 +514,21 @@ namespace Polymesh {
 
                 // when no image or number
                 if (!im) {
-                    helpers.imageFillCircle(output, cx, cy, scale, t.color)
+                    helpers.imageFillCircle(output, cx, cy, scale * zoom, t.color)
                     continue;
                 }
                 
                 // when is number not image
                 if (typeof im === "number") {
-                    helpers.imageFillCircle(output, cx, cy, scale * im, t.color)
+                    helpers.imageFillCircle(output, cx, cy, scale * zoom * im, t.color)
                     continue;
                 }
                 // set scale image from camera distance
                 const baseW = im.width;
                 const baseH = im.height;
 
-                const halfW = (baseW / 2) * scale;
-                const halfH = (baseH / 2) * scale;
+                const halfW = (baseW / 2) * scale * zoom;
+                const halfH = (baseH / 2) * scale * zoom;
                 
                 // fill circle if image is empty
                 if (isEmptyImage(im)) {
