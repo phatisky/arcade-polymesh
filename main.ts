@@ -511,8 +511,14 @@ namespace Polymesh {
                 // center image
                 const cx = pt.x;
                 const cy = pt.y;
+
+                // when no image or number
+                if (!im) {
+                    helpers.imageFillCircle(output, cx, cy, scale, t.color)
+                    continue;
+                }
                 
-                // when no image
+                // when is number not image
                 if (typeof im === "number") {
                     helpers.imageFillCircle(output, cx, cy, scale * im, t.color)
                     continue;
