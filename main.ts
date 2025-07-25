@@ -2,6 +2,8 @@
 //% block="Poly mesh" color="#279139" icon="\uf1b2" groups='["Create","Controls","Styling"]'
 namespace Polymesh {
 
+    const inProcess: boolean[] = [false, false]
+
     export enum Angles {
         //% block="Angle x"
         AngleX = 0,
@@ -413,7 +415,8 @@ namespace Polymesh {
     //% weight=9
     export function renderAll(plms: mesh[], output: Image, linecolor?: number) {
         if (!plms || !output || plms.length <= 0) return;
-
+        if (inProcess[1]) return;
+        inProcess[1] = true
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
         switch (sort) {
@@ -421,6 +424,7 @@ namespace Polymesh {
             case 1: introSort(sorted, (a, b) => b.depth - a.depth); break
         }
         for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
+        inProcess[1] = false
     }
 
     //% blockId=poly_rendermesh
@@ -431,6 +435,9 @@ namespace Polymesh {
     export function render(plm: mesh, output: Image, linecolor?: number) {
         if (!plm || !output || plm.points.length <= 0 || plm.faces.length <= 0) return;
         if (plm.flag.invisible) return;
+        
+        if (inProcess[0]) return;
+        inProcess[0] = true
 
         const centerX = output.width >> 1;
         const centerY = output.height >> 1;
@@ -577,6 +584,7 @@ namespace Polymesh {
 
         }
         
+        inProcess[0] = false
     }
 
     function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
