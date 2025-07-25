@@ -128,14 +128,31 @@ namespace Polymesh {
             return false
         }
 
-        //% blockid=poly_addvertice
+        //% blockid=poly_vertice_set
         //% block=" $this set vertice at $idx to x: $x y: $y z: $z"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=10
         public setVertice(idx: number, x: number, y: number, z: number) { this.points[idx] = { x: x, y: y, z: z } }
 
-        //% blockid=poly_setface
+        //% blockid=poly_vertice_add
+        //% block=" $this add vertice to x: $x y: $y z: $z"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh property"
+        //% weight=8
+        public addVertice(x: number, y: number, z: number) { this.points.push({ x: x, y: y, z: z }) }
+
+        //% blockid=poly_vertice_del
+        //% block=" $this remove vertice|| at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh remover"
+        //% weight=10
+        public delVertice(idx?: number) {
+            if (idx) this.points.removeAt(idx);
+            else this.points.pop();
+        }
+
+        //% blockid=poly_face_set
         //% block=" $this set face at $idx to color $c=colorindexpicker and idc1 $i1 idc2 $i2|| idc3 $i3 idc4 $i4 and texture $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
@@ -148,14 +165,7 @@ namespace Polymesh {
             else this.faces[idx] = { indices: indice, color: c };
         }
 
-        //% blockid=poly_addvertice
-        //% block=" $this add vertice to x: $x y: $y z: $z"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh property"
-        //% weight=8
-        public addVertice(x: number, y: number, z: number) { this.points.push({ x: x, y: y, z: z }) }
-
-        //% blockid=poly_setface
+        //% blockid=poly_face_add
         //% block=" $this add face to color $c=colorindexpicker and idc1 $i1 idc2 $i2|| idc3 $i3 idc4 $i4 and texture $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
@@ -168,17 +178,7 @@ namespace Polymesh {
             else this.faces.push({ indices: indice, color: c });
         }
 
-        //% blockid=poly_delvertice
-        //% block=" $this remove vertice|| at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh remover"
-        //% weight=10
-        public delVertice(idx?: number) {
-            if (idx) this.points.removeAt(idx);
-            else this.points.pop();
-        }
-
-        //% blockid=poly_delface
+        //% blockid=poly_face_del
         //% block=" $this remove face|| at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh remover"
