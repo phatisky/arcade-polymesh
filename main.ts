@@ -96,7 +96,7 @@ namespace Polymesh {
     export function indiceShadow(i1: number, i2?: number, i3?: number, i4?: number) { return new shadowIndices(i1, i2, i3, i4)}
 
     export class mesh {
-        public faces: { indices: number[], color: number, img?: Image }[]
+        public faces: { indices: number[], color: number, img?: Image|number}[]
         public points: { x: number, y: number, z: number }[]
         public pivot: { x: number, y: number, z: number}
         public rot: { x: number, y: number, z: number }
@@ -227,8 +227,20 @@ namespace Polymesh {
         //% group="mesh face property"
         //% weight=9
         public setFaceImage(idx: number, img: Image) {
-            if (this.faces[idx].img.equals(img)) return;
+            if (typeof this.faces[idx].img === "number") delete this.faces[idx].img
+            if ((this.faces[idx].img as Image).equals(img)) return;
             this.faces[idx].img = img
+        }
+
+        //% blockid=poly_setfacerange
+        //% block=" $this set face range at $idx to $range"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh face property"
+        //% weight=9
+        public setFaceRange(idx: number, range: number) {
+            if (typeof this.faces[idx].img !== "number") delete this.faces[idx].img
+            if ((this.faces[idx].img as number) === range) return;
+            this.faces[idx].img = range
         }
 
         //% blockid=poly_clearfaceimage
@@ -410,12 +422,12 @@ namespace Polymesh {
     }
 
     //% blockid=poly_rendermesh_all
-    //% block=" $plms render all meshes to $image=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
+    //% block=" $plms render all meshes to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% plms.shadow=variables_get plms.defl=myMeshes
     //% group="render"
     //% weight=9
-    export function renderAll(plms: mesh[], image: Image, linecolor?: number) {
-        if (!plms || !image || plms.length <= 0) return;
+    export function renderAll(plms: mesh[], output: Image, linecolor?: number) {
+        if (!plms || !output || plms.length <= 0) return;
 
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
@@ -423,20 +435,20 @@ namespace Polymesh {
             case 0: sorted.sort((a, b) => b.depth - a.depth); break
             case 1: introSort(sorted, (a, b) => b.depth - a.depth); break
         }
-        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, image, linecolor);
+        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
     }
 
     //% blockid=poly_rendermesh
-    //% block=" $plm render to $image=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
+    //% block=" $plm render to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% plm.shadow=variables_get plm.defl=myMesh
     //% group="render"
     //% weight=10
-    export function render(plm: mesh, image: Image, linecolor?: number) {
-        if (!plm || !image || plm.points.length <= 0 || plm.faces.length <= 0) return;
+    export function render(plm: mesh, output: Image, linecolor?: number) {
+        if (!plm || !output || plm.points.length <= 0 || plm.faces.length <= 0) return;
         if (plm.flag.invisible) return;
 
-        const centerX = image.width >> 1;
-        const centerY = image.height >> 1;
+        const centerX = output.width >> 1;
+        const centerY = output.height >> 1;
 
         const cosX = Math.cos(ax), sinX = Math.sin(ax);
         const cosY = Math.cos(ay), sinY = Math.sin(ay);
@@ -484,35 +496,47 @@ namespace Polymesh {
         
         // Render
         for (const t of tris) {
+            const im: (Image | number) = (typeof t.img === "number") ? (t.img as number) : (t.img as Image)
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist))) continue;
-            if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, image.width, image.height)))) continue;
+            if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height)))) continue;
             
             // Backface culling
             if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, plm.flag.backface)) continue;
 
             // when have 2D image billboard (indices.length == 1 and img)
-            if (t.indices.length === 1 && t.img) {
+            if (t.indices.length === 1) {
                 const idx = t.indices[0];
                 const pt = rotated[idx];
                 if (pt.z < -dist) continue;
 
-                // set scale image from camera distance
-                const baseW = t.img.width;
-                const baseH = t.img.height;
                 const scale = pt.scale;
-
-                const halfW = (baseW / 2) * scale;
-                const halfH = (baseH / 2) * scale;
-
                 // center image
                 const cx = pt.x;
                 const cy = pt.y;
+                
+                // when no image
+                if (typeof im === "number") {
+                    helpers.imageFillCircle(output, cx, cy, scale * im, t.color)
+                    continue;
+                }
+                // set scale image from camera distance
+                const baseW = im.width;
+                const baseH = im.height;
 
+                const halfW = (baseW / 2) * scale;
+                const halfH = (baseH / 2) * scale;
+                
+                // fill circle if image is empty
+                if (isEmptyImage(im)) {
+                    const square = Math.min(im.width, im.height)
+                    helpers.imageFillCircle(output, cx, cy, Math.floor(square / 2), t.color)
+                    continue;
+                }
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
-                distortImage(t.img.clone(), image,
+                distortImage(im.clone(), output,
                     cx - halfW, cy - halfH,
                     cx + halfW, cy - halfH,
                     cx - halfW, cy + halfH,
@@ -520,27 +544,26 @@ namespace Polymesh {
                 continue;
             }
 
+            if (inds.length < 2) continue;
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
-                helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
+                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
                 if (inds.length < 3) continue;
-                helpers.imageDrawLine(image, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
-                if (inds.length > 3) helpers.imageDrawLine(image, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor), helpers.imageDrawLine(image, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
-                else helpers.imageDrawLine(image, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
+                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
+                if (inds.length > 3) helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor), helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
+                else helpers.imageDrawLine(output, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
                 continue;
             }
             
             // Draw line when no shape
-            helpers.imageDrawLine(
-                image,
+            helpers.imageDrawLine( output,
                 rotated[inds[0]].x, rotated[inds[0]].y,
                 rotated[inds[1]].x, rotated[inds[1]].y,
                 t.color
             );
             // Draw solid when is vertice shape
             if (inds.length > 2) {
-                helpers.imageFillTriangle(
-                    image,
+                helpers.imageFillTriangle( output,
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
@@ -548,8 +571,7 @@ namespace Polymesh {
                 );
             }
             if (inds.length > 3) {
-                helpers.imageFillTriangle(
-                    image,
+                helpers.imageFillTriangle( output,
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
@@ -558,17 +580,23 @@ namespace Polymesh {
             }
 
             // Draw texture over
-            if (t.img && inds.length === 4) {
-                distortImage(t.img.clone(), image,
-                    rotated[inds[0]].x, rotated[inds[0]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
-                    rotated[inds[3]].x, rotated[inds[3]].y
-                );
+            if (inds.length === 4) {
+                if (typeof im !== "number") {
+                    distortImage(im.clone(), output,
+                        rotated[inds[0]].x, rotated[inds[0]].y,
+                        rotated[inds[1]].x, rotated[inds[1]].y,
+                        rotated[inds[2]].x, rotated[inds[2]].y,
+                        rotated[inds[3]].x, rotated[inds[3]].y
+                    );
+                }
             }
 
         }
         
+    }
+
+    function isEmptyImage(img: Image) {
+        return img.equals(image.create(img.width, img.height))
     }
 
     function isOutOfArea(x: number, y: number, width: number, height: number) {
