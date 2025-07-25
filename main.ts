@@ -73,7 +73,7 @@ namespace Polymesh {
         return y;
     }
 
-    //% blockid=poly_sorttype
+    //% blockId=poly_sorttype
     //% block="set sorting method to $method"
     //% group="sorting"
     //% weight=10
@@ -81,19 +81,12 @@ namespace Polymesh {
         sort = method
     }
 
-    //% blockid=poly_newmesh
+    //% blockId=poly_newmesh
     //% block="create new mesh"
     //% blockSetVariable=myMesh
     //% group="create"
     //% weight=10
     export function newmesh() { return new mesh() }
-
-    export class shadowIndices { constructor(public i1: number, public i2?: number, public i3?: number, public i4?: number) { } }
-
-    //% blockid=poly_shadow_indices
-    //% block="indice of i1 $i1|| i2 $i2 i3 $i3 i4 $i4"
-    //% blockHidden
-    export function indiceShadow(i1: number, i2?: number, i3?: number, i4?: number) { return new shadowIndices(i1, i2, i3, i4)}
 
     export class mesh {
         public faces: { indices: number[], color: number, img?: Image|number}[]
@@ -122,7 +115,7 @@ namespace Polymesh {
             this.__home__()
         }
 
-        //% blockid=poly_flag_set
+        //% blockId=poly_flag_set
         //% block=" $this set flag of $flag right? $ok=toggleYesNo"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="Flag mesh"
@@ -135,7 +128,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_flag_get
+        //% blockId=poly_flag_get
         //% block=" $this get flag of $flag"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="Flag mesh"
@@ -149,21 +142,23 @@ namespace Polymesh {
             return false
         }
 
-        //% blockid=poly_vertice_set
-        //% block=" $this set vertice at $idx to x: $x y: $y z: $z"
+        //% blockId=poly_vertice_set
+        //% block=" $this set vertice at $idx to $point3"
+        //% point3.shadow=poly_shadow_point3
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=10
-        public setVertice(idx: number, x: number, y: number, z: number) { this.points[idx] = { x: x, y: y, z: z } }
+        public setVertice(idx: number, point3: shadowPoint3) { this.points[idx] = point3 }
 
-        //% blockid=poly_vertice_add
-        //% block=" $this add vertice to x: $x y: $y z: $z"
+        //% blockId=poly_vertice_add
+        //% block=" $this add vertice to $point3"
+        //% point3.shadow=poly_shadow_point3
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
-        //% weight=8
-        public addVertice(x: number, y: number, z: number) { this.points.push({ x: x, y: y, z: z }) }
+        //% weight=9
+        public addVertice(point3: shadowPoint3) { this.points.push(point3) }
 
-        //% blockid=poly_vertice_del
+        //% blockId=poly_vertice_del
         //% block=" $this remove vertice|| at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh remover"
@@ -173,11 +168,12 @@ namespace Polymesh {
             else this.points.pop();
         }
 
-        //% blockid=poly_face_set
-        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds=poly_shadow_indices|| and texture $img=screen_image_picker"
+        //% blockId=poly_face_set
+        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds|| and texture $img=screen_image_picker"
+        //% inds.shadow=poly_shadow_indices
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
-        //% weight=9
+        //% weight=8
         public setFace(idx: number, c: number, inds: shadowIndices, img?: Image) {
             const indice = [inds.i1]
             if (inds.i2) indice.push(inds.i2);
@@ -187,8 +183,9 @@ namespace Polymesh {
             else this.faces[idx] = { indices: indice, color: c };
         }
 
-        //% blockid=poly_face_add
-        //% block=" $this add face to color $c=colorindexpicker and $inds=poly_shadow_indices|| and texture $img=screen_image_picker"
+        //% blockId=poly_face_add
+        //% block=" $this add face to color $c=colorindexpicker and $inds|| and texture $img=screen_image_picker"
+        //% inds.shadow=poly_shadow_indices
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=7
@@ -201,7 +198,7 @@ namespace Polymesh {
             else this.faces.push({ indices: indice, color: c });
         }
 
-        //% blockid=poly_face_del
+        //% blockId=poly_face_del
         //% block=" $this remove face|| at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh remover"
@@ -211,7 +208,7 @@ namespace Polymesh {
             else this.faces.pop();
         }
 
-        //% blockid=poly_setfacecolor
+        //% blockId=poly_setfacecolor
         //% block=" $this set face color at $idx to $c=colorindexpicker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh face property"
@@ -221,7 +218,7 @@ namespace Polymesh {
             this.faces[idx].color = c
         }
 
-        //% blockid=poly_setfaceimage
+        //% blockId=poly_setfaceimage
         //% block=" $this set face image at $idx to $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh face property"
@@ -232,7 +229,7 @@ namespace Polymesh {
             this.faces[idx].img = img
         }
 
-        //% blockid=poly_setfacerange
+        //% blockId=poly_setfacerange
         //% block=" $this set face range at $idx to $range"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh face property"
@@ -243,7 +240,7 @@ namespace Polymesh {
             this.faces[idx].img = range
         }
 
-        //% blockid=poly_clearfaceimage
+        //% blockId=poly_clearfaceimage
         //% block=" $this clear face image at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh face property"
@@ -253,7 +250,7 @@ namespace Polymesh {
             delete this.faces[idx].img
         }
 
-        //% blockid=poly_mesh_pivot_set
+        //% blockId=poly_mesh_pivot_set
         //% block=" $this set $choice to $x"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh pivot"
@@ -266,7 +263,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_mesh_pivot_change
+        //% blockId=poly_mesh_pivot_change
         //% block=" $this change $choice by $x"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh pivot"
@@ -279,7 +276,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_mesh_pivot_get
+        //% blockId=poly_mesh_pivot_get
         //% block=" $this get $choice"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh pivot"
@@ -293,7 +290,7 @@ namespace Polymesh {
             return NaN
         }
 
-        //% blockid=poly_mesh_rot_set
+        //% blockId=poly_mesh_rot_set
         //% block=" $this set $choice to $x"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh angle"
@@ -306,7 +303,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_mesh_rot_change
+        //% blockId=poly_mesh_rot_change
         //% block=" $this change $choice by $x"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh angle"
@@ -319,7 +316,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_mesh_rot_get
+        //% blockId=poly_mesh_rot_get
         //% block=" $this get $choice"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh angle"
@@ -333,7 +330,7 @@ namespace Polymesh {
             return NaN
         }
 
-        //% blockid=poly_mesh_pos_set
+        //% blockId=poly_mesh_pos_set
         //% block=" $this set $choice to $x"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh position property"
@@ -349,7 +346,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_mesh_pos_change
+        //% blockId=poly_mesh_pos_change
         //% block=" $this change $choice by $x"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh position property"
@@ -365,7 +362,7 @@ namespace Polymesh {
             }
         }
 
-        //% blockid=poly_mesh_pos_get
+        //% blockId=poly_mesh_pos_get
         //% block=" $this get $choice"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh position property"
@@ -421,7 +418,7 @@ namespace Polymesh {
         };
     }
 
-    //% blockid=poly_rendermesh_all
+    //% blockId=poly_rendermesh_all
     //% block=" $plms render all meshes to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% plms.shadow=variables_get plms.defl=myMeshes
     //% group="render"
@@ -438,7 +435,7 @@ namespace Polymesh {
         for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
     }
 
-    //% blockid=poly_rendermesh
+    //% blockId=poly_rendermesh
     //% block=" $plm render to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% plm.shadow=variables_get plm.defl=myMesh
     //% group="render"
@@ -755,7 +752,7 @@ namespace Polymesh {
         }
     }
 
-    //% blockid=poly_angle_change
+    //% blockId=poly_angle_change
     //% block="change $choice by $x"
     //% group="main angle"
     //% weight=5
@@ -766,7 +763,7 @@ namespace Polymesh {
             case 2: az += x; break
         }
     }
-    //% blockid=poly_camera_change
+    //% blockId=poly_camera_change
     //% block="change $choice by $x"
     //% group="main camera"
     //% weight=5
@@ -779,7 +776,7 @@ namespace Polymesh {
             case 4: dist += x; break
         }
     }
-    //% blockid=poly_angle_set
+    //% blockId=poly_angle_set
     //% block="set $choice to $x"
     //% group="main angle"
     //% weight=10
@@ -790,7 +787,7 @@ namespace Polymesh {
             case 2: az = x; break
         }
     }
-    //% blockid=poly_camera_set
+    //% blockId=poly_camera_set
     //% block="set $choice to $x"
     //% group="main camera"
     //% weight=10
@@ -804,7 +801,7 @@ namespace Polymesh {
         }
     }
 
-    //% blockid=poly_angle_get
+    //% blockId=poly_angle_get
     //% block="$choice"
     //% group="main angle"
     //% weight=4
@@ -817,7 +814,7 @@ namespace Polymesh {
         return NaN
     }
 
-    //% blockid=poly_camera_get
+    //% blockId=poly_camera_get
     //% block="$choice"
     //% group="main camera"
     //% weight=4
@@ -832,10 +829,21 @@ namespace Polymesh {
         return NaN
     }
 
-    //% blockid=poly_camera_setpos
+    //% blockId=poly_camera_setpos
     //% block="set camera position to x: $x y: $y z: $z"
     //% group="main camera"
     //% weight=3
     export function setCamPosition(x: number, y: number, z: number) { [camx, camy, camz] = [x, y, z] }
 
+    export class shadowIndices { constructor(public i1: number, public i2?: number, public i3?: number, public i4?: number) { } }
+    //% blockId=poly_shadow_indices
+    //% block="indice of i1 $i1|| i2 $i2 i3 $i3 i4 $i4"
+    //% blockHidden=true
+    export function indiceShadow(i1: number, i2?: number, i3?: number, i4?: number) { return new shadowIndices(i1, i2, i3, i4) }
+
+    export class shadowPoint3 { constructor(public x: number, public y: number, public z: number) { } }
+    //% blockId=poly_shadow_point3
+    //% block="x: $x y: $y z: $z"
+    //% blockHidden=true
+    export function point3Shadow(x: number, y: number, z: number) { return new shadowPoint3(x, y, z) }
 }
