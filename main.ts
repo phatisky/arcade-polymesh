@@ -89,7 +89,7 @@ namespace Polymesh {
     export function newmesh() { return new mesh() }
 
     export class mesh {
-        public faces: { indices: number[], color: number, img?: Image|number}[]
+        public faces: { indices: number[], color: number, img?: Image}[]
         public points: { x: number, y: number, z: number }[]
         public pivot: { x: number, y: number, z: number}
         public rot: { x: number, y: number, z: number }
@@ -224,20 +224,8 @@ namespace Polymesh {
         //% group="mesh face property"
         //% weight=9
         public setFaceImage(idx: number, img: Image) {
-            if (typeof this.faces[idx].img === "number") delete this.faces[idx].img
             if ((this.faces[idx].img as Image).equals(img)) return;
             this.faces[idx].img = img
-        }
-
-        //% blockId=poly_setfacerange
-        //% block=" $this set face range at $idx to $range"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=9
-        public setFaceRange(idx: number, range: number) {
-            if (typeof this.faces[idx].img !== "number") delete this.faces[idx].img
-            if ((this.faces[idx].img as number) === range) return;
-            this.faces[idx].img = range
         }
 
         //% blockId=poly_clearfaceimage
@@ -493,7 +481,7 @@ namespace Polymesh {
         
         // Render
         for (const t of tris) {
-            const im: (Image | number) = (typeof t.img === "number") ? (t.img as number) : (t.img as Image)
+            let im = t.img
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist))) continue;
             if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height)))) continue;
@@ -514,15 +502,10 @@ namespace Polymesh {
 
                 // when no image or number
                 if (!im) {
-                    helpers.imageFillCircle(output, cx, cy, scale * zoom, t.color)
+                    fillCircleImage(output, cx, cy, scale * zoom, t.color)
                     continue;
                 }
                 
-                // when is number not image
-                if (typeof im === "number") {
-                    helpers.imageFillCircle(output, cx, cy, scale * zoom * im, t.color)
-                    continue;
-                }
                 // set scale image from camera distance
                 const baseW = im.width;
                 const baseH = im.height;
@@ -532,8 +515,8 @@ namespace Polymesh {
                 
                 // fill circle if image is empty
                 if (isEmptyImage(im)) {
-                    const square = Math.min(im.width, im.height)
-                    helpers.imageFillCircle(output, cx, cy, Math.floor(square / 2), t.color)
+                    const square = Math.min(halfW, halfH)
+                    fillCircleImage(output, cx, cy, Math.floor(square / 2), t.color)
                     continue;
                 }
                 // Draw Simple 2D image (billboard) as quad pixel on image
@@ -584,18 +567,37 @@ namespace Polymesh {
 
             // Draw texture over
             if (inds.length === 4 && im) {
-                if (typeof im !== "number") {
-                    distortImage(im.clone(), output,
-                        rotated[inds[0]].x, rotated[inds[0]].y,
-                        rotated[inds[1]].x, rotated[inds[1]].y,
-                        rotated[inds[2]].x, rotated[inds[2]].y,
-                        rotated[inds[3]].x, rotated[inds[3]].y
-                    );
-                }
+                distortImage(im.clone(), output,
+                    rotated[inds[0]].x, rotated[inds[0]].y,
+                    rotated[inds[1]].x, rotated[inds[1]].y,
+                    rotated[inds[2]].x, rotated[inds[2]].y,
+                    rotated[inds[3]].x, rotated[inds[3]].y
+                );
             }
 
         }
         
+    }
+
+    function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
+        let src = image.create(r * 2, r * 2)
+        helpers.imageFillCircle(src, r, r, r, c)
+        let srcBuf = pins.createBuffer(src.height)
+        for (let i = 0; i < r; i++) src.getRows(r + i, srcBuf), src.setRows(r - i, srcBuf);
+        let destBuf = pins.createBuffer(dest.height)
+
+        for (let xn = 0; xn < src.width; xn++) {
+            let xi = x + xn - r
+            if (xi < 0 || xi >= dest.width) continue;
+            dest.getRows(xi, destBuf)
+            src.getRows(xn, srcBuf)
+            for (let yn = 0; yn < srcBuf.length; yn++) {
+                let yi = y + yn - r
+                if (yi < 0 || yi >= destBuf.length) continue;
+                if (srcBuf[yn] && srcBuf[yn] > 0) destBuf[yi] = srcBuf[yn]
+            }
+            dest.setRows(xi, destBuf)
+        }
     }
 
     function isEmptyImage(img: Image) {
