@@ -148,7 +148,7 @@ namespace Polymesh {
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=10
-        public setVertice(idx: number, point3: shadowPoint3) { this.points[idx] = point3 }
+        public setVertice(idx: number, point3: shadowPoint3) { this.points[idx] = { x: point3.x, y: point3.y, z: point3.z } }
 
         //% blockId=poly_vertice_add
         //% block=" $this add vertice to $point3"
@@ -156,7 +156,7 @@ namespace Polymesh {
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=9
-        public addVertice(point3: shadowPoint3) { this.points.push(point3) }
+        public addVertice(point3: shadowPoint3) { this.points.push({ x: point3.x, y: point3.y, z: point3.z }) }
 
         //% blockId=poly_vertice_del
         //% block=" $this remove vertice|| at $idx"
@@ -577,7 +577,7 @@ namespace Polymesh {
             }
 
             // Draw texture over
-            if (inds.length === 4) {
+            if (inds.length === 4 && im) {
                 if (typeof im !== "number") {
                     distortImage(im.clone(), output,
                         rotated[inds[0]].x, rotated[inds[0]].y,
