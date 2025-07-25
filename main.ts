@@ -97,7 +97,7 @@ namespace Polymesh {
         flag: { invisible: boolean, noncull: boolean, backface: boolean}
         __home__() {
             forever(() => {
-                const delta = game.currentScene().eventContext.deltaTimeMillis
+                const delta = control.eventContext().deltaTime
                 if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
                 if (this.pos.vy !== 0) this.pos.y += this.pos.vy * delta;
                 if (this.pos.vz !== 0) this.pos.z += this.pos.vz * delta;
