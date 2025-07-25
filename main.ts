@@ -59,6 +59,20 @@ namespace Polymesh {
         Backface = 2,
     }
 
+    /** Fast inverse square root **/
+    function fastInverseSquareRoot(x: number): number {
+        if (x <= 0) return 0;
+        const buf = pins.createBuffer(4);
+        buf.setNumber(NumberFormat.Float32LE, 0, x);
+        let i = buf.getNumber(NumberFormat.Int32LE, 0);
+        i = 0x5f3759df - (i >> 1);
+        buf.setNumber(NumberFormat.Int32LE, 0, i);
+        let y = buf.getNumber(NumberFormat.Float32LE, 0);
+        // One iteration Newton-Raphson
+        y = y * (1.5 - (0.5 * x * y * y));
+        return y;
+    }
+
     //% blockid=poly_sorttype
     //% block="set sorting method to $method"
     //% group="sorting"
@@ -73,6 +87,13 @@ namespace Polymesh {
     //% group="create"
     //% weight=10
     export function newmesh() { return new mesh() }
+
+    export class shadowIndices { constructor(public i1: number, public i2?: number, public i3?: number, public i4?: number) { } }
+
+    //% blockid=poly_shadow_indices
+    //% block="indice of i1 $i1|| i2 $i2 i3 $i3 i4 $i4"
+    //% blockHidden
+    export function indiceShadow(i1: number, i2?: number, i3?: number, i4?: number) { return new shadowIndices(i1, i2, i3, i4)}
 
     export class mesh {
         public faces: { indices: number[], color: number, img?: Image }[]
@@ -153,27 +174,29 @@ namespace Polymesh {
         }
 
         //% blockid=poly_face_set
-        //% block=" $this set face at $idx to color $c=colorindexpicker and idc1 $i1 idc2 $i2|| idc3 $i3 idc4 $i4 and texture $img=screen_image_picker"
+        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds=poly_shadow_indices|| and texture $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=9
-        public setFace(idx: number, c: number, i1: number, i2: number, i3?: number, i4?: number, img?: Image) {
-            const indice = [i1, i2]
-            if (i3) indice.push(i3);
-            if (i4) indice.push(i4);
+        public setFace(idx: number, c: number, inds: shadowIndices, img?: Image) {
+            const indice = [inds.i1]
+            if (inds.i2) indice.push(inds.i2);
+            if (inds.i3) indice.push(inds.i3);
+            if (inds.i4) indice.push(inds.i4);
             if (indice.length > 3 && img) this.faces[idx] = { indices: indice, color: c, img: img };
             else this.faces[idx] = { indices: indice, color: c };
         }
 
         //% blockid=poly_face_add
-        //% block=" $this add face to color $c=colorindexpicker and idc1 $i1 idc2 $i2|| idc3 $i3 idc4 $i4 and texture $img=screen_image_picker"
+        //% block=" $this add face to color $c=colorindexpicker and $inds=poly_shadow_indices|| and texture $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=7
-        public addFace(c: number, i1: number, i2: number, i3?: number, i4?: number, img?: Image) {
-            const indice = [i1, i2]
-            if (i3) indice.push(i3);
-            if (i4) indice.push(i4);
+        public addFace(c: number, inds: shadowIndices, img?: Image) {
+            const indice = [inds.i1]
+            if (inds.i2) indice.push(inds.i2);
+            if (inds.i3) indice.push(inds.i3);
+            if (inds.i4) indice.push(inds.i4);
             if (indice.length > 3 && img) this.faces.push({ indices: indice, color: c, img: img });
             else this.faces.push({ indices: indice, color: c });
         }
@@ -445,6 +468,7 @@ namespace Polymesh {
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
+                scale: scale,
                 x: centerX + x * scale * zoom,
                 y: centerY + y * scale * zoom,
                 z: z
@@ -466,6 +490,35 @@ namespace Polymesh {
             
             // Backface culling
             if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, plm.flag.backface)) continue;
+
+            // when have 2D image billboard (indices.length == 1 and img)
+            if (t.indices.length === 1 && t.img) {
+                const idx = t.indices[0];
+                const pt = rotated[idx];
+                if (pt.z < -dist) continue;
+
+                // set scale image from camera distance
+                const baseW = t.img.width;
+                const baseH = t.img.height;
+                const scale = pt.scale;
+
+                const halfW = (baseW / 2) * scale;
+                const halfH = (baseH / 2) * scale;
+
+                // center image
+                const cx = pt.x;
+                const cy = pt.y;
+
+                // Draw Simple 2D image (billboard) as quad pixel on image
+                // use distortImage or drawing without perspective distortion
+                // I will use distortImage draw as vertex quad
+                distortImage(t.img.clone(), image,
+                    cx - halfW, cy - halfH,
+                    cx + halfW, cy - halfH,
+                    cx - halfW, cy + halfH,
+                    cx + halfW, cy + halfH);
+                continue;
+            }
 
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
