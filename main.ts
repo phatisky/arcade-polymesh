@@ -590,8 +590,11 @@ namespace Polymesh {
     function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
         let src = image.create(r * 2, r * 2)
         helpers.imageFillCircle(src, r, r, r, c)
-        let buf = pins.createBuffer(src.height)
-        for (let i = 0; i < r; i++) src.getRows(r + i, buf), src.setRows(r - i, buf);
+        let src0 = src.clone()
+        src0.flipX()
+        src.drawTransparentImage(src0.clone(), 0, 0)
+        src0.flipY()
+        src.drawTransparentImage(src0.clone(), 0, 0)
         dest.drawTransparentImage(src, x - r, y - r)
     }
 
