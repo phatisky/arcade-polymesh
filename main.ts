@@ -4,6 +4,8 @@ namespace Polymesh {
 
     const inProcess: boolean[] = [false, false]
 
+    const bitcalc = (nv: number, b: number) => Math.log(nv) / Math.log(b)
+
     export enum Angles {
         //% block="Angle x"
         AngleX = 0,
@@ -490,7 +492,7 @@ namespace Polymesh {
         for (const t of tris) {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist))) continue;
-            let idx: number, pt: {scale: number, x: number, y: number, z: number}, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number
+            let idx: number, pt: {scale: number, x: number, y: number, z: number}, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number
             if (t.indices.length === 1) {
                 idx = t.indices[0];
                 pt = rotated[idx];
@@ -516,17 +518,31 @@ namespace Polymesh {
             
             // Backface culling
             if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, plm.flag.backface)) continue;
+                
+            idx = t.indices[0];
+            pt = rotated[idx];
+            scale = pt.scale;
+            // center image
+            cx = pt.x;
+            cy = pt.y;
 
+            square = 1
+
+            if (t.img) {
+                // set scale image from camera distance
+                baseW = t.img.width;
+                baseH = t.img.height;
+
+                halfW = (baseW / 2) * scale * zoom;
+                halfH = (baseH / 2) * scale * zoom;
+
+                square = Math.min(halfW, halfH)
+            }
+            // LOD calculating?
+            let mydist = avgZ(rotated, inds) < -Math.abs(dist) / 4 ? range : Math.round((avgZ(rotated, inds) + Math.abs(dist / 4)) / Math.abs(16 * zoom));
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
-                idx = t.indices[0];
-                pt = rotated[idx];
                 if (pt.z < -Math.abs(dist)) continue;
-
-                scale = pt.scale;
-                // center image
-                cx = pt.x;
-                cy = pt.y;
 
                 // when no image
                 if (!t.img) {
@@ -534,16 +550,8 @@ namespace Polymesh {
                     continue;
                 }
 
-                // set scale image from camera distance
-                baseW = t.img.width;
-                baseH = t.img.height;
-
-                halfW = (baseW / 2) * scale * zoom;
-                halfH = (baseH / 2) * scale * zoom;
-                
                 // fill circle if image is empty
                 if (isEmptyImage(t.img)) {
-                    const square = Math.min(halfW, halfH)
                     fillCircleImage(output, cx, cy, Math.floor(square), t.color)
                     continue;
                 }
@@ -555,7 +563,7 @@ namespace Polymesh {
                     cx + halfW, cy - halfH,
                     cx - halfW, cy + halfH,
                     cx + halfW, cy + halfH,
-                    true, true);
+                    mydist, true, true);
                 continue;
             }
 
@@ -600,7 +608,8 @@ namespace Polymesh {
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
-                    rotated[inds[3]].x, rotated[inds[3]].y
+                    rotated[inds[3]].x, rotated[inds[3]].y,
+                    mydist
                 );
             }
 
@@ -767,13 +776,14 @@ namespace Polymesh {
 
     function distortImage(src: Image, dest: Image,
         X1: number, Y1: number, X2: number, Y2: number,
-        X3: number, Y3: number, X4: number, Y4: number, reX?: boolean, reY?: boolean) {
-        for (let y = 0; y < src.height; y++) {
-            for (let x = 0; x < src.width; x++) {
-                const col = src.getPixel(reX ? x : src.width - x, reY ? y : src.height - y);
+        X3: number, Y3: number, X4: number, Y4: number, Z: number, reX?: boolean, reY?: boolean) {
+        Z = Math.max(Z, 1)
+        for (let y = 0; y < src.height / Z; y++) {
+            for (let x = 0; x < src.width / Z; x++) {
+                const col = src.getPixel(reX ? (x * Z) : src.width - (x * Z), reY ? (y * Z) : src.height - (y * Z));
                 if (!col || col <= 0) continue;
-                const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (X4 - X3)))
-                const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (Y4 - Y2)))
+                const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / ((src.height / Z) * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / ((src.width / Z) * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / ((src.height / Z) * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / ((src.width / Z) * s) * (X4 - X3)))
+                const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / ((src.width / Z) * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / ((src.height / Z) * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / ((src.width / Z) * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / ((src.height / Z) * s) * (Y4 - Y2)))
                 if (isOutOfArea(sx(zoom), sy(zoom), dest.width, dest.height) && isOutOfArea(sx(zoom, true), sy(zoom, true), dest.width, dest.height)) continue;
                 helpers.imageFillTriangle(dest, sx(zoom, true), sy(zoom), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
                 helpers.imageFillTriangle(dest, sx(zoom), sy(zoom, true), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
