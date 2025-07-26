@@ -181,7 +181,7 @@ namespace Polymesh {
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
             if (inds.i4) indice.push(inds.i4);
-            if (indice.length > 3 && img) this.faces[idx] = { indices: indice, color: c, img: img };
+            if (img) this.faces[idx] = { indices: indice, color: c, img: img };
             else this.faces[idx] = { indices: indice, color: c };
         }
 
@@ -196,7 +196,7 @@ namespace Polymesh {
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
             if (inds.i4) indice.push(inds.i4);
-            if (indice.length > 3 && img) this.faces.push({ indices: indice, color: c, img: img });
+            if (img) this.faces.push({ indices: indice, color: c, img: img });
             else this.faces.push({ indices: indice, color: c });
         }
 
@@ -488,52 +488,74 @@ namespace Polymesh {
         
         // Render
         for (const t of tris) {
-            let im = t.img
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist))) continue;
-            if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height)))) continue;
+            let idx: number, pt: {scale: number, x: number, y: number, z: number}, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number
+            if (t.indices.length === 1) {
+                idx = t.indices[0];
+                pt = rotated[idx];
+
+                // center image
+                cx = pt.x;
+                cy = pt.y;
+
+                scale = pt.scale;
+                range = scale * zoom / 2
+                if (t.img) {
+                    // set scale image from camera distance
+                    baseW = t.img.width;
+                    baseH = t.img.height;
+
+                    halfW = (baseW / 2) * scale * zoom;
+                    halfH = (baseH / 2) * scale * zoom;
+                    if (isOutOfArea(cx + halfW, cy + halfH, output.width, output.height) && isOutOfArea(cx - halfW, cy - halfH, output.width, output.height)) continue;
+                } else {
+                    if (isOutOfArea(cx + range, cy + range, output.width, output.height) && isOutOfArea(cx - range, cy - range, output.width, output.height)) continue;
+                }
+            } else if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height)))) continue;
             
             // Backface culling
             if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, plm.flag.backface)) continue;
 
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
-                const idx = t.indices[0];
-                const pt = rotated[idx];
-                if (pt.z < -dist) continue;
+                idx = t.indices[0];
+                pt = rotated[idx];
+                if (pt.z < -Math.abs(dist)) continue;
 
-                const scale = pt.scale;
+                scale = pt.scale;
                 // center image
-                const cx = pt.x;
-                const cy = pt.y;
+                cx = pt.x;
+                cy = pt.y;
 
-                // when no image or number
-                if (!im) {
-                    fillCircleImage(output, cx, cy, scale * zoom, t.color)
+                // when no image
+                if (!t.img) {
+                    fillCircleImage(output, cx, cy, scale * zoom / 2, t.color)
                     continue;
                 }
-                
-                // set scale image from camera distance
-                const baseW = im.width;
-                const baseH = im.height;
 
-                const halfW = (baseW / 2) * scale * zoom;
-                const halfH = (baseH / 2) * scale * zoom;
+                // set scale image from camera distance
+                baseW = t.img.width;
+                baseH = t.img.height;
+
+                halfW = (baseW / 2) * scale * zoom;
+                halfH = (baseH / 2) * scale * zoom;
                 
                 // fill circle if image is empty
-                if (isEmptyImage(im)) {
+                if (isEmptyImage(t.img)) {
                     const square = Math.min(halfW, halfH)
-                    fillCircleImage(output, cx, cy, Math.floor(square / 2), t.color)
+                    fillCircleImage(output, cx, cy, Math.floor(square), t.color)
                     continue;
                 }
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
-                distortImage(im.clone(), output,
+                distortImage(t.img.clone(), output,
                     cx - halfW, cy - halfH,
                     cx + halfW, cy - halfH,
                     cx - halfW, cy + halfH,
-                    cx + halfW, cy + halfH);
+                    cx + halfW, cy + halfH,
+                    true, true);
                 continue;
             }
 
@@ -573,8 +595,8 @@ namespace Polymesh {
             }
 
             // Draw texture over
-            if (inds.length === 4 && im) {
-                distortImage(im.clone(), output,
+            if (inds.length === 4 && t.img) {
+                distortImage(t.img.clone(), output,
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
@@ -588,8 +610,10 @@ namespace Polymesh {
     }
 
     function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
-        let src = image.create(r * 2, r * 2)
-        helpers.imageFillCircle(src, r, r, r, c)
+        if (r <= 0) return;
+        let src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
+        if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
+        else src.fill(c)
         let src0 = src.clone()
         src0.flipX()
         src.drawTransparentImage(src0.clone(), 0, 0)
@@ -744,14 +768,14 @@ namespace Polymesh {
 
     function distortImage(src: Image, dest: Image,
         X1: number, Y1: number, X2: number, Y2: number,
-        X3: number, Y3: number, X4: number, Y4: number) {
+        X3: number, Y3: number, X4: number, Y4: number, reX?: boolean, reY?: boolean) {
         for (let y = 0; y < src.height; y++) {
             for (let x = 0; x < src.width; x++) {
-                const col = src.getPixel(src.width - x, src.height - y);
+                const col = src.getPixel(reX ? x : src.width - x, reY ? y : src.height - y);
                 if (!col || col <= 0) continue;
                 const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (X4 - X3)))
                 const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / (src.width * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / (src.height * s) * (Y4 - Y2)))
-                if (isOutOfArea(sx(zoom), sy(zoom), dest.width, dest.height) || isOutOfArea(sx(zoom, true), sy(zoom, true), dest.width, dest.height)) continue;
+                if (isOutOfArea(sx(zoom), sy(zoom), dest.width, dest.height) && isOutOfArea(sx(zoom, true), sy(zoom, true), dest.width, dest.height)) continue;
                 helpers.imageFillTriangle(dest, sx(zoom, true), sy(zoom), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
                 helpers.imageFillTriangle(dest, sx(zoom), sy(zoom, true), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
             }
