@@ -610,7 +610,6 @@ namespace Polymesh {
     }
 
     function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
-        if (r <= 0) return;
         let src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
         if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
         else src.fill(c)
