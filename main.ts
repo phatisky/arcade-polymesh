@@ -4,27 +4,37 @@ namespace Polymesh {
 
     const inProcess: boolean[] = [false, false]
 
-    const bitcalc = (nv: number, b: number) => Math.log(nv) / Math.log(b)
-
     export enum Angles {
         //% block="Angle x"
-        AngleX = 0,
+        x = 0,
         //% block="Angle y"
-        AngleY = 1,
+        y = 1,
         //% block="Angle z"
-        AngleZ = 2,
+        z = 2,
+        //% block="Angle vx"
+        vx = 3,
+        //% block="Angle vy"
+        vy = 4,
+        //% block="Angle vz"
+        vz = 5,
     }
     export enum Cameras {
-        //% block="Camera x"
-        CamX = 0,
-        //% block="Camera y"
-        CamY = 1,
-        //% block="Camera z"
-        CamZ = 2,
         //% block="Camera zoom"
-        Zoom = 3,
+        zoom = 0,
         //% block="Camera distance"
-        Dist = 4,
+        dist = 1,
+        //% block="Camera x"
+        x = 2,
+        //% block="Camera y"
+        y = 3,
+        //% block="Camera z"
+        z = 4,
+        //% block="Camera vx"
+        vx = 5,
+        //% block="Camera vy"
+        vy = 6,
+        //% block="Camera vz"
+        vz = 7,
     }
     export enum PointProp {
         //% block="x"
@@ -42,25 +52,25 @@ namespace Polymesh {
     }
     export enum PivotPos {
         //% block="Pivot x"
-        PivotX = 0,
+        x = 0,
         //% block="Pivot y"
-        PivotY = 1,
+        y = 1,
         //% block="Pivot z"
-        PivotZ = 2,
+        z = 2,
     }
     export enum SortingMethods {
         //% block="accurate"
-        Accurate = 0,
+        accurate = 0,
         //% block="fast"
-        Fast = 1,
+        quick = 1,
     }
     export enum MeshFlags {
         //% block="Invisible"
-        Invisible = 0,
+        invisible = 0,
         //% block="Non culling"
-        Noncull = 1,
+        noncull = 1,
         //% block="Back face"
-        Backface = 2,
+        backface = 2,
     }
 
     /** Fast inverse square root **/
@@ -76,6 +86,125 @@ namespace Polymesh {
         y = y * (1.5 - (0.5 * x * y * y));
         return y;
     }
+
+    let ax = 0, az = 0, ay = 0, avx = 0, avy = 0, avz = 0
+    let camx = 0, camy = 0, camz = 0, camvx = 0, camvy = 0, camvz = 0
+    let zoom = 1, sort = 0, dist = 150
+
+    forever(() => {
+        const deltaG = control.eventContext().deltaTime
+
+        // Velocity angle of camera
+        if (avx !== 0) ax += avx * deltaG
+        if (avy !== 0) ay += avy * deltaG
+        if (avz !== 0) az += avz * deltaG
+
+        // Velocity position of camera
+        if (camvx !== 0) camx += camvx * deltaG
+        if (camvy !== 0) camy += camvy * deltaG
+        if (camvz !== 0) camz += camvz * deltaG
+    })
+
+    //% blockId=poly_angle_change
+    //% block="change $choice by $x"
+    //% group="main angle"
+    //% weight=5
+    export function changeAngle(choice: Angles, x: number) {
+        switch (choice) {
+            case 0: ax += x; break
+            case 1: ay += x; break
+            case 2: az += x; break
+            case 3: avx += x; break
+            case 4: avy += x; break
+            case 5: avz += x; break
+        }
+    }
+    //% blockId=poly_camera_change
+    //% block="change $choice by $x"
+    //% group="main camera"
+    //% weight=5
+    export function changeCam(choice: Cameras, x: number) {
+        switch (choice) {
+            case 0: default: zoom += x; break
+            case 1: dist += x; break
+            case 2: camx += x; break
+            case 3: camy += x; break
+            case 4: camz += x; break
+            case 5: camvx += x; break
+            case 6: camvy += x; break
+            case 7: camvz += x; break
+        }
+    }
+    //% blockId=poly_angle_set
+    //% block="set $choice to $x"
+    //% group="main angle"
+    //% weight=10
+    export function setAngle(choice: Angles, x: number) {
+        switch (choice) {
+            case 0: ax = x; break
+            case 1: ay = x; break
+            case 2: az = x; break
+            case 3: avx = x; break
+            case 4: avy = x; break
+            case 5: avz = x; break
+        }
+    }
+    //% blockId=poly_camera_set
+    //% block="set $choice to $x"
+    //% group="main camera"
+    //% weight=10
+    export function setCam(choice: Cameras, x: number) {
+        switch (choice) {
+            case 0: default: zoom = x; break
+            case 1: dist = x; break
+            case 2: camx = x; break
+            case 3: camy = x; break
+            case 4: camz = x; break
+            case 5: camvx = x; break
+            case 6: camvy = x; break
+            case 7: camvz = x; break
+        }
+    }
+
+    //% blockId=poly_angle_get
+    //% block="$choice"
+    //% group="main angle"
+    //% weight=4
+    export function getAngle(choice: Angles) {
+        switch (choice) {
+            case 0: return ax
+            case 1: return ay
+            case 2: return az
+            case 3: return avx
+            case 4: return avy
+            case 5: return avz
+        }
+        return NaN
+    }
+
+    //% blockId=poly_camera_get
+    //% block="$choice"
+    //% group="main camera"
+    //% weight=4
+    export function getCam(choice: Cameras) {
+        switch (choice) {
+            case 0: default: return zoom
+            case 1: return dist
+            case 2: return camx
+            case 3: return camy
+            case 4: return camz
+            case 5: return camvx
+            case 6: return camvy
+            case 7: return camvz
+        }
+        return NaN
+    }
+
+    //% blockId=poly_camera_setpos
+    //% block="set camera position to x: $x y: $y z: $z"
+    //% group="main camera"
+    //% weight=3
+    export function setCamPosition(x: number, y: number, z: number) { [camx, camy, camz] = [x, y, z] }
 
     //% blockId=poly_sorttype
     //% block="set sorting method to $method"
@@ -96,12 +225,19 @@ namespace Polymesh {
         public faces: { indices: number[], color: number, img?: Image}[]
         public points: { x: number, y: number, z: number }[]
         public pivot: { x: number, y: number, z: number}
-        public rot: { x: number, y: number, z: number }
-        public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number}
+        public rot: { x: number, y: number, z: number, vx: number, vy: number, vz: number }
+        public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number }
         flag: { invisible: boolean, noncull: boolean, backface: boolean}
         __home__() {
             forever(() => {
                 const delta = control.eventContext().deltaTime
+
+                // Velocity angle of this mesh
+                if (this.rot.vx !== 0) this.rot.x += this.rot.vx * delta;
+                if (this.rot.vy !== 0) this.rot.y += this.rot.vy * delta;
+                if (this.rot.vz !== 0) this.rot.z += this.rot.vz * delta;
+
+                // Velocity position of this mesh
                 if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
                 if (this.pos.vy !== 0) this.pos.y += this.pos.vy * delta;
                 if (this.pos.vz !== 0) this.pos.z += this.pos.vz * delta;
@@ -112,7 +248,7 @@ namespace Polymesh {
             this.faces = []
             this.points = []
             this.pivot = { x: 0, y: 0, z: 0 }
-            this.rot = { x: 0, y: 0, z: 0 }
+            this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
             this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
             this.flag = { invisible: false, noncull: false, backface: false }
 
@@ -292,6 +428,9 @@ namespace Polymesh {
                 case 0: this.rot.x = x; break
                 case 1: this.rot.y = x; break
                 case 2: this.rot.z = x; break
+                case 3: this.rot.vx = x; break
+                case 4: this.rot.vy = x; break
+                case 5: this.rot.vz = x; break
             }
         }
 
@@ -305,6 +444,9 @@ namespace Polymesh {
                 case 0: this.rot.x += x; break
                 case 1: this.rot.y += x; break
                 case 2: this.rot.z += x; break
+                case 3: this.rot.vx += x; break
+                case 4: this.rot.vy += x; break
+                case 5: this.rot.vz += x; break
             }
         }
 
@@ -318,6 +460,9 @@ namespace Polymesh {
                 case 0: return this.rot.x
                 case 1: return this.rot.y
                 case 2: return this.rot.z
+                case 3: return this.rot.vx
+                case 4: return this.rot.vy
+                case 5: return this.rot.vz
             }
             return NaN
         }
@@ -372,10 +517,6 @@ namespace Polymesh {
         }
 
     }
-
-    let ax = 0, az = 0, ay = 0
-    let camx = 0, camy = 0, camz = 0
-    let zoom = 1, sort = 0, dist = 150
 
     function rotatePoint3D(point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) {
 
@@ -790,89 +931,6 @@ namespace Polymesh {
             }
         }
     }
-
-    //% blockId=poly_angle_change
-    //% block="change $choice by $x"
-    //% group="main angle"
-    //% weight=5
-    export function changeAngle(choice: Angles, x: number) {
-        switch (choice) {
-            case 0: ax += x; break
-            case 1: ay += x; break
-            case 2: az += x; break
-        }
-    }
-    //% blockId=poly_camera_change
-    //% block="change $choice by $x"
-    //% group="main camera"
-    //% weight=5
-    export function changeCam(choice: Cameras, x: number) {
-        switch (choice) {
-            case 0: camx += x; break
-            case 1: camy += x; break
-            case 2: camz += x; break
-            case 3: default: zoom += x; break
-            case 4: dist += x; break
-        }
-    }
-    //% blockId=poly_angle_set
-    //% block="set $choice to $x"
-    //% group="main angle"
-    //% weight=10
-    export function setAngle(choice: Angles, x: number) {
-        switch (choice) {
-            case 0: ax = x; break
-            case 1: ay = x; break
-            case 2: az = x; break
-        }
-    }
-    //% blockId=poly_camera_set
-    //% block="set $choice to $x"
-    //% group="main camera"
-    //% weight=10
-    export function setCam(choice: Cameras, x: number) {
-        switch (choice) {
-            case 0: camx = x; break
-            case 1: camy = x; break
-            case 2: camz = x; break
-            case 3: default: zoom = x; break
-            case 4: dist = x; break
-        }
-    }
-
-    //% blockId=poly_angle_get
-    //% block="$choice"
-    //% group="main angle"
-    //% weight=4
-    export function getAngle(choice: Angles) {
-        switch (choice) {
-            case 0: return ax
-            case 1: return ay
-            case 2: return az
-        }
-        return NaN
-    }
-
-    //% blockId=poly_camera_get
-    //% block="$choice"
-    //% group="main camera"
-    //% weight=4
-    export function getCam(choice: Cameras) {
-        switch (choice) {
-            case 0: return camx
-            case 1: return camy
-            case 2: return camz
-            case 3: default: return zoom
-            case 4: return dist
-        }
-        return NaN
-    }
-
-    //% blockId=poly_camera_setpos
-    //% block="set camera position to x: $x y: $y z: $z"
-    //% group="main camera"
-    //% weight=3
-    export function setCamPosition(x: number, y: number, z: number) { [camx, camy, camz] = [x, y, z] }
 
     export class shadowIndices { constructor(public i1: number, public i2?: number, public i3?: number, public i4?: number) { } }
     //% blockId=poly_shadow_indices
