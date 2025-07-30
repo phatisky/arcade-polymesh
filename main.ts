@@ -502,7 +502,7 @@ namespace Polymesh {
                 cy = pt.y;
 
                 scale = pt.scale;
-                range = scale * zoom / 2
+                range = scale * zoom / 2.2
                 if (t.img) {
                     // set scale image from camera distance
                     baseW = t.img.width;
@@ -539,14 +539,14 @@ namespace Polymesh {
                 square = Math.min(halfW, halfH)
             }
             // LOD calculating?
-            let mydist = avgZ(rotated, inds) < -Math.abs(dist) / 4 ? range : Math.round((avgZ(rotated, inds) + Math.abs(dist / 4)) / Math.abs(16 * zoom));
+            let mydist = avgZ(rotated, inds) < -Math.abs(dist) / 2.2 ? range : Math.round((avgZ(rotated, inds) + Math.abs(dist / 4.2)) / Math.abs(16.8 * zoom));
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
                 if (pt.z < -Math.abs(dist)) continue;
 
                 // when no image
                 if (!t.img) {
-                    fillCircleImage(output, cx, cy, scale * zoom / 2, t.color)
+                    fillCircleImage(output, cx, cy, scale * zoom / 2.2, t.color)
                     continue;
                 }
 
@@ -555,6 +555,10 @@ namespace Polymesh {
                     fillCircleImage(output, cx, cy, Math.floor(square), t.color)
                     continue;
                 }
+
+                halfW /= 2.2;
+                halfH /= 2.2;
+                
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
@@ -778,12 +782,13 @@ namespace Polymesh {
         X1: number, Y1: number, X2: number, Y2: number,
         X3: number, Y3: number, X4: number, Y4: number, Z: number, reX?: boolean, reY?: boolean) {
         Z = Math.max(Z, 1)
-        for (let y = 0; y < src.height / Z; y++) {
-            for (let x = 0; x < src.width / Z; x++) {
-                const col = src.getPixel(reX ? (x * Z) : src.width - (x * Z), reY ? (y * Z) : src.height - (y * Z));
+        const uwidth = Math.max(src.width / Z, 1), uheight = Math.max(src.height / Z, 1)
+        for (let y = 0; y < uheight; y++) {
+            for (let x = 0; x < uwidth; x++) {
+                const col = src.getPixel(reX ? (x * Z) : uwidth - (x * Z), reY ? (y * Z) : uheight - (y * Z));
                 if (!col || col <= 0) continue;
-                const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / ((src.height / Z) * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / ((src.width / Z) * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / ((src.height / Z) * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / ((src.width / Z) * s) * (X4 - X3)))
-                const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / ((src.width / Z) * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / ((src.height / Z) * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / ((src.width / Z) * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / ((src.height / Z) * s) * (Y4 - Y2)))
+                const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / (uheight * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / (uwidth * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / (uheight * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / (uwidth * s) * (X4 - X3)))
+                const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / (uwidth * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / (uheight * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / (uwidth * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / (uheight * s) * (Y4 - Y2)))
                 if (isOutOfArea(sx(zoom), sy(zoom), dest.width, dest.height) && isOutOfArea(sx(zoom, true), sy(zoom, true), dest.width, dest.height)) continue;
                 helpers.imageFillTriangle(dest, sx(zoom, true), sy(zoom), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
                 helpers.imageFillTriangle(dest, sx(zoom), sy(zoom, true), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
