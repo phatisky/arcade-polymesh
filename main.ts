@@ -61,7 +61,7 @@ namespace Polymesh {
     export enum SortingMethods {
         //% block="accurate"
         accurate = 0,
-        //% block="fast"
+        //% block="quick"
         quick = 1,
     }
     export enum MeshFlags {
