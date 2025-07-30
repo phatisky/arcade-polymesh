@@ -502,7 +502,7 @@ namespace Polymesh {
                 cy = pt.y;
 
                 scale = pt.scale;
-                range = scale * zoom / 2.2
+                range = scale * zoom / 4.2
                 if (t.img) {
                     // set scale image from camera distance
                     baseW = t.img.width;
@@ -539,7 +539,7 @@ namespace Polymesh {
                 square = Math.min(halfW, halfH)
             }
             // LOD calculating?
-            let mydist = avgZ(rotated, inds) < -Math.abs(dist) / 2.2 ? range : Math.round((avgZ(rotated, inds) + Math.abs(dist / 4.2)) / Math.abs(16.8 * zoom));
+            let mydist = avgZ(rotated, inds) < -Math.abs(dist) / 64.8 ? range : Math.round((avgZ(rotated, inds) + Math.abs(dist / 2.2)) / Math.abs(2.2 * zoom));
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
                 if (pt.z < -Math.abs(dist)) continue;
@@ -556,8 +556,8 @@ namespace Polymesh {
                     continue;
                 }
 
-                halfW /= 2.2;
-                halfH /= 2.2;
+                halfW /= 1.2
+                halfH /= 1.2
                 
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
@@ -634,17 +634,11 @@ namespace Polymesh {
         dest.drawTransparentImage(src, x - r, y - r)
     }
 
-    function isEmptyImage(img: Image) {
-        return img.equals(image.create(img.width, img.height))
-    }
+    function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
 
-    function isOutOfArea(x: number, y: number, width: number, height: number) {
-        return isOutOfRange(x, width) || isOutOfRange(y, height)
-    }
+    function isOutOfArea(x: number, y: number, width: number, height: number) { return isOutOfRange(x, width) || isOutOfRange(y, height) }
 
-    function isOutOfRange(x: number, range: number) {
-        return x < 0 || x >= range
-    }
+    function isOutOfRange(x: number, range: number) { return x < 0 || x >= range }
 
     function isFaceVisible(rotated: { z: number }[], indices: number[], inner?: boolean): boolean {
         // Simple normal calculation for culling
@@ -774,21 +768,22 @@ namespace Polymesh {
         }
     }
 
-    function avgZ(rot: { z: number }[], inds: number[]): number {
-        return inds.reduce((s, i) => s + rot[i].z, 0) / inds.length;
-    }
+    function avgZ(rot: { z: number }[], inds: number[]): number { return inds.reduce((s, i) => s + rot[i].z, 0) / inds.length; }
+
+    function gapAround(n: number, r: number, g: number) { n -= Math.round(r / 2), n /= g, n += Math.round(r / 2); return Math.round(n) }
 
     function distortImage(src: Image, dest: Image,
         X1: number, Y1: number, X2: number, Y2: number,
         X3: number, Y3: number, X4: number, Y4: number, Z: number, reX?: boolean, reY?: boolean) {
         Z = Math.max(Z, 1)
-        const uwidth = Math.max(src.width / Z, 1), uheight = Math.max(src.height / Z, 1)
-        for (let y = 0; y < uheight; y++) {
-            for (let x = 0; x < uwidth; x++) {
-                const col = src.getPixel(reX ? (x * Z) : uwidth - (x * Z), reY ? (y * Z) : uheight - (y * Z));
+        Z = Math.min(Z, Math.min(src.width, src.height))
+        const sumW = Math.max(1, Math.floor(src.width / Z)), sumH = Math.max(1, Math.floor(src.height / Z))
+        for (let y = 0; y < sumH; y++) {
+            for (let x = 0; x < sumW; x++) {
+                const col = src.getPixel(reX ? gapAround(x * Z, src.width, Z) : src.width - gapAround(x * Z, src.width, Z), reY ? gapAround(y * Z, src.height, Z) : src.height - gapAround(y * Z, src.height, Z));
                 if (!col || col <= 0) continue;
-                const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / (uheight * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / (uwidth * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / (uheight * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / (uwidth * s) * (X4 - X3)))
-                const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / (uwidth * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / (uheight * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / (uwidth * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / (uheight * s) * (Y4 - Y2)))
+                const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / (sumH * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / (sumW * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / (sumH * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / (sumW * s) * (X4 - X3)))
+                const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / (sumW * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / (sumH * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / (sumW * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / (sumH * s) * (Y4 - Y2)))
                 if (isOutOfArea(sx(zoom), sy(zoom), dest.width, dest.height) && isOutOfArea(sx(zoom, true), sy(zoom, true), dest.width, dest.height)) continue;
                 helpers.imageFillTriangle(dest, sx(zoom, true), sy(zoom), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
                 helpers.imageFillTriangle(dest, sx(zoom), sy(zoom, true), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
