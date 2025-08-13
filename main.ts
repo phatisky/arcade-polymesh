@@ -17,6 +17,18 @@ namespace Polymesh {
         vy = 4,
         //% block="Angle vz"
         vz = 5,
+        //% block="Angle ax"
+        ax = 6,
+        //% block="Angle ay"
+        ay = 7,
+        //% block="Angle az"
+        az = 8,
+        //% block="Angle fx"
+        fx = 9,
+        //% block="Angle fy"
+        fy = 10,
+        //% block="Angle fz"
+        fz = 11,
     }
     export enum Cameras {
         //% block="Camera zoom"
@@ -35,6 +47,18 @@ namespace Polymesh {
         vy = 6,
         //% block="Camera vz"
         vz = 7,
+        //% block="Camera ax"
+        ax = 8,
+        //% block="Camera ay"
+        ay = 9,
+        //% block="Camera az"
+        az = 10,
+        //% block="Camera fx"
+        fx = 11,
+        //% block="Camera fy"
+        fy = 12,
+        //% block="Camera fz"
+        fz = 13,
     }
     export enum PointProp {
         //% block="x"
@@ -49,6 +73,18 @@ namespace Polymesh {
         vy = 4,
         //% block="vz"
         vz = 5,
+        //% block="ax"
+        ax = 6,
+        //% block="ay"
+        ay = 7,
+        //% block="az"
+        az = 8,
+        //% block="fx"
+        fx = 9,
+        //% block="fy"
+        fy = 10,
+        //% block="fz"
+        fz = 11,
     }
     export enum PivotPos {
         //% block="Pivot x"
@@ -87,17 +123,37 @@ namespace Polymesh {
         return y;
     }
 
-    let ax = 0, az = 0, ay = 0, avx = 0, avy = 0, avz = 0
-    let camx = 0, camy = 0, camz = 0, camvx = 0, camvy = 0, camvz = 0
+    let ax = 0, az = 0, ay = 0, avx = 0, avy = 0, avz = 0, aax = 0, aay = 0, aaz = 0, afx = 0, afy = 0, afz = 0
+    let camx = 0, camy = 0, camz = 0, camvx = 0, camvy = 0, camvz = 0, camax = 0, camay = 0, camaz = 0, camfx = 0, camfy = 0, camfz = 0
     let zoom = 1, sort = 0, dist = 150
 
     forever(() => {
         const deltaG = control.eventContext().deltaTime
 
+        // Acalletion angle of camera
+        if (aax !== 0) avx += aax * deltaG
+        if (aay !== 0) avy += aay * deltaG
+        if (aaz !== 0) avz += aaz * deltaG
+
+        // Friction angle of camera
+        if (afx !== 0) avx = avx < 0 ? Math.min(avx + Math.abs(afx) * deltaG, 0) : Math.max(avx - Math.abs(afx) * deltaG, 0)
+        if (afx !== 0) avy = avy < 0 ? Math.min(avy + Math.abs(afy) * deltaG, 0) : Math.max(avy - Math.abs(afy) * deltaG, 0)
+        if (afz !== 0) avz = avz < 0 ? Math.min(avz + Math.abs(afz) * deltaG, 0) : Math.max(avz - Math.abs(afz) * deltaG, 0)
+
         // Velocity angle of camera
         if (avx !== 0) ax += avx * deltaG
         if (avy !== 0) ay += avy * deltaG
         if (avz !== 0) az += avz * deltaG
+
+        // Acalletion position of camera
+        if (camax !== 0) camvx += camax * deltaG
+        if (camay !== 0) camvy += camay * deltaG
+        if (camaz !== 0) camvz += camaz * deltaG
+
+        // Friction position of camera
+        if (camfx !== 0) camvx = camvx < 0 ? Math.min(camvx + Math.abs(camfx) * deltaG, 0) : Math.max(camvx - Math.abs(camfx) * deltaG, 0)
+        if (camfy !== 0) camvy = camvy < 0 ? Math.min(camvy + Math.abs(camfy) * deltaG, 0) : Math.max(camvy - Math.abs(camfy) * deltaG, 0)
+        if (camfz !== 0) camvz = camvz < 0 ? Math.min(camvz + Math.abs(camfz) * deltaG, 0) : Math.max(camvz - Math.abs(camfz) * deltaG, 0)
 
         // Velocity position of camera
         if (camvx !== 0) camx += camvx * deltaG
@@ -117,6 +173,12 @@ namespace Polymesh {
             case 3: avx += x; break
             case 4: avy += x; break
             case 5: avz += x; break
+            case 6: aax += x; break
+            case 7: aay += x; break
+            case 8: aaz += x; break
+            case 9: afx += x; break
+            case 10: afy += x; break
+            case 11: afz += x; break
         }
     }
     //% blockId=poly_camera_change
@@ -133,6 +195,12 @@ namespace Polymesh {
             case 5: camvx += x; break
             case 6: camvy += x; break
             case 7: camvz += x; break
+            case 8: camax += x; break
+            case 9: camay += x; break
+            case 10: camaz += x; break
+            case 11: camfx += x; break
+            case 12: camfy += x; break
+            case 13: camfz += x; break
         }
     }
     //% blockId=poly_angle_set
@@ -147,6 +215,12 @@ namespace Polymesh {
             case 3: avx = x; break
             case 4: avy = x; break
             case 5: avz = x; break
+            case 6: aax = x; break
+            case 7: aay = x; break
+            case 8: aaz = x; break
+            case 9: afx = x; break
+            case 10: afy = x; break
+            case 11: afz = x; break
         }
     }
     //% blockId=poly_camera_set
@@ -163,6 +237,12 @@ namespace Polymesh {
             case 5: camvx = x; break
             case 6: camvy = x; break
             case 7: camvz = x; break
+            case 8: camax = x; break
+            case 9: camay = x; break
+            case 10: camaz = x; break
+            case 11: camfx = x; break
+            case 12: camfy = x; break
+            case 13: camfz = x; break
         }
     }
 
@@ -178,6 +258,12 @@ namespace Polymesh {
             case 3: return avx
             case 4: return avy
             case 5: return avz
+            case 6: return aax
+            case 7: return aay
+            case 8: return aaz
+            case 9: return afx
+            case 10: return afy
+            case 11: return afz
         }
         return NaN
     }
@@ -196,6 +282,12 @@ namespace Polymesh {
             case 5: return camvx
             case 6: return camvy
             case 7: return camvz
+            case 8: return camax
+            case 9: return camay
+            case 10: return camaz
+            case 11: return camfx
+            case 12: return camfy
+            case 13: return camfz
         }
         return NaN
     }
@@ -225,17 +317,37 @@ namespace Polymesh {
         public faces: { indices: number[], color: number, img?: Image}[]
         public points: { x: number, y: number, z: number }[]
         public pivot: { x: number, y: number, z: number}
-        public rot: { x: number, y: number, z: number, vx: number, vy: number, vz: number }
-        public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number }
+        public rot: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
+        public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
         flag: { invisible: boolean, noncull: boolean, backface: boolean}
         __home__() {
             forever(() => {
                 const delta = control.eventContext().deltaTime
 
+                // Acalletion angle of this mesh
+                if (this.rot.ax !== 0) this.rot.vx += this.rot.ax * delta
+                if (this.rot.ay !== 0) this.rot.vy += this.rot.ay * delta
+                if (this.rot.az !== 0) this.rot.vz += this.rot.az * delta
+
+                // Friction angle of this mesh
+                if (this.rot.fx !== 0) this.rot.vx = this.rot.vx < 0 ? Math.min(this.rot.vx + Math.abs(this.rot.fx) * delta, 0) : Math.max(this.rot.vx - Math.abs(this.rot.fx) * delta, 0)
+                if (this.rot.fy !== 0) this.rot.vy = this.rot.vy < 0 ? Math.min(this.rot.vy + Math.abs(this.rot.fy) * delta, 0) : Math.max(this.rot.vy - Math.abs(this.rot.fy) * delta, 0)
+                if (this.rot.fz !== 0) this.rot.vz = this.rot.vz < 0 ? Math.min(this.rot.vz + Math.abs(this.rot.fz) * delta, 0) : Math.max(this.rot.vz - Math.abs(this.rot.fz) * delta, 0)
+
                 // Velocity angle of this mesh
                 if (this.rot.vx !== 0) this.rot.x += this.rot.vx * delta;
                 if (this.rot.vy !== 0) this.rot.y += this.rot.vy * delta;
                 if (this.rot.vz !== 0) this.rot.z += this.rot.vz * delta;
+
+                // Acalletion position of this mesh
+                if (this.pos.ax !== 0) this.pos.vx += this.pos.ax * delta
+                if (this.pos.ay !== 0) this.pos.vy += this.pos.ay * delta
+                if (this.pos.az !== 0) this.pos.vz += this.pos.az * delta
+
+                // Friction position of this mesh
+                if (this.pos.fx !== 0) this.pos.vx = this.pos.vx < 0 ? Math.min(this.pos.vx + Math.abs(this.pos.fx) * delta, 0) : Math.max(this.pos.vx - Math.abs(this.pos.fx) * delta, 0)
+                if (this.pos.fy !== 0) this.pos.vy = this.pos.vy < 0 ? Math.min(this.pos.vy + Math.abs(this.pos.fy) * delta, 0) : Math.max(this.pos.vy - Math.abs(this.pos.fy) * delta, 0)
+                if (this.pos.fz !== 0) this.pos.vz = this.pos.vz < 0 ? Math.min(this.pos.vz + Math.abs(this.pos.fz) * delta, 0) : Math.max(this.pos.vz - Math.abs(this.pos.fz) * delta, 0)
 
                 // Velocity position of this mesh
                 if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
@@ -248,8 +360,8 @@ namespace Polymesh {
             this.faces = []
             this.points = []
             this.pivot = { x: 0, y: 0, z: 0 }
-            this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
-            this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 }
+            this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 }
+            this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 }
             this.flag = { invisible: false, noncull: false, backface: false }
 
             this.__home__()
@@ -431,6 +543,12 @@ namespace Polymesh {
                 case 3: this.rot.vx = x; break
                 case 4: this.rot.vy = x; break
                 case 5: this.rot.vz = x; break
+                case 6: this.rot.ax = x; break
+                case 7: this.rot.ay = x; break
+                case 8: this.rot.az = x; break
+                case 9: this.rot.fx = x; break
+                case 10: this.rot.fy = x; break
+                case 11: this.rot.fz = x; break
             }
         }
 
@@ -447,6 +565,12 @@ namespace Polymesh {
                 case 3: this.rot.vx += x; break
                 case 4: this.rot.vy += x; break
                 case 5: this.rot.vz += x; break
+                case 6: this.rot.ax += x; break
+                case 7: this.rot.ay += x; break
+                case 8: this.rot.az += x; break
+                case 9: this.rot.fx += x; break
+                case 10: this.rot.fy += x; break
+                case 11: this.rot.fz += x; break
             }
         }
 
@@ -463,6 +587,12 @@ namespace Polymesh {
                 case 3: return this.rot.vx
                 case 4: return this.rot.vy
                 case 5: return this.rot.vz
+                case 6: return this.rot.ax
+                case 7: return this.rot.ay
+                case 8: return this.rot.az
+                case 9: return this.rot.fx
+                case 10: return this.rot.fy
+                case 11: return this.rot.fz
             }
             return NaN
         }
@@ -480,6 +610,12 @@ namespace Polymesh {
                 case 3: this.pos.vx = x; break
                 case 4: this.pos.vy = x; break
                 case 5: this.pos.vz = x; break
+                case 6: this.pos.ax = x; break
+                case 7: this.pos.ay = x; break
+                case 8: this.pos.az = x; break
+                case 9: this.pos.fx = x; break
+                case 10: this.pos.fy = x; break
+                case 11: this.pos.fz = x; break
             }
         }
 
@@ -496,6 +632,12 @@ namespace Polymesh {
                 case 3: this.pos.vx += x; break
                 case 4: this.pos.vy += x; break
                 case 5: this.pos.vz += x; break
+                case 6: this.pos.ax += x; break
+                case 7: this.pos.ay += x; break
+                case 8: this.pos.az += x; break
+                case 9: this.pos.fx += x; break
+                case 10: this.pos.fy += x; break
+                case 11: this.pos.fz += x; break
             }
         }
 
@@ -512,6 +654,12 @@ namespace Polymesh {
                 case 3: return this.pos.vx
                 case 4: return this.pos.vy
                 case 5: return this.pos.vz
+                case 6: return this.pos.ax
+                case 7: return this.pos.ay
+                case 8: return this.pos.az
+                case 9: return this.pos.fx
+                case 10: return this.pos.fy
+                case 11: return this.pos.fz
             }
             return NaN
         }
@@ -766,12 +914,15 @@ namespace Polymesh {
     function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
         let src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
         if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
-        else src.fill(c)
+        else {
+            src.fill(c)
+            dest.drawTransparentImage(src, x - r, y - r)
+            return
+        }
         let src0 = src.clone()
-        src0.flipX()
-        src.drawTransparentImage(src0.clone(), 0, 0)
-        src0.flipY()
-        src.drawTransparentImage(src0.clone(), 0, 0)
+        src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
+        src0.flipY(), src.drawTransparentImage(src0.clone(), 0, 0)
+        src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
         dest.drawTransparentImage(src, x - r, y - r)
     }
 
@@ -781,19 +932,30 @@ namespace Polymesh {
 
     function isOutOfRange(x: number, range: number) { return x < 0 || x >= range }
 
-    function isFaceVisible(rotated: { z: number }[], indices: number[], inner?: boolean): boolean {
+    function isCull(b: boolean, x: number, y: number) { return b ? x < y : x > y }
+
+    function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], inner?: boolean): boolean {
         // Simple normal calculation for culling
         if (indices.length > 0) {
-            const zs = indices.map(ind => rotated[ind].z)
+            const xyzs = indices.map(ind => rotated[ind])
 
             // Average depth comparison
-            const avgZ = zs.reduce((sum, z) => sum + z, 0) / zs.length;
-            const otherZs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(p => p.z);
+            const avgZ = xyzs.reduce((sum, v) => sum + v.z, 0) / xyzs.length;
+            // const avgY = xyzs.reduce((sum, v) => sum + v.y, 0) / xyzs.length;
+            // const avgX = xyzs.reduce((sum, v) => sum + v.x, 0) / xyzs.length;
 
-            if (otherZs.length > 0) {
-                const otherAvg = otherZs.reduce((sum, z) => sum + z, 0) / otherZs.length;
-                return inner ? avgZ < otherAvg : avgZ > otherAvg;
-            }
+            const otherXYZs: {xs: number[] , ys: number[] , zs: number[] } = { xs: [], ys: [], zs: []}
+            // otherXYZs.xs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.x);
+            // otherXYZs.ys = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.y);
+            otherXYZs.zs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.z);
+            
+            if (otherXYZs.xs.length <= 0 || otherXYZs.ys.length <= 0 || otherXYZs.zs.length <= 0) return true;
+            // const otherAvgX = otherXYZs.xs.reduce((sum, x) => sum + x, 0) / otherXYZs.xs.length;
+            // const otherAvgY = otherXYZs.ys.reduce((sum, y) => sum + y, 0) / otherXYZs.ys.length;
+            const otherAvgZ = otherXYZs.zs.reduce((sum, z) => sum + z, 0) / otherXYZs.zs.length;
+            
+            return (inner ? avgZ < otherAvgZ : avgZ > otherAvgZ);
+            // return (inner ? avgZ < otherAvgZ && (avgX !== otherAvgX && avgY !== otherAvgY) : avgZ > otherAvgZ && (avgX === otherAvgX && avgY === otherAvgY));
         }
         return true;
     }
