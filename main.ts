@@ -862,7 +862,7 @@ namespace Polymesh {
                     cx + halfW, cy - halfH,
                     cx - halfW, cy + halfH,
                     cx + halfW, cy + halfH,
-                    mydist, true, true);
+                    plm.flag.lod ? mydist : 1, true, true);
                 continue;
             }
 
@@ -908,7 +908,7 @@ namespace Polymesh {
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[3]].x, rotated[inds[3]].y,
-                    mydist
+                    plm.flag.lod ? mydist : 1
                 );
             }
 
