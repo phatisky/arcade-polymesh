@@ -770,6 +770,8 @@ namespace Polymesh {
             };
         })
 
+        const maxDist = Math.abs(dist) / (Math.abs(dist) + (zoom / Math.PI))
+
         // Sort triangles
         const tris = plm.faces.slice();
         switch (sort) {
@@ -828,7 +830,7 @@ namespace Polymesh {
                 square = Math.min(halfW, halfH)
             }
             // LOD calculating?
-            let mydist = avgZ(rotated, inds) < -Math.abs(dist) / 64.8 ? range : Math.round((avgZ(rotated, inds) + Math.abs(dist / 2.2)) / Math.abs(2.2 * zoom));
+            const mydist = Math.abs(dist * (Math.E / 2)) / (Math.abs(dist) - avgZ(rotated, inds))
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
                 if (pt.z < -Math.abs(dist)) continue;
@@ -1081,15 +1083,19 @@ namespace Polymesh {
         Z = Math.max(Z, 1)
         Z = Math.min(Z, Math.min(src.width, src.height))
         const sumW = Math.max(1, Math.floor(src.width / Z)), sumH = Math.max(1, Math.floor(src.height / Z))
+        const sumWm = Math.max(1, sumW - 1), sumHm = Math.max(1, sumH - 1)
+        const halfW = dest.width >> 1, halfH = dest.height >> 1
         for (let y = 0; y < sumH; y++) {
             for (let x = 0; x < sumW; x++) {
                 const col = src.getPixel(reX ? gapAround(x * Z, src.width, Z) : src.width - gapAround(x * Z, src.width, Z), reY ? gapAround(y * Z, src.height, Z) : src.height - gapAround(y * Z, src.height, Z));
                 if (!col || col <= 0) continue;
-                const sx = (s: number, m?: boolean) => Math.trunc((1 - ((y * s) + (m ? s : 0) - (s / 2)) / (sumH * s)) * (X1 + ((x * s) + (m ? s : 0) - (s / 2)) / (sumW * s) * (X2 - X1)) + ((y * s) + (m ? s : 0) - (s / 2)) / (sumH * s) * (X3 + ((x * s) + (m ? s : 0) - (s / 2)) / (sumW * s) * (X4 - X3)))
-                const sy = (s: number, m?: boolean) => Math.trunc((1 - ((x * s) + (m ? s : 0) - (s / 2)) / (sumW * s)) * (Y1 + ((y * s) + (m ? s : 0) - (s / 2)) / (sumH * s) * (Y3 - Y1)) + ((x * s) + (m ? s : 0) - (s / 2)) / (sumW * s) * (Y2 + ((y * s) + (m ? s : 0) - (s / 2)) / (sumH * s) * (Y4 - Y2)))
-                if (isOutOfArea(sx(zoom), sy(zoom), dest.width, dest.height) && isOutOfArea(sx(zoom, true), sy(zoom, true), dest.width, dest.height)) continue;
-                helpers.imageFillTriangle(dest, sx(zoom, true), sy(zoom), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
-                helpers.imageFillTriangle(dest, sx(zoom), sy(zoom, true), sx(zoom), sy(zoom), sx(zoom, true), sy(zoom, true), col)
+                const sx = (s: number, m: boolean) => Math.trunc((1 - (((y - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumHm * (s * (s / Math.PI)))) * (X1 + (((x - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumWm * (s * (s / Math.PI))) * (X2 - X1)) + (((y - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumHm * (s * (s / Math.PI))) * (X3 + (((x - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumWm * (s * (s / Math.PI))) * (X4 - X3)))
+                const sy = (s: number, m: boolean) => Math.trunc((1 - (((x - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumWm * (s * (s / Math.PI)))) * (Y1 + (((y - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumHm * (s * (s / Math.PI))) * (Y3 - Y1)) + (((x - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumWm * (s * (s / Math.PI))) * (Y2 + (((y - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumHm * (s * (s / Math.PI))) * (Y4 - Y2)))
+                const sx0 = sx(zoom * dist, false), sx1 = sx(zoom * dist, true)
+                const sy0 = sy(zoom * dist, false), sy1 = sy(zoom * dist, true)
+                if (isOutOfArea(sx0, sy0, dest.width, dest.height) && isOutOfArea(sx1, sy1, dest.width, dest.height)) continue;
+                helpers.imageFillTriangle(dest, sx1, sy0, sx0, sy0, sx1, sy1, col)
+                helpers.imageFillTriangle(dest, sx0, sy1, sx0, sy0, sx1, sy1, col)
             }
         }
     }
