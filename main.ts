@@ -468,17 +468,37 @@ namespace Polymesh {
         //% block=" $this set face color at $idx to $c=colorindexpicker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh face property"
-        //% weight=10
+        //% weight=9
         public setFaceColor(idx: number, c: number) {
             if (this.faces[idx].color === c) return;
             this.faces[idx].color = c
+        }
+
+        //% blockId=poly_getfacecolor
+        //% block=" $this get face color at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh face property"
+        //% weight=10
+        public getFaceColor(idx: number) {
+            if (!this.faces[idx].color) return NaN
+            return this.faces[idx].color
+        }
+
+        //% blockId=poly_getfaceimage
+        //% block=" $this get face image at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh face property"
+        //% weight=8
+        public getFaceImage(idx: number) {
+            if (!this.faces[idx].img) return null
+            return this.faces[idx].img
         }
 
         //% blockId=poly_setfaceimage
         //% block=" $this set face image at $idx to $img=screen_image_picker"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh face property"
-        //% weight=9
+        //% weight=7
         public setFaceImage(idx: number, img: Image) {
             if ((this.faces[idx].img as Image).equals(img)) return;
             this.faces[idx].img = img
@@ -488,7 +508,7 @@ namespace Polymesh {
         //% block=" $this clear face image at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh face property"
-        //% weight=8
+        //% weight=6
         public clearFaceImage(idx: number) {
             if (!this.faces[idx].img) return;
             delete this.faces[idx].img
