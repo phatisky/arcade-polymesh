@@ -887,7 +887,7 @@ namespace Polymesh {
             }
 
             if (inds.length < 2) continue;
-            mydist = (scale * zoom) - (Math.abs(dist * Math.E * 2) / (Math.abs(dist) - avgZ(rotated, inds)))
+            mydist = (Math.abs(dist * Math.E * 2) / (Math.abs(dist) - avgZ(rotated, inds)))
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
