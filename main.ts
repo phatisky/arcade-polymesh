@@ -107,6 +107,8 @@ namespace Polymesh {
         noncull = 1,
         //% block="Back face"
         backface = 2,
+        //% block="Level of detail"
+        lod = 3,
     }
 
     /** Fast inverse square root **/
@@ -319,7 +321,7 @@ namespace Polymesh {
         public pivot: { x: number, y: number, z: number}
         public rot: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
         public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
-        flag: { invisible: boolean, noncull: boolean, backface: boolean}
+        flag: { invisible: boolean, noncull: boolean, backface: boolean, lod: boolean}
         __home__() {
             forever(() => {
                 const delta = control.eventContext().deltaTime
@@ -362,7 +364,7 @@ namespace Polymesh {
             this.pivot = { x: 0, y: 0, z: 0 }
             this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 }
             this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 }
-            this.flag = { invisible: false, noncull: false, backface: false }
+            this.flag = { invisible: false, noncull: false, backface: false, lod: false }
 
             this.__home__()
         }
@@ -377,6 +379,7 @@ namespace Polymesh {
                 case 0: default: this.flag.invisible = ok; break
                 case 1: this.flag.noncull = ok; break
                 case 2: this.flag.backface = ok; break
+                case 3: this.flag.lod = ok; break
             }
         }
 
@@ -390,6 +393,7 @@ namespace Polymesh {
                 case 0: default: return this.flag.invisible;
                 case 1: return this.flag.noncull;
                 case 2: return this.flag.backface;
+                case 3: return this.flag.lod;
             }
             return false
         }
