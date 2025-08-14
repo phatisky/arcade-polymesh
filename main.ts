@@ -853,7 +853,7 @@ namespace Polymesh {
                 square = Math.min(halfW, halfH)
             }
             // LOD calculating?
-            let mydist = Math.abs(dist) / (Math.abs(dist) - avgZ(rotated, inds))
+            let mydist = Math.abs(dist * Math.E / 2) / (Math.abs(dist) - avgZ(rotated, inds))
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
                 if (pt.z < -Math.abs(dist)) continue;
@@ -886,7 +886,7 @@ namespace Polymesh {
             }
 
             if (inds.length < 2) continue;
-            mydist = (zoom * scale) - (Math.abs(dist * Math.E * 2) / (Math.abs(dist) + avgZ(rotated, inds)))
+            // mydist = (zoom * scale) - (Math.abs(dist * Math.E * 2) / (Math.abs(dist) + avgZ(rotated, inds)))
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
