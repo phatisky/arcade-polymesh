@@ -1187,14 +1187,17 @@ namespace Polymesh {
                 if (colorIdx === 0) continue; // transparent
 
                 // Map quad on 1 pixel
-                const q00 = lerpQuad(p0, p1, p2, p3, u0, v0);
-                const q10 = lerpQuad(p0, p1, p2, p3, u1, v0);
-                const q11 = lerpQuad(p0, p1, p2, p3, u1, v1);
-                const q01 = lerpQuad(p0, p1, p2, p3, u0, v1);
-
+                const q = [
+                    lerpQuad(p0, p1, p2, p3, u0, v0),
+                    lerpQuad(p0, p1, p2, p3, u1, v0),
+                    lerpQuad(p0, p1, p2, p3, u0, v1),
+                    lerpQuad(p0, p1, p2, p3, u1, v1),
+                ]
+                
+                if (q.every(v => isOutOfArea(v.x, v.y, dest.width, dest.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
-                helpers.imageFillTriangle(dest, q10.x, q10.y, q00.x, q00.y, q11.x, q11.y, colorIdx);
-                helpers.imageFillTriangle(dest, q01.x, q01.y, q00.x, q00.y, q11.x, q11.y, colorIdx);
+                helpers.imageFillTriangle(dest, q[1].x, q[1].y, q[0].x, q[0].y, q[3].x, q[3].y, colorIdx);
+                helpers.imageFillTriangle(dest, q[2].x, q[2].y, q[0].x, q[0].y, q[3].x, q[3].y, colorIdx);
             }
         }
     }
