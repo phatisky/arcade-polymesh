@@ -854,7 +854,7 @@ namespace Polymesh {
                 square = Math.min(halfW, halfH)
             }
             // LOD calculating?
-            const mydist = Math.abs(dist * (Math.E / 2)) / (Math.abs(dist) - avgZ(rotated, inds))
+            let mydist = Math.abs(dist) / (Math.abs(dist) - avgZ(rotated, inds))
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
                 if (pt.z < -Math.abs(dist)) continue;
@@ -887,6 +887,7 @@ namespace Polymesh {
             }
 
             if (inds.length < 2) continue;
+            mydist = (scale * zoom) - (Math.abs(dist * Math.E * 2) / (Math.abs(dist) - avgZ(rotated, inds)))
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
@@ -1101,20 +1102,24 @@ namespace Polymesh {
 
     function gapAround(n: number, r: number, g: number) { n -= Math.round(r / 2), n /= g, n += Math.round(r / 2); return Math.round(n) }
     
+    function allAroundValue(x: number, r: number, g: number) {
+        x -= r / 2
+        x /= g
+        x += r / 2
+        return x
+    }
+
     function pixelessImage(from: Image, srink: number) {
         if (srink <= 1) return from
         srink = Math.max(srink, 1)
         const to = image.create(Math.floor(from.width / srink), Math.floor(from.height / srink))
-        const fromBuf = pins.createBuffer(from.height)
-        const toBuf = pins.createBuffer(to.height)
-        for (let i = 0;i < to.width;i++) {
-            const ix = Math.floor(srink / 2) + (i * srink)
-            from.getRows(ix, fromBuf)
-            for (let j = 0;j < to.height;j++) {
-                const jx = Math.floor(srink / 2) + (j * srink)
-                toBuf[j] = fromBuf[jx]
+        for (let xi = 0;xi < to.width;xi++) {
+            for (let yi = 0;yi < to.height;yi++) {
+                const xj = allAroundValue(xi, from.width, srink)
+                const yj = allAroundValue(xi, from.height, srink)
+                const col = from.getPixel(xj, yj)
+                if (col > 0) to.setPixel(xi, yi, col)
             }
-            to.setRows(i, toBuf)
         }
         return to
     }
