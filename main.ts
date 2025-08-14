@@ -817,7 +817,6 @@ namespace Polymesh {
                 cy = pt.y;
 
                 scale = pt.scale;
-                range = scale * zoom / 4.2
                 if (t.img) {
                     // set scale image from camera distance
                     baseW = t.img.width;
@@ -887,7 +886,7 @@ namespace Polymesh {
             }
 
             if (inds.length < 2) continue;
-            mydist = (Math.abs(dist * Math.E * 2) / (Math.abs(dist) - avgZ(rotated, inds)))
+            mydist = (zoom * scale) - (Math.abs(dist * Math.E * 2) / (Math.abs(dist) - avgZ(rotated, inds)))
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
