@@ -1102,7 +1102,7 @@ namespace Polymesh {
     function gapAround(n: number, r: number, g: number) { n -= Math.round(r / 2), n /= g, n += Math.round(r / 2); return Math.round(n) }
     
     function pixelessImage(from: Image, srink: number) {
-        if (srink < 2) return from
+        if (srink <= 1) return from
         srink = Math.max(srink, 1)
         const to = image.create(Math.floor(from.width / srink), Math.floor(from.height / srink))
         const fromBuf = pins.createBuffer(from.height)
@@ -1112,7 +1112,7 @@ namespace Polymesh {
             from.getRows(ix, fromBuf)
             for (let j = 0;j < to.height;j++) {
                 const jx = Math.floor(srink / 2) + (j * srink)
-                toBuf[j] = fromBuf[j]
+                toBuf[j] = fromBuf[jx]
             }
             to.setRows(i, toBuf)
         }
@@ -1123,7 +1123,7 @@ namespace Polymesh {
         x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
         srink: number, revX?: boolean, revY?: boolean) {
         let p0 = { x: x0, y: y0 }, p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 }, p3 = { x: x3, y: y3 }
-        distortImageUtil(pixelessImage(src, srink), dest, p0, p1, p2, p3, revX, revY)
+        distortImageUtil(pixelessImage(src.clone(), srink), dest, p0, p1, p2, p3, revX, revY)
     }
 
     interface Pt { x: number; y: number; }
@@ -1178,7 +1178,7 @@ namespace Polymesh {
                 const u0 = sx / w;
                 const u1 = (sx + 1) / w;
 
-                const colorIdx = src.getPixel(revX ? w - sx : sx, revY ? h - sy : sy);
+                const colorIdx = src.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
                 if (colorIdx === 0) continue; // transparent
 
                 // Map quad on 1 pixel
