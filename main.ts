@@ -500,7 +500,7 @@ namespace Polymesh {
         //% group="mesh face property"
         //% weight=7
         public setFaceImage(idx: number, img: Image) {
-            if ((this.faces[idx].img as Image).equals(img)) return;
+            if (this.faces[idx].img && this.faces[idx].img.equals(img)) return;
             this.faces[idx].img = img
         }
 
@@ -511,7 +511,7 @@ namespace Polymesh {
         //% weight=6
         public clearFaceImage(idx: number) {
             if (!this.faces[idx].img) return;
-            delete this.faces[idx].img
+            this.faces[idx].img = null
         }
 
         //% blockId=poly_mesh_pivot_set
@@ -928,7 +928,7 @@ namespace Polymesh {
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[3]].x, rotated[inds[3]].y,
-                    plm.flag.lod ? mydist : 1
+                    plm.flag.lod ? mydist : 1,
                 );
             }
 
@@ -1100,26 +1100,96 @@ namespace Polymesh {
     function avgZ(rot: { z: number }[], inds: number[]): number { return inds.reduce((s, i) => s + rot[i].z, 0) / inds.length; }
 
     function gapAround(n: number, r: number, g: number) { n -= Math.round(r / 2), n /= g, n += Math.round(r / 2); return Math.round(n) }
+    
+    function pixelessImage(from: Image, srink: number) {
+        if (srink < 2) return from
+        srink = Math.max(srink, 1)
+        const to = image.create(Math.floor(from.width / srink), Math.floor(from.height / srink))
+        const fromBuf = pins.createBuffer(from.height)
+        const toBuf = pins.createBuffer(to.height)
+        for (let i = 0;i < to.width;i++) {
+            const ix = Math.floor(srink / 2) + (i * srink)
+            from.getRows(ix, fromBuf)
+            for (let j = 0;j < to.height;j++) {
+                const jx = Math.floor(srink / 2) + (j * srink)
+                toBuf[j] = fromBuf[j]
+            }
+            to.setRows(i, toBuf)
+        }
+        return to
+    }
 
     function distortImage(src: Image, dest: Image,
-        X1: number, Y1: number, X2: number, Y2: number,
-        X3: number, Y3: number, X4: number, Y4: number, Z: number, reX?: boolean, reY?: boolean) {
-        Z = Math.max(Z, 1)
-        Z = Math.min(Z, Math.min(src.width, src.height))
-        const sumW = Math.max(1, Math.floor(src.width / Z)), sumH = Math.max(1, Math.floor(src.height / Z))
-        const sumWm = Math.max(1, sumW - 1), sumHm = Math.max(1, sumH - 1)
-        const halfW = dest.width >> 1, halfH = dest.height >> 1
-        for (let y = 0; y < sumH; y++) {
-            for (let x = 0; x < sumW; x++) {
-                const col = src.getPixel(reX ? gapAround(x * Z, src.width, Z) : src.width - gapAround(x * Z, src.width, Z), reY ? gapAround(y * Z, src.height, Z) : src.height - gapAround(y * Z, src.height, Z));
-                if (!col || col <= 0) continue;
-                const sx = (s: number, m: boolean) => Math.trunc((1 - (((y - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumHm * (s * (s / Math.PI)))) * (X1 + (((x - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumWm * (s * (s / Math.PI))) * (X2 - X1)) + (((y - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumHm * (s * (s / Math.PI))) * (X3 + (((x - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumWm * (s * (s / Math.PI))) * (X4 - X3)))
-                const sy = (s: number, m: boolean) => Math.trunc((1 - (((x - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumWm * (s * (s / Math.PI)))) * (Y1 + (((y - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumHm * (s * (s / Math.PI))) * (Y3 - Y1)) + (((x - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumWm * (s * (s / Math.PI))) * (Y2 + (((y - 0.9999999999) * (s * (s / Math.PI))) + (m ? (s * (s / Math.PI)) : 0)) / (sumHm * (s * (s / Math.PI))) * (Y4 - Y2)))
-                const sx0 = sx(zoom * dist, false), sx1 = sx(zoom * dist, true)
-                const sy0 = sy(zoom * dist, false), sy1 = sy(zoom * dist, true)
-                if (isOutOfArea(sx0, sy0, dest.width, dest.height) && isOutOfArea(sx1, sy1, dest.width, dest.height)) continue;
-                helpers.imageFillTriangle(dest, sx1, sy0, sx0, sy0, sx1, sy1, col)
-                helpers.imageFillTriangle(dest, sx0, sy1, sx0, sy0, sx1, sy1, col)
+        x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
+        srink: number, revX?: boolean, revY?: boolean) {
+        let p0 = { x: x0, y: y0 }, p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 }, p3 = { x: x3, y: y3 }
+        distortImageUtil(pixelessImage(src, srink), dest, p0, p1, p2, p3, revX, revY)
+    }
+
+    interface Pt { x: number; y: number; }
+
+    // check if two points is cross
+    function segmentsIntersect(p1: Pt, p2: Pt, p3: Pt, p4: Pt): boolean {
+        function ccw(a: Pt, b: Pt, c: Pt): boolean {
+            return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
+        }
+        return ccw(p1, p3, p4) != ccw(p2, p3, p4) &&
+            ccw(p1, p2, p3) != ccw(p1, p2, p4);
+    }
+
+    // fix quad if intersect
+    function fixQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt): [Pt, Pt, Pt, Pt] {
+        if (segmentsIntersect(p0, p1, p2, p3) || segmentsIntersect(p1, p2, p3, p0)) {
+            // get swapped
+            return [p3, p2, p0, p1];
+        }
+        return [p2, p3, p1, p0];
+    }
+
+    // Bilinear interpolation on quad
+    function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
+        const x0 = p0.x + (p1.x - p0.x) * u;
+        const y0 = p0.y + (p1.y - p0.y) * u;
+        const x1 = p3.x + (p2.x - p3.x) * u;
+        const y1 = p3.y + (p2.y - p3.y) * u;
+        return {
+            x: x0 + (x1 - x0) * v,
+            y: y0 + (y1 - y0) * v
+        };
+    }
+
+    // main distortImage function
+    function distortImageUtil(
+        src: Image, dest: Image,
+        p0: Pt, p1: Pt, p2: Pt, p3: Pt,
+        revX?: boolean, revY?: boolean
+    ) {
+        // fix quad of intersect
+        [p0, p1, p2, p3] = fixQuad(p0, p1, p2, p3);
+
+        const w = src.width;
+        const h = src.height;
+
+        for (let sy = 0; sy < h; sy++) {
+            const v0 = sy / h;
+            const v1 = (sy + 1) / h;
+
+            for (let sx = 0; sx < w; sx++) {
+                const u0 = sx / w;
+                const u1 = (sx + 1) / w;
+
+                const colorIdx = src.getPixel(revX ? w - sx : sx, revY ? h - sy : sy);
+                if (colorIdx === 0) continue; // transparent
+
+                // Map quad on 1 pixel
+                const q00 = lerpQuad(p0, p1, p2, p3, u0, v0);
+                const q10 = lerpQuad(p0, p1, p2, p3, u1, v0);
+                const q11 = lerpQuad(p0, p1, p2, p3, u1, v1);
+                const q01 = lerpQuad(p0, p1, p2, p3, u0, v1);
+
+                // stamp 2 triangles by pixel
+                helpers.imageFillTriangle(dest, q10.x, q10.y, q00.x, q00.y, q11.x, q11.y, colorIdx);
+                helpers.imageFillTriangle(dest, q01.x, q01.y, q00.x, q00.y, q11.x, q11.y, colorIdx);
             }
         }
     }
