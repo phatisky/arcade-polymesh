@@ -839,13 +839,13 @@ namespace Polymesh {
                     bq[1].x -= halfW, bq[1].y += halfH
                     bq[2].x += halfW, bq[2].y -= halfH
                     bq[3].x -= halfW, bq[3].y -= halfH
-                    if (inds.every((_, i) => (isOutOfArea(bq[i].x, bq[i].y, output.width, output.height)))) continue;
+                    if (bq.every(v => (isOutOfArea(v.x, v.y, output.width, output.height)))) continue;
                 } else {
                     bq[0].x += square, bq[0].y += square
                     bq[1].x -= square, bq[1].y += square
                     bq[2].x += square, bq[2].y -= square
                     bq[3].x -= square, bq[3].y -= square
-                    if (inds.every((_, i) => (isOutOfArea(bq[i].x, bq[i].y, output.width, output.height)))) continue;
+                    if (bq.every(v => (isOutOfArea(v.x, v.y, output.width, output.height)))) continue;
                 }
             } else if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height)))) continue;
             
@@ -973,7 +973,7 @@ namespace Polymesh {
 
     function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
 
-    function isOutOfArea(x: number, y: number, width: number, height: number, some?: boolean) { return some ? isOutOfRange(x, width) || isOutOfRange(y, height) : isOutOfRange(x, width) && isOutOfRange(y, height) }
+    function isOutOfArea(x: number, y: number, width: number, height: number) { return (isOutOfRange(x, width) || isOutOfRange(y, height)) }
 
     function isOutOfRange(x: number, range: number) { return x < 0 || x >= range }
 
