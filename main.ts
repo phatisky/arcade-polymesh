@@ -819,17 +819,33 @@ namespace Polymesh {
                 cx = pt.x;
                 cy = pt.y;
 
+                const bq = [
+                    { x: cx, y: cy },
+                    { x: cx, y: cy },
+                    { x: cx, y: cy },
+                    { x: cx, y: cy },
+                ]
+
                 scale = pt.scale;
+                square = 1.5 * scale * zoom
                 if (t.img) {
                     // set scale image from camera distance
                     baseW = t.img.width;
                     baseH = t.img.height;
 
-                    halfW = (baseW / 2) * scale * zoom;
-                    halfH = (baseH / 2) * scale * zoom;
-                    if (isOutOfArea(cx + halfW, cy + halfH, output.width, output.height) && isOutOfArea(cx - halfW, cy - halfH, output.width, output.height)) continue;
+                    halfW = (baseW / 3) * scale * zoom;
+                    halfH = (baseH / 3) * scale * zoom;
+                    bq[0].x += halfW, bq[0].y += halfH
+                    bq[1].x -= halfW, bq[1].y += halfH
+                    bq[2].x += halfW, bq[2].y -= halfH
+                    bq[3].x -= halfW, bq[3].y -= halfH
+                    if (inds.every((_, i) => (isOutOfArea(bq[i].x, bq[i].y, output.width, output.height)))) continue;
                 } else {
-                    if (isOutOfArea(cx + range, cy + range, output.width, output.height) && isOutOfArea(cx - range, cy - range, output.width, output.height)) continue;
+                    bq[0].x += square, bq[0].y += square
+                    bq[1].x -= square, bq[1].y += square
+                    bq[2].x += square, bq[2].y -= square
+                    bq[3].x -= square, bq[3].y -= square
+                    if (inds.every((_, i) => (isOutOfArea(bq[i].x, bq[i].y, output.width, output.height)))) continue;
                 }
             } else if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height)))) continue;
             
@@ -843,15 +859,15 @@ namespace Polymesh {
             cx = pt.x;
             cy = pt.y;
 
-            square = 1
+            square = 1.5 * scale * zoom
 
             if (t.img) {
                 // set scale image from camera distance
                 baseW = t.img.width;
                 baseH = t.img.height;
 
-                halfW = (baseW / 2) * scale * zoom;
-                halfH = (baseH / 2) * scale * zoom;
+                halfW = (baseW / 3) * scale * zoom;
+                halfH = (baseH / 3) * scale * zoom;
 
                 square = Math.min(halfW, halfH)
             }
@@ -873,8 +889,8 @@ namespace Polymesh {
                     continue;
                 }
 
-                halfW /= 1.2
-                halfH /= 1.2
+                halfW /= 1.1
+                halfH /= 1.1
                 
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
@@ -889,7 +905,7 @@ namespace Polymesh {
             }
 
             if (inds.length < 2) continue;
-            // mydist = (zoom * scale) - (Math.abs(dist * Math.E * 2) / (Math.abs(dist) + avgZ(rotated, inds)))
+            mydist = (Math.abs(dist * Math.E / Math.PI) / (Math.abs(dist) - avgZ(rotated, inds) / (Math.PI * Math.E / 0.618033)))
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
@@ -957,7 +973,7 @@ namespace Polymesh {
 
     function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
 
-    function isOutOfArea(x: number, y: number, width: number, height: number) { return isOutOfRange(x, width) || isOutOfRange(y, height) }
+    function isOutOfArea(x: number, y: number, width: number, height: number) { return isOutOfRange(x, width) && isOutOfRange(y, height) }
 
     function isOutOfRange(x: number, range: number) { return x < 0 || x >= range }
 
@@ -1105,20 +1121,25 @@ namespace Polymesh {
     function gapAround(n: number, r: number, g: number) { n -= Math.round(r / 2), n /= g, n += Math.round(r / 2); return Math.round(n) }
     
     function allAroundValue(x: number, r: number, g: number) {
-        x -= r / 2
-        x /= g
-        x += r / 2
+        x -= Math.round(r / 2)
+        x = Math.round(x / g)
+        x += Math.round(r / 2)
         return x
     }
 
     function pixelessImage(from: Image, srink: number) {
         if (srink <= 1) return from
         srink = Math.max(srink, 1)
-        const to = image.create(Math.floor(from.width / srink), Math.floor(from.height / srink))
+        const to = image.create(Math.max(1, Math.floor(from.width / srink)), Math.max(1, Math.floor(from.height / srink)))
+        if (to.width <= 1 || to.height <= 1) {
+            const col = from.getPixel(Math.floor(from.width / 2), Math.floor(from.width / 2))
+            to.fill(col)
+            return to
+        }
         for (let xi = 0;xi < to.width;xi++) {
+            const xj = allAroundValue(xi, from.width, srink)
             for (let yi = 0;yi < to.height;yi++) {
-                const xj = allAroundValue(xi, from.width, srink)
-                const yj = allAroundValue(xi, from.height, srink)
+                const yj = allAroundValue(yi, from.height, srink)
                 const col = from.getPixel(xj, yj)
                 if (col > 0) to.setPixel(xi, yi, col)
             }
