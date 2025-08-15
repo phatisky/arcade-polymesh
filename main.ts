@@ -973,7 +973,7 @@ namespace Polymesh {
 
     function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
 
-    function isOutOfArea(x: number, y: number, width: number, height: number) { return isOutOfRange(x, width) && isOutOfRange(y, height) }
+    function isOutOfArea(x: number, y: number, width: number, height: number, some?: boolean) { return some ? isOutOfRange(x, width) || isOutOfRange(y, height) : isOutOfRange(x, width) && isOutOfRange(y, height) }
 
     function isOutOfRange(x: number, range: number) { return x < 0 || x >= range }
 
