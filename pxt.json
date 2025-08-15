@@ -1,6 +1,6 @@
 {
     "name": "arcade-polymesh",
-    "version": "0.13.10",
+    "version": "0.13.11",
     "description": "basic 3d render like polygon and mesh",
     "dependencies": {
         "device": "*"
