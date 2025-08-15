@@ -132,14 +132,14 @@ namespace Polymesh {
     forever(() => {
         const deltaG = control.eventContext().deltaTime
 
-        // Acalletion angle of camera
+        // Acceleration angle of camera
         if (aax !== 0) avx += aax * deltaG
         if (aay !== 0) avy += aay * deltaG
         if (aaz !== 0) avz += aaz * deltaG
 
         // Friction angle of camera
         if (afx !== 0) avx = avx < 0 ? Math.min(avx + Math.abs(afx) * deltaG, 0) : Math.max(avx - Math.abs(afx) * deltaG, 0)
-        if (afx !== 0) avy = avy < 0 ? Math.min(avy + Math.abs(afy) * deltaG, 0) : Math.max(avy - Math.abs(afy) * deltaG, 0)
+        if (afy !== 0) avy = avy < 0 ? Math.min(avy + Math.abs(afy) * deltaG, 0) : Math.max(avy - Math.abs(afy) * deltaG, 0)
         if (afz !== 0) avz = avz < 0 ? Math.min(avz + Math.abs(afz) * deltaG, 0) : Math.max(avz - Math.abs(afz) * deltaG, 0)
 
         // Velocity angle of camera
@@ -147,7 +147,7 @@ namespace Polymesh {
         if (avy !== 0) ay += avy * deltaG
         if (avz !== 0) az += avz * deltaG
 
-        // Acalletion position of camera
+        // Acceleration​ position of camera
         if (camax !== 0) camvx += camax * deltaG
         if (camay !== 0) camvy += camay * deltaG
         if (camaz !== 0) camvz += camaz * deltaG
@@ -326,7 +326,7 @@ namespace Polymesh {
             forever(() => {
                 const delta = control.eventContext().deltaTime
 
-                // Acalletion angle of this mesh
+                // Acceleration angle of this mesh
                 if (this.rot.ax !== 0) this.rot.vx += this.rot.ax * delta
                 if (this.rot.ay !== 0) this.rot.vy += this.rot.ay * delta
                 if (this.rot.az !== 0) this.rot.vz += this.rot.az * delta
@@ -341,7 +341,7 @@ namespace Polymesh {
                 if (this.rot.vy !== 0) this.rot.y += this.rot.vy * delta;
                 if (this.rot.vz !== 0) this.rot.z += this.rot.vz * delta;
 
-                // Acalletion position of this mesh
+                // Acceleration position of this mesh
                 if (this.pos.ax !== 0) this.pos.vx += this.pos.ax * delta
                 if (this.pos.ay !== 0) this.pos.vy += this.pos.ay * delta
                 if (this.pos.az !== 0) this.pos.vz += this.pos.az * delta
@@ -404,7 +404,9 @@ namespace Polymesh {
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=10
-        public setVertice(idx: number, point3: shadowPoint3) { this.points[idx] = { x: point3.x, y: point3.y, z: point3.z } }
+        public setVertice(idx: number, point3: shadowPoint3) {
+            if (isOutOfRange(idx, this.points.length + 1)) return;
+            this.points[idx] = { x: point3.x, y: point3.y, z: point3.z } }
 
         //% blockId=poly_vertice_add
         //% block=" $this add vertice to $point3"
@@ -431,6 +433,7 @@ namespace Polymesh {
         //% group="mesh property"
         //% weight=8
         public setFace(idx: number, c: number, inds: shadowIndices, img?: Image) {
+            if (isOutOfRange(idx, this.faces.length + 1)) return;
             const indice = [inds.i1]
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
