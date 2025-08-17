@@ -810,10 +810,14 @@ namespace Polymesh {
         for (const t of tris) {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist))) continue;
-            let idx: number, pt: {scale: number, x: number, y: number, z: number}, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number
+            let idx: number, pt: {scale: number, x: number, y: number, z: number}, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
+            // LOD calculating?
+            let mydist = Math.abs(dist * Math.E / 2) / (Math.abs(dist) - avgZ(rotated, inds))
             if (t.indices.length === 1) {
                 idx = t.indices[0];
                 pt = rotated[idx];
+
+                im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
 
                 // center image
                 cx = pt.x;
@@ -828,10 +832,10 @@ namespace Polymesh {
 
                 scale = pt.scale;
                 square = 1.5 * scale * zoom
-                if (t.img) {
+                if (im) {
                     // set scale image from camera distance
-                    baseW = t.img.width;
-                    baseH = t.img.height;
+                    baseW = im.width;
+                    baseH = im.height;
 
                     halfW = (baseW / 3) * scale * zoom;
                     halfH = (baseH / 3) * scale * zoom;
@@ -862,17 +866,16 @@ namespace Polymesh {
             square = 1.5 * scale * zoom
 
             if (t.img) {
+                im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
                 // set scale image from camera distance
-                baseW = t.img.width;
-                baseH = t.img.height;
+                baseW = im.width;
+                baseH = im.height;
 
                 halfW = (baseW / 3) * scale * zoom;
                 halfH = (baseH / 3) * scale * zoom;
 
                 square = Math.min(halfW, halfH)
             }
-            // LOD calculating?
-            let mydist = Math.abs(dist * Math.E / 2) / (Math.abs(dist) - avgZ(rotated, inds))
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
                 if (pt.z < -Math.abs(dist)) continue;
@@ -895,12 +898,12 @@ namespace Polymesh {
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
-                distortImage(t.img.clone(), output,
+                distortImage(im.clone(), output,
                     cx - halfW, cy - halfH,
                     cx + halfW, cy - halfH,
                     cx - halfW, cy + halfH,
                     cx + halfW, cy + halfH,
-                    plm.flag.lod ? mydist : 1, true, true);
+                    1, true, true);
                 continue;
             }
 
@@ -961,7 +964,7 @@ namespace Polymesh {
         if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
         else {
             src.fill(c)
-            dest.drawTransparentImage(src, x - r, y - r)
+            dest.drawTransparentImage(src, x, y)
             return
         }
         let src0 = src.clone()
