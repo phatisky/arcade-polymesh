@@ -950,7 +950,7 @@ namespace Polymesh {
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[3]].x, rotated[inds[3]].y,
-                    plm.flag.lod ? mydist : 1,
+                    plm.flag.lod ? mydist : 1, false, false
                 );
             }
 
@@ -1179,13 +1179,14 @@ namespace Polymesh {
 
     // Bilinear interpolation on quad
     function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
-        const x0 = p0.x + (p1.x - p0.x) * u;
-        const y0 = p0.y + (p1.y - p0.y) * u;
-        const x1 = p3.x + (p2.x - p3.x) * u;
-        const y1 = p3.y + (p2.y - p3.y) * u;
+        const tileW = 1, tileH = 1
+        const x0 = p0.x + (p1.x - p0.x) * u * tileW;
+        const y0 = p0.y + (p1.y - p0.y) * u * tileW;
+        const x1 = p3.x + (p2.x - p3.x) * u * tileW;
+        const y1 = p3.y + (p2.y - p3.y) * u * tileW;
         return {
-            x: x0 + (x1 - x0) * v,
-            y: y0 + (y1 - y0) * v
+            x: x0 + (x1 - x0) * v * tileH,
+            y: y0 + (y1 - y0) * v * tileH
         };
     }
 
@@ -1201,15 +1202,25 @@ namespace Polymesh {
         const w = src.width;
         const h = src.height;
 
-        for (let sy = 0; sy < h; sy++) {
-            const v0 = sy / h;
-            const v1 = (sy + 1) / h;
+        const srcBuf = pins.createBuffer(src.height)
 
-            for (let sx = 0; sx < w; sx++) {
-                const u0 = sx / w;
-                const u1 = (sx + 1) / w;
+        for (let sx = 0; sx < w; sx++) {
+            src.getRows(sx, srcBuf)
+            if (srcBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
+            const u0 = (sx / w);
+            const u1 = ((sx + 1) / w);
 
-                const colorIdx = src.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
+            for (let sy = 0; sy < h; sy++) {
+                const v0 = (sy / h);
+                const v1 = ((sy + 1) / h);
+
+                let colorIdx = src.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
+                const nearColor = [
+                    src.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy - 1),
+                    src.getPixel(revX ? w - sx - 1 : sx - 1, revY ? h - sy - 1 : sy - 1),
+                    src.getPixel(revX ? w - sx - 1 : sx - 1, revY ? h - sy - 1 : sy),
+                ]
+
                 if (colorIdx === 0) continue; // transparent
 
                 // Map quad on 1 pixel
@@ -1226,6 +1237,14 @@ namespace Polymesh {
                 helpers.imageFillTriangle(dest, q[2].x, q[2].y, q[0].x, q[0].y, q[3].x, q[3].y, colorIdx);
             }
         }
+    }
+
+    function minPosArr(xyarr: { x: number, y: number}[]) {
+        return { x: xyarr.reduce((cur, val) => Math.min(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.min(cur, val.y), xyarr[0].y)}
+    }
+
+    function maxPosArr(xyarr: { x: number, y: number }[]) {
+        return { x: xyarr.reduce((cur, val) => Math.max(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.max(cur, val.y), xyarr[0].y) }
     }
 
     export class shadowIndices { constructor(public i1: number, public i2?: number, public i3?: number, public i4?: number) { } }
