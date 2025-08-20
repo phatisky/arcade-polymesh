@@ -756,12 +756,10 @@ namespace Polymesh {
         inProcess[1] = true
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
-        control.runInBackground(() => {
-            switch (sort) {
-                case 0: sorted.sort((a, b) => b.depth - a.depth); break
-                case 1: introSort(sorted, (a, b) => b.depth - a.depth); break
-            }
-        })
+        switch (sort) {
+            case 0: sorted.sort((a, b) => b.depth - a.depth); break
+            case 1: introSort(sorted, (a, b) => b.depth - a.depth); break
+        }
         for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
         inProcess[1] = false
     }
@@ -815,8 +813,6 @@ namespace Polymesh {
                 x: centerX + x * scale * zoom,
                 y: centerY + y * scale * zoom,
                 z: z,
-                ix: x,
-                iy: y,
             };
         })
 
@@ -824,12 +820,10 @@ namespace Polymesh {
 
         // Sort triangles
         const tris = plm.faces.slice();
-        control.runInBackground(() => {
-            switch (sort) {
-                case 0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-                case 1: default: introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-            }
-        })
+        switch (sort) {
+            case 0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            case 1: default: introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+        }
         
         // Render
         for (const t of tris) {
@@ -951,17 +945,25 @@ namespace Polymesh {
                 t.color
             );
             // Draw solid when is vertice shape
-            if (inds.length > 2) {
+            if (inds.length > 3) {
+                /*
                 helpers.imageFillTriangle( output,
-                    rotated[inds[0]].x, rotated[inds[0]].y,
+                    rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     t.color
                 );
-            }
-            if (inds.length > 3) {
-                helpers.imageFillTriangle( output,
+                */
+                helpers.imageFillPolygon4(output,
                     rotated[inds[3]].x, rotated[inds[3]].y,
+                    rotated[inds[2]].x, rotated[inds[2]].y,
+                    rotated[inds[0]].x, rotated[inds[0]].y,
+                    rotated[inds[1]].x, rotated[inds[1]].y,
+                    t.color
+                );
+            } else if (inds.length > 2) {
+                helpers.imageFillTriangle(output,
+                    rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     t.color
@@ -1027,7 +1029,9 @@ namespace Polymesh {
             // const otherAvgY = otherXYZs.ys.reduce((sum, y) => sum + y, 0) / otherXYZs.ys.length;
             const otherAvgZ = otherXYZs.zs.reduce((sum, z) => sum + z, 0) / otherXYZs.zs.length;
             
-            return (oface < 0 ? avgZ < otherAvgZ : oface > 0 ? avgZ > otherAvgZ : true);
+            if (oface < 0) return avgZ < otherAvgZ
+            if (oface > 0) return avgZ > otherAvgZ
+            return true
             // return (inner ? avgZ < otherAvgZ && (avgX !== otherAvgX && avgY !== otherAvgY) : avgZ > otherAvgZ && (avgX === otherAvgX && avgY === otherAvgY));
         }
         return true;
@@ -1240,11 +1244,6 @@ namespace Polymesh {
                 const v1 = ((sy + 1) / h);
 
                 let colorIdx = src.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
-                const nearColor = [
-                    src.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy - 1),
-                    src.getPixel(revX ? w - sx - 1 : sx - 1, revY ? h - sy - 1 : sy - 1),
-                    src.getPixel(revX ? w - sx - 1 : sx - 1, revY ? h - sy - 1 : sy),
-                ]
 
                 if (colorIdx === 0) continue; // transparent
 
@@ -1255,11 +1254,14 @@ namespace Polymesh {
                     lerpQuad(p0, p1, p2, p3, u0, v1),
                     lerpQuad(p0, p1, p2, p3, u1, v1),
                 ]
+
+                const qt = q.map( v => ({ x: Math.trunc(v.x), y: Math.trunc(v.y) }))
                 
-                if (q.every(v => isOutOfArea(v.x, v.y, dest.width, dest.height))) continue; // skipped if out of screen
+                if (qt.every(v => isOutOfArea(v.x, v.y, dest.width, dest.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
-                helpers.imageFillTriangle(dest, q[1].x, q[1].y, q[0].x, q[0].y, q[3].x, q[3].y, colorIdx);
-                helpers.imageFillTriangle(dest, q[2].x, q[2].y, q[0].x, q[0].y, q[3].x, q[3].y, colorIdx);
+                //helpers.imageFillTriangle(dest, qt[1].x, qt[1].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
+                //helpers.imageFillTriangle(dest, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
+                helpers.imageFillPolygon4(dest, qt[3].x, qt[3].y, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[1].x, qt[1].y, colorIdx);
             }
         }
     }
