@@ -105,10 +105,8 @@ namespace Polymesh {
         invisible = 0,
         //% block="Non culling"
         noncull = 1,
-        //% block="Back face"
-        backface = 2,
         //% block="Level of detail"
-        lod = 3,
+        lod = 2,
     }
 
     /** Fast inverse square root **/
@@ -316,41 +314,41 @@ namespace Polymesh {
     export function newmesh() { return new mesh() }
 
     export class mesh {
-        public faces: { indices: number[], color: number, img?: Image}[]
+        public faces: { indices: number[], color: number, offset: number, img?: Image}[]
         public points: { x: number, y: number, z: number }[]
         public pivot: { x: number, y: number, z: number}
         public rot: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
         public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
-        flag: { invisible: boolean, noncull: boolean, backface: boolean, lod: boolean}
+        flag: { invisible: boolean, noncull: boolean, lod: boolean}
         __home__() {
             forever(() => {
                 const delta = control.eventContext().deltaTime
-
+    
                 // Acceleration angle of this mesh
                 if (this.rot.ax !== 0) this.rot.vx += this.rot.ax * delta
                 if (this.rot.ay !== 0) this.rot.vy += this.rot.ay * delta
                 if (this.rot.az !== 0) this.rot.vz += this.rot.az * delta
-
+    
                 // Friction angle of this mesh
                 if (this.rot.fx !== 0) this.rot.vx = this.rot.vx < 0 ? Math.min(this.rot.vx + Math.abs(this.rot.fx) * delta, 0) : Math.max(this.rot.vx - Math.abs(this.rot.fx) * delta, 0)
                 if (this.rot.fy !== 0) this.rot.vy = this.rot.vy < 0 ? Math.min(this.rot.vy + Math.abs(this.rot.fy) * delta, 0) : Math.max(this.rot.vy - Math.abs(this.rot.fy) * delta, 0)
                 if (this.rot.fz !== 0) this.rot.vz = this.rot.vz < 0 ? Math.min(this.rot.vz + Math.abs(this.rot.fz) * delta, 0) : Math.max(this.rot.vz - Math.abs(this.rot.fz) * delta, 0)
-
+    
                 // Velocity angle of this mesh
                 if (this.rot.vx !== 0) this.rot.x += this.rot.vx * delta;
                 if (this.rot.vy !== 0) this.rot.y += this.rot.vy * delta;
                 if (this.rot.vz !== 0) this.rot.z += this.rot.vz * delta;
-
+    
                 // Acceleration position of this mesh
                 if (this.pos.ax !== 0) this.pos.vx += this.pos.ax * delta
                 if (this.pos.ay !== 0) this.pos.vy += this.pos.ay * delta
                 if (this.pos.az !== 0) this.pos.vz += this.pos.az * delta
-
+    
                 // Friction position of this mesh
                 if (this.pos.fx !== 0) this.pos.vx = this.pos.vx < 0 ? Math.min(this.pos.vx + Math.abs(this.pos.fx) * delta, 0) : Math.max(this.pos.vx - Math.abs(this.pos.fx) * delta, 0)
                 if (this.pos.fy !== 0) this.pos.vy = this.pos.vy < 0 ? Math.min(this.pos.vy + Math.abs(this.pos.fy) * delta, 0) : Math.max(this.pos.vy - Math.abs(this.pos.fy) * delta, 0)
                 if (this.pos.fz !== 0) this.pos.vz = this.pos.vz < 0 ? Math.min(this.pos.vz + Math.abs(this.pos.fz) * delta, 0) : Math.max(this.pos.vz - Math.abs(this.pos.fz) * delta, 0)
-
+    
                 // Velocity position of this mesh
                 if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
                 if (this.pos.vy !== 0) this.pos.y += this.pos.vy * delta;
@@ -364,7 +362,7 @@ namespace Polymesh {
             this.pivot = { x: 0, y: 0, z: 0 }
             this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 }
             this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 }
-            this.flag = { invisible: false, noncull: false, backface: false, lod: false }
+            this.flag = { invisible: false, noncull: false, lod: false }
 
             this.__home__()
         }
@@ -378,8 +376,7 @@ namespace Polymesh {
             switch (flag) {
                 case 0: default: this.flag.invisible = ok; break
                 case 1: this.flag.noncull = ok; break
-                case 2: this.flag.backface = ok; break
-                case 3: this.flag.lod = ok; break
+                case 2: this.flag.lod = ok; break
             }
         }
 
@@ -392,8 +389,7 @@ namespace Polymesh {
             switch (flag) {
                 case 0: default: return this.flag.invisible;
                 case 1: return this.flag.noncull;
-                case 2: return this.flag.backface;
-                case 3: return this.flag.lod;
+                case 2: return this.flag.lod;
             }
             return false
         }
@@ -427,34 +423,36 @@ namespace Polymesh {
         }
 
         //% blockId=poly_face_set
-        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds|| and texture $img=screen_image_picker"
+        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds with face offset $oface|| and texture $img=screen_image_picker"
         //% inds.shadow=poly_shadow_indices
+        //% oface.min=-1 oface.max=1
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=8
-        public setFace(idx: number, c: number, inds: shadowIndices, img?: Image) {
+        public setFace(idx: number, c: number, inds: shadowIndices, oface: number, img?: Image) {
             if (isOutOfRange(idx, this.faces.length + 1)) return;
             const indice = [inds.i1]
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
             if (inds.i4) indice.push(inds.i4);
-            if (img) this.faces[idx] = { indices: indice, color: c, img: img };
-            else this.faces[idx] = { indices: indice, color: c };
+            if (img) this.faces[idx] = { indices: indice, color: c, offset: oface, img: img };
+            else this.faces[idx] = { indices: indice, color: c, offset: oface };
         }
 
         //% blockId=poly_face_add
-        //% block=" $this add face to color $c=colorindexpicker and $inds|| and texture $img=screen_image_picker"
+        //% block=" $this add face to color $c=colorindexpicker and $inds and face offset $oface|| and texture $img=screen_image_picker"
         //% inds.shadow=poly_shadow_indices
+        //% oface.min=-1 oface.max=1
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=7
-        public addFace(c: number, inds: shadowIndices, img?: Image) {
+        public addFace(c: number, inds: shadowIndices, oface: number, img?: Image) {
             const indice = [inds.i1]
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
             if (inds.i4) indice.push(inds.i4);
-            if (img) this.faces.push({ indices: indice, color: c, img: img });
-            else this.faces.push({ indices: indice, color: c });
+            if (img) this.faces.push({ indices: indice, color: c, offset: oface, img: img });
+            else this.faces.push({ indices: indice, color: c, offset: oface });
         }
 
         //% blockId=poly_face_del
@@ -467,16 +465,6 @@ namespace Polymesh {
             else this.faces.pop();
         }
 
-        //% blockId=poly_setfacecolor
-        //% block=" $this set face color at $idx to $c=colorindexpicker"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=9
-        public setFaceColor(idx: number, c: number) {
-            if (this.faces[idx].color === c) return;
-            this.faces[idx].color = c
-        }
-
         //% blockId=poly_getfacecolor
         //% block=" $this get face color at $idx"
         //% this.shadow=variables_get this.defl=myMesh
@@ -485,6 +473,16 @@ namespace Polymesh {
         public getFaceColor(idx: number) {
             if (!this.faces[idx].color) return NaN
             return this.faces[idx].color
+        }
+
+        //% blockId=poly_setfacecolor
+        //% block=" $this set face color at $idx to $c=colorindexpicker"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh face property"
+        //% weight=9
+        public setFaceColor(idx: number, c: number) {
+            if (this.faces[idx].color === c) return;
+            this.faces[idx].color = c
         }
 
         //% blockId=poly_getfaceimage
@@ -515,6 +513,27 @@ namespace Polymesh {
         public clearFaceImage(idx: number) {
             if (!this.faces[idx].img) return;
             this.faces[idx].img = null
+        }
+
+        //% blockId=poly_setfaceimage
+        //% block=" $this get face offset at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh face property"
+        //% weight=5
+        public getFaceOffset(idx: number) {
+            if (!this.faces[idx].offset) return NaN
+            return this.faces[idx].offset
+        }
+
+        //% blockId=poly_setfaceimage
+        //% block=" $this set face offset at $idx to $oface"
+        //% oface.min=-1 oface.max=1
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh face property"
+        //% weight=4
+        public setFaceOffset(idx: number, oface: number) {
+            if (this.faces[idx].offset === oface) return;
+            this.faces[idx].offset = oface
         }
 
         //% blockId=poly_mesh_pivot_set
@@ -737,10 +756,12 @@ namespace Polymesh {
         inProcess[1] = true
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
-        switch (sort) {
-            case 0: sorted.sort((a, b) => b.depth - a.depth); break
-            case 1: introSort(sorted, (a, b) => b.depth - a.depth); break
-        }
+        control.runInBackground(() => {
+            switch (sort) {
+                case 0: sorted.sort((a, b) => b.depth - a.depth); break
+                case 1: introSort(sorted, (a, b) => b.depth - a.depth); break
+            }
+        })
         for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
         inProcess[1] = false
     }
@@ -793,7 +814,9 @@ namespace Polymesh {
                 scale: scale,
                 x: centerX + x * scale * zoom,
                 y: centerY + y * scale * zoom,
-                z: z
+                z: z,
+                ix: x,
+                iy: y,
             };
         })
 
@@ -801,10 +824,12 @@ namespace Polymesh {
 
         // Sort triangles
         const tris = plm.faces.slice();
-        switch (sort) {
-            case 0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-            case 1: default: introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-        }
+        control.runInBackground(() => {
+            switch (sort) {
+                case 0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+                case 1: default: introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            }
+        })
         
         // Render
         for (const t of tris) {
@@ -816,27 +841,27 @@ namespace Polymesh {
             if (t.indices.length === 1) {
                 idx = t.indices[0];
                 pt = rotated[idx];
-
+    
                 im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
-
+    
                 // center image
                 cx = pt.x;
                 cy = pt.y;
-
+    
                 const bq = [
                     { x: cx, y: cy },
                     { x: cx, y: cy },
                     { x: cx, y: cy },
                     { x: cx, y: cy },
                 ]
-
+    
                 scale = pt.scale;
                 square = 1.5 * scale * zoom
                 if (im) {
                     // set scale image from camera distance
                     baseW = im.width;
                     baseH = im.height;
-
+    
                     halfW = (baseW / 3) * scale * zoom;
                     halfH = (baseH / 3) * scale * zoom;
                     bq[0].x += halfW, bq[0].y += halfH
@@ -854,7 +879,7 @@ namespace Polymesh {
             } else if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height)))) continue;
             
             // Backface culling
-            if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, plm.flag.backface)) continue;
+            if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
                 
             idx = t.indices[0];
             pt = rotated[idx];
@@ -862,36 +887,36 @@ namespace Polymesh {
             // center image
             cx = pt.x;
             cy = pt.y;
-
+    
             square = 1.5 * scale * zoom
-
+    
             if (t.img) {
                 im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
                 // set scale image from camera distance
                 baseW = im.width;
                 baseH = im.height;
-
+    
                 halfW = (baseW / 3) * scale * zoom;
                 halfH = (baseH / 3) * scale * zoom;
-
+    
                 square = Math.min(halfW, halfH)
             }
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
                 if (pt.z < -Math.abs(dist)) continue;
-
+    
                 // when no image
                 if (!t.img) {
                     fillCircleImage(output, cx, cy, scale * zoom / 2.2, t.color)
                     continue;
                 }
-
+    
                 // fill circle if image is empty
                 if (isEmptyImage(t.img)) {
                     fillCircleImage(output, cx, cy, Math.floor(square), t.color)
                     continue;
                 }
-
+    
                 halfW /= 1.1
                 halfH /= 1.1
                 
@@ -906,7 +931,7 @@ namespace Polymesh {
                     1, true, true);
                 continue;
             }
-
+    
             if (inds.length < 2) continue;
             mydist = (Math.abs(dist * Math.E / Math.PI) / (Math.abs(dist) - avgZ(rotated, inds) / (Math.PI * Math.E / 0.618033)))
             // Draw line canvas when have line color index
@@ -942,7 +967,7 @@ namespace Polymesh {
                     t.color
                 );
             }
-
+    
             // Draw texture over
             if (inds.length === 4 && t.img) {
                 distortImage(t.img.clone(), output,
@@ -953,7 +978,7 @@ namespace Polymesh {
                     plm.flag.lod ? mydist : 1, false, false
                 );
             }
-
+    
         }
         
         inProcess[0] = false
@@ -982,7 +1007,7 @@ namespace Polymesh {
 
     function isCull(b: boolean, x: number, y: number) { return b ? x < y : x > y }
 
-    function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], inner?: boolean): boolean {
+    function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number): boolean {
         // Simple normal calculation for culling
         if (indices.length > 0) {
             const xyzs = indices.map(ind => rotated[ind])
@@ -1002,7 +1027,7 @@ namespace Polymesh {
             // const otherAvgY = otherXYZs.ys.reduce((sum, y) => sum + y, 0) / otherXYZs.ys.length;
             const otherAvgZ = otherXYZs.zs.reduce((sum, z) => sum + z, 0) / otherXYZs.zs.length;
             
-            return (inner ? avgZ < otherAvgZ : avgZ > otherAvgZ);
+            return (oface < 0 ? avgZ < otherAvgZ : oface > 0 ? avgZ > otherAvgZ : true);
             // return (inner ? avgZ < otherAvgZ && (avgX !== otherAvgX && avgY !== otherAvgY) : avgZ > otherAvgZ && (avgX === otherAvgX && avgY === otherAvgY));
         }
         return true;
