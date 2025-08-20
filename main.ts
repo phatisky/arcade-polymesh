@@ -828,7 +828,7 @@ namespace Polymesh {
         // Render
         for (const t of tris) {
             const inds = t.indices;
-            if (inds.some(i => rotated[i].z < -Math.abs(dist))) continue;
+            if (inds.some(i => rotated[i].z < -Math.abs(dist) || rotated[i].z > Math.abs(dist ** 1.42 / zoom))) continue;
             let idx: number, pt: {scale: number, x: number, y: number, z: number}, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
             // LOD calculating?
             let mydist = Math.abs(dist * Math.E / 2) / (Math.abs(dist) - avgZ(rotated, inds))
@@ -927,7 +927,7 @@ namespace Polymesh {
             }
     
             if (inds.length < 2) continue;
-            mydist = (Math.abs(dist * Math.E / Math.PI) / (Math.abs(dist) - avgZ(rotated, inds) / (Math.PI * Math.E / 0.618033)))
+            mydist = (Math.abs(dist) / (Math.abs(dist) - Math.floor((avgZ(rotated, inds) + Math.abs((Math.abs(dist / 0.8) + 0.6180339887))) / Math.abs(dist * scale / zoom))))
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
