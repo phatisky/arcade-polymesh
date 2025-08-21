@@ -314,7 +314,7 @@ namespace Polymesh {
     export function newmesh() { return new mesh() }
 
     export class mesh {
-        public faces: { indices: number[], color: number, offset: number, img?: Image}[]
+        public faces: { indices: number[], color: number, offset: number, scale: number, img?: Image}[]
         public points: { x: number, y: number, z: number }[]
         public pivot: { x: number, y: number, z: number}
         public rot: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
@@ -423,36 +423,38 @@ namespace Polymesh {
         }
 
         //% blockId=poly_face_set
-        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds with face offset $oface|| and texture $img=screen_image_picker"
+        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds with face offset $oface|| in scale $scale and texture $img=screen_image_picker"
         //% inds.shadow=poly_shadow_indices
         //% oface.min=-1 oface.max=1
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=8
-        public setFace(idx: number, c: number, inds: shadowIndices, oface: number, img?: Image) {
+        public setFace(idx: number, c: number, inds: shadowIndices, oface: number, scale?: number, img?: Image) {
             if (isOutOfRange(idx, this.faces.length + 1)) return;
+            if (!scale) scale = 1
             const indice = [inds.i1]
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
             if (inds.i4) indice.push(inds.i4);
-            if (img) this.faces[idx] = { indices: indice, color: c, offset: oface, img: img };
-            else this.faces[idx] = { indices: indice, color: c, offset: oface };
+            if (img) this.faces[idx] = { indices: indice, color: c, offset: oface, scale: scale, img: img };
+            else this.faces[idx] = { indices: indice, color: c, offset: oface, scale: scale };
         }
 
         //% blockId=poly_face_add
-        //% block=" $this add face to color $c=colorindexpicker and $inds and face offset $oface|| and texture $img=screen_image_picker"
+        //% block=" $this add face to color $c=colorindexpicker and $inds and face offset $oface||in scale $scale and texture $img=screen_image_picker"
         //% inds.shadow=poly_shadow_indices
         //% oface.min=-1 oface.max=1
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=7
-        public addFace(c: number, inds: shadowIndices, oface: number, img?: Image) {
+        public addFace(c: number, inds: shadowIndices, oface: number, scale?: number, img?: Image) {
+            if (!scale) scale = 1
             const indice = [inds.i1]
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
             if (inds.i4) indice.push(inds.i4);
-            if (img) this.faces.push({ indices: indice, color: c, offset: oface, img: img });
-            else this.faces.push({ indices: indice, color: c, offset: oface });
+            if (img) this.faces.push({ indices: indice, color: c, offset: oface, scale: scale, img: img });
+            else this.faces.push({ indices: indice, color: c, offset: oface, scale: scale });
         }
 
         //% blockId=poly_face_del
@@ -515,7 +517,7 @@ namespace Polymesh {
             this.faces[idx].img = null
         }
 
-        //% blockId=poly_setfaceimage
+        //% blockId=poly_getfaceoffset
         //% block=" $this get face offset at $idx"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh face property"
@@ -525,7 +527,7 @@ namespace Polymesh {
             return this.faces[idx].offset
         }
 
-        //% blockId=poly_setfaceimage
+        //% blockId=poly_setfaceoffset
         //% block=" $this set face offset at $idx to $oface"
         //% oface.min=-1 oface.max=1
         //% this.shadow=variables_get this.defl=myMesh
@@ -534,6 +536,27 @@ namespace Polymesh {
         public setFaceOffset(idx: number, oface: number) {
             if (this.faces[idx].offset === oface) return;
             this.faces[idx].offset = oface
+        }
+
+        //% blockId=poly_getfacescale
+        //% block=" $this get face scale at $idx"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh face property"
+        //% weight=5
+        public getFaceScale(idx: number) {
+            if (!this.faces[idx].scale) return NaN
+            return this.faces[idx].scale
+        }
+
+        //% blockId=poly_setfacescale
+        //% block=" $this set face scale at $idx to $scale"
+        //% oface.min=-1 oface.max=1
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="mesh face property"
+        //% weight=4
+        public setFaceScale(idx: number, scale: number) {
+            if (this.faces[idx].scale === scale) return;
+            this.faces[idx].scale = scale
         }
 
         //% blockId=poly_mesh_pivot_set
@@ -850,14 +873,14 @@ namespace Polymesh {
                 ]
     
                 scale = pt.scale;
-                square = 1.5 * scale * zoom
+                square = 1.5 * scale * t.scale * zoom
                 if (im) {
                     // set scale image from camera distance
                     baseW = im.width;
                     baseH = im.height;
     
-                    halfW = (baseW / 3) * scale * zoom;
-                    halfH = (baseH / 3) * scale * zoom;
+                    halfW = (baseW / 3) * scale * t.scale * zoom;
+                    halfH = (baseH / 3) * scale * t.scale * zoom;
                     bq[0].x += halfW, bq[0].y += halfH
                     bq[1].x -= halfW, bq[1].y += halfH
                     bq[2].x += halfW, bq[2].y -= halfH
@@ -882,7 +905,7 @@ namespace Polymesh {
             cx = pt.x;
             cy = pt.y;
     
-            square = 1.5 * scale * zoom
+            square = 1.5 * scale * t.scale * zoom
     
             if (t.img) {
                 im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
@@ -890,8 +913,8 @@ namespace Polymesh {
                 baseW = im.width;
                 baseH = im.height;
     
-                halfW = (baseW / 3) * scale * zoom;
-                halfH = (baseH / 3) * scale * zoom;
+                halfW = (baseW / 3) * scale * t.scale * zoom;
+                halfH = (baseH / 3) * scale * t.scale * zoom;
     
                 square = Math.min(halfW, halfH)
             }
