@@ -423,38 +423,39 @@ namespace Polymesh {
         }
 
         //% blockId=poly_face_set
-        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds with face offset $oface|| in scale $scale and texture $img=screen_image_picker"
+        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds $clface=poly_shadow_offsetface $billscale=poly_shadow_billscale|| and texture $img=screen_image_picker"
         //% inds.shadow=poly_shadow_indices
-        //% oface.min=-1 oface.max=1
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=8
-        public setFace(idx: number, c: number, inds: shadowIndices, oface: number, scale?: number, img?: Image) {
+        public setFace(idx: number, c: number, inds: shadowIndices, clface: shadowOffsetFace, billscale: shadowBillSize, img?: Image) {
             if (isOutOfRange(idx, this.faces.length + 1)) return;
-            if (!scale) scale = 1
+            if (!billscale.scale) billscale.scale = 1
+            if (!clface.oface) clface.oface = 0
             const indice = [inds.i1]
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
             if (inds.i4) indice.push(inds.i4);
-            if (img) this.faces[idx] = { indices: indice, color: c, offset: oface, scale: scale, img: img };
-            else this.faces[idx] = { indices: indice, color: c, offset: oface, scale: scale };
+            if (img) this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img };
+            else this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale };
         }
 
         //% blockId=poly_face_add
-        //% block=" $this add face to color $c=colorindexpicker and $inds and face offset $oface||in scale $scale and texture $img=screen_image_picker"
+        //% block=" $this add face to color $c=colorindexpicker and $inds $clface=poly_shadow_offsetface $billscale=poly_shadow_billscale|| and texture $img=screen_image_picker"
         //% inds.shadow=poly_shadow_indices
         //% oface.min=-1 oface.max=1
         //% this.shadow=variables_get this.defl=myMesh
         //% group="mesh property"
         //% weight=7
-        public addFace(c: number, inds: shadowIndices, oface: number, scale?: number, img?: Image) {
-            if (!scale) scale = 1
+        public addFace(c: number, inds: shadowIndices, clface: shadowOffsetFace, billscale: shadowBillSize, img?: Image) {
+            if (!billscale.scale) billscale.scale = 1
+            if (!clface.oface) clface.oface = 0
             const indice = [inds.i1]
             if (inds.i2) indice.push(inds.i2);
             if (inds.i3) indice.push(inds.i3);
             if (inds.i4) indice.push(inds.i4);
-            if (img) this.faces.push({ indices: indice, color: c, offset: oface, scale: scale, img: img });
-            else this.faces.push({ indices: indice, color: c, offset: oface, scale: scale });
+            if (img) this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img });
+            else this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale });
         }
 
         //% blockId=poly_face_del
@@ -1300,12 +1301,24 @@ namespace Polymesh {
     export class shadowIndices { constructor(public i1: number, public i2?: number, public i3?: number, public i4?: number) { } }
     //% blockId=poly_shadow_indices
     //% block="indice of i1 $i1|| i2 $i2 i3 $i3 i4 $i4"
-    //% blockHidden=true
+    //% blockHidden
     export function indiceShadow(i1: number, i2?: number, i3?: number, i4?: number) { return new shadowIndices(i1, i2, i3, i4) }
 
     export class shadowPoint3 { constructor(public x: number, public y: number, public z: number) { } }
     //% blockId=poly_shadow_point3
     //% block="x: $x y: $y z: $z"
-    //% blockHidden=true
+    //% blockHidden
     export function point3Shadow(x: number, y: number, z: number) { return new shadowPoint3(x, y, z) }
+
+    export class shadowOffsetFace { constructor(public oface?: number) { } }
+    //% blockId=poly_shadow_offsetface
+    //% block="||offset face of $oface"
+    //% blockHidden
+    export function offsetFaceShadow(oface?: number) { return new shadowOffsetFace(oface) }
+
+    export class shadowBillSize { constructor(public scale?: number) { } }
+    //% blockId=poly_shadow_billscale
+    //% block="||bill size of $scale"
+    //% blockHidden
+    export function billSizeShadow(scale?: number) { return new shadowBillSize(scale) }
 }
