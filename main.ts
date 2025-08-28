@@ -894,7 +894,7 @@ namespace Polymesh {
                     bq[3].x -= square, bq[3].y -= square
                     if (bq.every(v => (isOutOfArea(v.x, v.y, output.width, output.height)))) continue;
                 }
-            } else if (inds.every(i => (isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height)))) continue;
+            } else if (isOutOfAreaOnFace(rotated, inds, output.width, output.height)) if (inds.every(i => isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height))) continue;
             
             // Backface culling
             if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
@@ -1027,7 +1027,19 @@ namespace Polymesh {
 
     function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
 
-    function isOutOfArea(x: number, y: number, width: number, height: number) { return (isOutOfRange(x, width) || isOutOfRange(y, height)) }
+    function isOutOfArea(x: number, y: number, width: number, height: number) {
+        return (isOutOfRange(x, width) || isOutOfRange(y, height))
+    }
+
+    function isOutOfAreaOnFace(rotated: {x: number, y: number}[], ind: number[], width: number, height: number) {
+        const avgXYs = { x: ind.reduce((cur, i) => cur + rotated[i].x, 0) / ind.length, y: ind.reduce((cur, i) => cur + rotated[i].y, 0) / ind.length}
+        return isOutOfArea(avgXYs.x, avgXYs.y, width, height)
+    }
+
+    function isOutOfAreaOnAvg(point2s: { x: number, y: number }[], width: number, height: number) {
+        const avgXYs = { x: point2s.reduce((cur, val) => cur + val.x, 0) / point2s.length, y: point2s.reduce((cur, val) => cur + val.y, 0) / point2s.length }
+        return isOutOfArea(avgXYs.x, avgXYs.y, width, height)
+    }
 
     function isOutOfRange(x: number, range: number) { return x < 0 || x >= range }
 
@@ -1281,7 +1293,7 @@ namespace Polymesh {
 
                 const qt = q.map( v => ({ x: Math.trunc(v.x), y: Math.trunc(v.y) }))
                 
-                if (qt.every(v => isOutOfArea(v.x, v.y, dest.width, dest.height))) continue; // skipped if out of screen
+                if (isOutOfAreaOnAvg(qt, dest.width, dest.height)) if (qt.every(v => isOutOfArea(v.x, v.y, dest.width, dest.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
                 //helpers.imageFillTriangle(dest, qt[1].x, qt[1].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
                 //helpers.imageFillTriangle(dest, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
