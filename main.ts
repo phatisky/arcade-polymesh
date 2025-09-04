@@ -110,7 +110,7 @@ namespace Polymesh {
     }
 
     /** Fast inverse square root **/
-    function fastInverseSquareRoot(x: number): number {
+    function fisqrt(x: number): number {
         if (x <= 0) return 0;
         const buf = pins.createBuffer(4);
         buf.setNumber(NumberFormat.Float32LE, 0, x);
@@ -365,6 +365,33 @@ namespace Polymesh {
             this.flag = { invisible: false, noncull: false, lod: false }
 
             this.__home__()
+        }
+
+        //% blockId=poly_dist_camera
+        //% block=" $this distance from camera"
+        //% group="Mesh util"
+        //% weight=8
+        public distFromCamera() {
+            const distPos = { x: camx - this.pos.x , y: camy - this.pos.y , z: camz - this.pos.z }
+            return 1 / fisqrt((distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z))
+        }
+
+        //% blockId=poly_dist_othermesh
+        //% block=" $this distance from $otherMesh"
+        //% group="Mesh util"
+        //% weight=9
+        public distBetween(otherMesh: mesh) {
+            const distPos = { x: otherMesh.pos.x - this.pos.x, y: otherMesh.pos.y - this.pos.y, z: otherMesh.pos.z - this.pos.z }
+            return 1 / fisqrt((distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z))
+        }
+
+        //% blockId=poly_normal_speed
+        //% block=" $this normal speed"
+        //% group="Mesh util"
+        //% weight=10
+        public normalSpeed() {
+            const distPosV = { vx: this.pos.vx, vy: this.pos.vy, vz: this.pos.vz }
+            return 1 / fisqrt((distPosV.vx * distPosV.vx) + (distPosV.vy * distPosV.vy) + (distPosV.vz * distPosV.vz))
         }
 
         //% blockId=poly_flag_set
@@ -1027,21 +1054,21 @@ namespace Polymesh {
 
     function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
 
-    function isOutOfArea(x: number, y: number, width: number, height: number) {
-        return (isOutOfRange(x, width) || isOutOfRange(y, height))
+    function isOutOfArea(x: number, y: number, width: number, height: number, scale?: number) {
+        return (isOutOfRange(x, width, scale) || isOutOfRange(y, height, scale))
     }
 
     function isOutOfAreaOnFace(rotated: {x: number, y: number}[], ind: number[], width: number, height: number) {
         const avgXYs = { x: ind.reduce((cur, i) => cur + rotated[i].x, 0) / ind.length, y: ind.reduce((cur, i) => cur + rotated[i].y, 0) / ind.length}
-        return isOutOfArea(avgXYs.x, avgXYs.y, width, height)
+        return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
     }
 
     function isOutOfAreaOnAvg(point2s: { x: number, y: number }[], width: number, height: number) {
         const avgXYs = { x: point2s.reduce((cur, val) => cur + val.x, 0) / point2s.length, y: point2s.reduce((cur, val) => cur + val.y, 0) / point2s.length }
-        return isOutOfArea(avgXYs.x, avgXYs.y, width, height)
+        return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
     }
 
-    function isOutOfRange(x: number, range: number) { return x < 0 || x >= range }
+    function isOutOfRange(x: number, range: number, scale?: number) { return scale ? x < -(range * scale) || x >= range + (range * scale) : x < 0 || x >= range }
 
     function isCull(b: boolean, x: number, y: number) { return b ? x < y : x > y }
 
@@ -1244,14 +1271,13 @@ namespace Polymesh {
 
     // Bilinear interpolation on quad
     function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
-        const tileW = 1, tileH = 1
-        const x0 = p0.x + (p1.x - p0.x) * u * tileW;
-        const y0 = p0.y + (p1.y - p0.y) * u * tileW;
-        const x1 = p3.x + (p2.x - p3.x) * u * tileW;
-        const y1 = p3.y + (p2.y - p3.y) * u * tileW;
+        const x0 = p0.x + (p1.x - p0.x) * u;
+        const y0 = p0.y + (p1.y - p0.y) * u;
+        const x1 = p3.x + (p2.x - p3.x) * u;
+        const y1 = p3.y + (p2.y - p3.y) * u;
         return {
-            x: x0 + (x1 - x0) * v * tileH,
-            y: y0 + (y1 - y0) * v * tileH
+            x: x0 + (x1 - x0) * v,
+            y: y0 + (y1 - y0) * v
         };
     }
 
