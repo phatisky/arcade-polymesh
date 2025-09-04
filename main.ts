@@ -367,6 +367,15 @@ namespace Polymesh {
             this.__home__()
         }
 
+        //% blockId=poly_dist_z
+        //% block=" $this distance of z"
+        //% this.shadow=variables_get this.defl=myMesh
+        //% group="Mesh util"
+        //% weight=8
+        public zDist() {
+            return meshDepthZ(this)
+        }
+
         //% blockId=poly_dist_camera
         //% block=" $this distance from camera"
         //% this.shadow=variables_get this.defl=myMesh
