@@ -368,16 +368,16 @@ namespace Polymesh {
         }
 
         //% blockId=poly_dist_z
-        //% block=" $this distance of z"
+        //% block="get $this depth of z"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="Mesh util"
-        //% weight=8
-        public zDist() {
+        //% weight=7
+        public zDepth() {
             return meshDepthZ(this)
         }
 
         //% blockId=poly_dist_camera
-        //% block=" $this distance from camera"
+        //% block="get $this distance from camera"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="Mesh util"
         //% weight=8
@@ -387,7 +387,7 @@ namespace Polymesh {
         }
 
         //% blockId=poly_dist_othermesh
-        //% block=" $this distance from $otherMesh"
+        //% block="get $this distance from $otherMesh"
         //% this.shadow=variables_get this.defl=myMesh
         //% otherMesh.shadow=variables_get otherMesh.defl=otherMesh
         //% group="Mesh util"
@@ -398,7 +398,7 @@ namespace Polymesh {
         }
 
         //% blockId=poly_normal_speed
-        //% block=" $this normal speed"
+        //% block="get $this normal speed"
         //% this.shadow=variables_get this.defl=myMesh
         //% group="Mesh util"
         //% weight=10
