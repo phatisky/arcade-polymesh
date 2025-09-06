@@ -10,9 +10,14 @@
         "main.ts",
         "README.md",
         "assets.json",
+        "me.ts",
+        "myself.ts",
         "module.ts",
         "class.ts",
-        "enum.ts"
+        "enum.ts",
+        "sorting.ts",
+        "help.ts",
+        "shadow.ts"
     ],
     "testFiles": [
         "test.ts"

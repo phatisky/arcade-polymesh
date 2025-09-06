@@ -275,69 +275,6 @@ namespace Polymesh {
         inProcess[0] = false
     }
 
-    function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
-        let src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
-        if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
-        else {
-            src.fill(c)
-            dest.drawTransparentImage(src, x, y)
-            return
-        }
-        let src0 = src.clone()
-        src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
-        src0.flipY(), src.drawTransparentImage(src0.clone(), 0, 0)
-        src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
-        dest.drawTransparentImage(src, x - r, y - r)
-    }
-
-    export function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
-
-    export function isOutOfArea(x: number, y: number, width: number, height: number, scale?: number) {
-        return (isOutOfRange(x, width, scale) || isOutOfRange(y, height, scale))
-    }
-
-    export function isOutOfAreaOnFace(rotated: { x: number, y: number }[], ind: number[], width: number, height: number) {
-        const avgXYs = { x: ind.reduce((cur, i) => cur + rotated[i].x, 0) / ind.length, y: ind.reduce((cur, i) => cur + rotated[i].y, 0) / ind.length }
-        return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
-    }
-
-    export function isOutOfAreaOnAvg(point2s: { x: number, y: number }[], width: number, height: number) {
-        const avgXYs = { x: point2s.reduce((cur, val) => cur + val.x, 0) / point2s.length, y: point2s.reduce((cur, val) => cur + val.y, 0) / point2s.length }
-        return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
-    }
-
-    export function isOutOfRange(x: number, range: number, scale?: number) { return scale ? x < -(range * scale) || x >= range + (range * scale) : x < 0 || x >= range }
-
-    function isCull(b: boolean, x: number, y: number) { return b ? x < y : x > y }
-
-    function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number): boolean {
-        // Simple normal calculation for culling
-        if (indices.length > 0) {
-            const xyzs = indices.map(ind => rotated[ind])
-
-            // Average depth comparison
-            const avgZ = xyzs.reduce((sum, v) => sum + v.z, 0) / xyzs.length;
-            // const avgY = xyzs.reduce((sum, v) => sum + v.y, 0) / xyzs.length;
-            // const avgX = xyzs.reduce((sum, v) => sum + v.x, 0) / xyzs.length;
-
-            const otherXYZs: { xs: number[], ys: number[], zs: number[] } = { xs: [], ys: [], zs: [] }
-            // otherXYZs.xs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.x);
-            // otherXYZs.ys = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.y);
-            otherXYZs.zs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.z);
-
-            if (otherXYZs.xs.length <= 0 || otherXYZs.ys.length <= 0 || otherXYZs.zs.length <= 0) return true;
-            // const otherAvgX = otherXYZs.xs.reduce((sum, x) => sum + x, 0) / otherXYZs.xs.length;
-            // const otherAvgY = otherXYZs.ys.reduce((sum, y) => sum + y, 0) / otherXYZs.ys.length;
-            const otherAvgZ = otherXYZs.zs.reduce((sum, z) => sum + z, 0) / otherXYZs.zs.length;
-
-            if (oface < 0) return avgZ < otherAvgZ
-            if (oface > 0) return avgZ > otherAvgZ
-            return true
-            // return (inner ? avgZ < otherAvgZ && (avgX !== otherAvgX && avgY !== otherAvgY) : avgZ > otherAvgZ && (avgX === otherAvgX && avgY === otherAvgY));
-        }
-        return true;
-    }
-
     export function meshDepthZ(plm: polymesh): number {
         let x = plm.pos.x - camx;
         let y = plm.pos.y - camy;
