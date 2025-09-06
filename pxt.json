@@ -1,5 +1,5 @@
 {
-    "name": "arcade-polymesh - Copy",
+    "name": "arcade-polymesh",
     "version": "0.14.9",
     "description": "basic 3d render like polygon and mesh",
     "dependencies": {
