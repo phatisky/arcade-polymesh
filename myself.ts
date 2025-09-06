@@ -69,18 +69,19 @@ namespace Polymesh {
         switch (choice) {
             case 0: default: zoom += x; break
             case 1: dist += x; break
-            case 2: camx += x; break
-            case 3: camy += x; break
-            case 4: camz += x; break
-            case 5: camvx += x; break
-            case 6: camvy += x; break
-            case 7: camvz += x; break
-            case 8: camax += x; break
-            case 9: camay += x; break
-            case 10: camaz += x; break
-            case 11: camfx += x; break
-            case 12: camfy += x; break
-            case 13: camfz += x; break
+            case 2: fardist += x; break
+            case 3: camx += x; break
+            case 4: camy += x; break
+            case 5: camz += x; break
+            case 6: camvx += x; break
+            case 7: camvy += x; break
+            case 8: camvz += x; break
+            case 9: camax += x; break
+            case 10: camay += x; break
+            case 11: camaz += x; break
+            case 12: camfx += x; break
+            case 13: camfy += x; break
+            case 14: camfz += x; break
         }
     }
     //% blockId=poly_angle_set
@@ -111,18 +112,19 @@ namespace Polymesh {
         switch (choice) {
             case 0: default: zoom = x; break
             case 1: dist = x; break
-            case 2: camx = x; break
-            case 3: camy = x; break
-            case 4: camz = x; break
-            case 5: camvx = x; break
-            case 6: camvy = x; break
-            case 7: camvz = x; break
-            case 8: camax = x; break
-            case 9: camay = x; break
-            case 10: camaz = x; break
-            case 11: camfx = x; break
-            case 12: camfy = x; break
-            case 13: camfz = x; break
+            case 2: fardist = x; break
+            case 3: camx = x; break
+            case 4: camy = x; break
+            case 5: camz = x; break
+            case 6: camvx = x; break
+            case 7: camvy = x; break
+            case 8: camvz = x; break
+            case 9: camax = x; break
+            case 10: camay = x; break
+            case 11: camaz = x; break
+            case 12: camfx = x; break
+            case 13: camfy = x; break
+            case 14: camfz = x; break
         }
     }
 
@@ -156,18 +158,19 @@ namespace Polymesh {
         switch (choice) {
             case 0: default: return zoom
             case 1: return dist
-            case 2: return camx
-            case 3: return camy
-            case 4: return camz
-            case 5: return camvx
-            case 6: return camvy
-            case 7: return camvz
-            case 8: return camax
-            case 9: return camay
-            case 10: return camaz
-            case 11: return camfx
-            case 12: return camfy
-            case 13: return camfz
+            case 2: return fardist
+            case 3: return camx
+            case 4: return camy
+            case 5: return camz
+            case 6: return camvx
+            case 7: return camvy
+            case 8: return camvz
+            case 9: return camax
+            case 10: return camay
+            case 11: return camaz
+            case 12: return camfx
+            case 13: return camfy
+            case 14: return camfz
         }
         return NaN
     }

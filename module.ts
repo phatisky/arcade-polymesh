@@ -117,7 +117,7 @@ namespace Polymesh {
         // Render
         for (const t of tris) {
             const inds = t.indices;
-            if (inds.some(i => rotated[i].z < -Math.abs(dist) || rotated[i].z > Math.abs(dist ** 1.42 / zoom))) continue;
+            if (inds.some(i => rotated[i].z < -Math.abs(dist) || rotated[i].z > Math.abs(fardist))) continue;
             let idx: number, pt: { scale: number, x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
             // LOD calculating?
             let mydist = Math.abs(dist * Math.E / 2) / (Math.abs(dist) - avgZ(rotated, inds))
