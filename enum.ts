@@ -25,7 +25,7 @@ enum PolyAngle {
     //% block="Angle fz"
     fz = 11,
 }
-enum PolyCamera {
+enum PolyCam {
     //% block="Camera zoom"
     zoom = 0,
     //% block="Camera distance"

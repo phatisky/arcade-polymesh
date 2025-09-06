@@ -65,7 +65,7 @@ namespace Polymesh {
     //% block="change $choice by $x"
     //% group="main camera"
     //% weight=5
-    export function changeCam(choice: PolyCamera, x: number) {
+    export function changeCam(choice: PolyCam, x: number) {
         switch (choice) {
             case 0: default: zoom += x; break
             case 1: dist += x; break
@@ -107,7 +107,7 @@ namespace Polymesh {
     //% block="set $choice to $x"
     //% group="main camera"
     //% weight=10
-    export function setCam(choice: PolyCamera, x: number) {
+    export function setCam(choice: PolyCam, x: number) {
         switch (choice) {
             case 0: default: zoom = x; break
             case 1: dist = x; break
@@ -152,7 +152,7 @@ namespace Polymesh {
     //% block="$choice"
     //% group="main camera"
     //% weight=4
-    export function getCam(choice: PolyCamera) {
+    export function getCam(choice: PolyCam) {
         switch (choice) {
             case 0: default: return zoom
             case 1: return dist
