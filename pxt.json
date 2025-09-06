@@ -9,7 +9,10 @@
         "main.blocks",
         "main.ts",
         "README.md",
-        "assets.json"
+        "assets.json",
+        "module.ts",
+        "class.ts",
+        "enum.ts"
     ],
     "testFiles": [
         "test.ts"

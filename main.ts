@@ -2,115 +2,10 @@
 //% block="Poly mesh" color="#279139" icon="\uf1b2" groups='["Create","Controls","Styling"]'
 namespace Polymesh {
 
-    const inProcess: boolean[] = [false, false]
-
-    export enum Angles {
-        //% block="Angle x"
-        x = 0,
-        //% block="Angle y"
-        y = 1,
-        //% block="Angle z"
-        z = 2,
-        //% block="Angle vx"
-        vx = 3,
-        //% block="Angle vy"
-        vy = 4,
-        //% block="Angle vz"
-        vz = 5,
-        //% block="Angle ax"
-        ax = 6,
-        //% block="Angle ay"
-        ay = 7,
-        //% block="Angle az"
-        az = 8,
-        //% block="Angle fx"
-        fx = 9,
-        //% block="Angle fy"
-        fy = 10,
-        //% block="Angle fz"
-        fz = 11,
-    }
-    export enum Cameras {
-        //% block="Camera zoom"
-        zoom = 0,
-        //% block="Camera distance"
-        dist = 1,
-        //% block="Camera x"
-        x = 2,
-        //% block="Camera y"
-        y = 3,
-        //% block="Camera z"
-        z = 4,
-        //% block="Camera vx"
-        vx = 5,
-        //% block="Camera vy"
-        vy = 6,
-        //% block="Camera vz"
-        vz = 7,
-        //% block="Camera ax"
-        ax = 8,
-        //% block="Camera ay"
-        ay = 9,
-        //% block="Camera az"
-        az = 10,
-        //% block="Camera fx"
-        fx = 11,
-        //% block="Camera fy"
-        fy = 12,
-        //% block="Camera fz"
-        fz = 13,
-    }
-    export enum PointProp {
-        //% block="x"
-        x = 0,
-        //% block="y"
-        y = 1,
-        //% block="z"
-        z = 2,
-        //% block="vx"
-        vx = 3,
-        //% block="vy"
-        vy = 4,
-        //% block="vz"
-        vz = 5,
-        //% block="ax"
-        ax = 6,
-        //% block="ay"
-        ay = 7,
-        //% block="az"
-        az = 8,
-        //% block="fx"
-        fx = 9,
-        //% block="fy"
-        fy = 10,
-        //% block="fz"
-        fz = 11,
-    }
-    export enum PivotPos {
-        //% block="Pivot x"
-        x = 0,
-        //% block="Pivot y"
-        y = 1,
-        //% block="Pivot z"
-        z = 2,
-    }
-    export enum SortingMethods {
-        //% block="accurate"
-        accurate = 0,
-        //% block="quick"
-        quick = 1,
-    }
-    export enum MeshFlags {
-        //% block="Invisible"
-        invisible = 0,
-        //% block="Non culling"
-        noncull = 1,
-        //% block="Level of detail"
-        lod = 2,
-    }
+    export const inProcess: boolean[] = [false, false]
 
     /** Fast inverse square root **/
-    function fisqrt(x: number): number {
+    export function fisqrt(x: number): number {
         if (x <= 0) return 0;
         const buf = pins.createBuffer(4);
         buf.setNumber(NumberFormat.Float32LE, 0, x);
@@ -123,9 +18,9 @@ namespace Polymesh {
         return y;
     }
 
-    let ax = 0, az = 0, ay = 0, avx = 0, avy = 0, avz = 0, aax = 0, aay = 0, aaz = 0, afx = 0, afy = 0, afz = 0
-    let camx = 0, camy = 0, camz = 0, camvx = 0, camvy = 0, camvz = 0, camax = 0, camay = 0, camaz = 0, camfx = 0, camfy = 0, camfz = 0
-    let zoom = 1, sort = 0, dist = 150
+    export let ax = 0, az = 0, ay = 0, avx = 0, avy = 0, avz = 0, aax = 0, aay = 0, aaz = 0, afx = 0, afy = 0, afz = 0
+    export let camx = 0, camy = 0, camz = 0, camvx = 0, camvy = 0, camvz = 0, camax = 0, camay = 0, camaz = 0, camfx = 0, camfy = 0, camfz = 0
+    export let zoom = 1, sort = 0, dist = 150
 
     forever(() => {
         const deltaG = control.eventContext().deltaTime
@@ -165,7 +60,7 @@ namespace Polymesh {
     //% block="change $choice by $x"
     //% group="main angle"
     //% weight=5
-    export function changeAngle(choice: Angles, x: number) {
+    export function changeAngle(choice: PolyAngle, x: number) {
         switch (choice) {
             case 0: ax += x; break
             case 1: ay += x; break
@@ -185,7 +80,7 @@ namespace Polymesh {
     //% block="change $choice by $x"
     //% group="main camera"
     //% weight=5
-    export function changeCam(choice: Cameras, x: number) {
+    export function changeCam(choice: PolyCamera, x: number) {
         switch (choice) {
             case 0: default: zoom += x; break
             case 1: dist += x; break
@@ -207,7 +102,7 @@ namespace Polymesh {
     //% block="set $choice to $x"
     //% group="main angle"
     //% weight=10
-    export function setAngle(choice: Angles, x: number) {
+    export function setAngle(choice: PolyAngle, x: number) {
         switch (choice) {
             case 0: ax = x; break
             case 1: ay = x; break
@@ -227,7 +122,7 @@ namespace Polymesh {
     //% block="set $choice to $x"
     //% group="main camera"
     //% weight=10
-    export function setCam(choice: Cameras, x: number) {
+    export function setCam(choice: PolyCamera, x: number) {
         switch (choice) {
             case 0: default: zoom = x; break
             case 1: dist = x; break
@@ -250,7 +145,7 @@ namespace Polymesh {
     //% block="$choice"
     //% group="main angle"
     //% weight=4
-    export function getAngle(choice: Angles) {
+    export function getAngle(choice: PolyAngle) {
         switch (choice) {
             case 0: return ax
             case 1: return ay
@@ -272,7 +167,7 @@ namespace Polymesh {
     //% block="$choice"
     //% group="main camera"
     //% weight=4
-    export function getCam(choice: Cameras) {
+    export function getCam(choice: PolyCamera) {
         switch (choice) {
             case 0: default: return zoom
             case 1: return dist
@@ -311,828 +206,7 @@ namespace Polymesh {
     //% blockSetVariable=myMesh
     //% group="create"
     //% weight=10
-    export function newmesh() { return new mesh() }
-
-    export class mesh {
-        public faces: { indices: number[], color: number, offset: number, scale: number, img?: Image}[]
-        public points: { x: number, y: number, z: number }[]
-        public pivot: { x: number, y: number, z: number}
-        public rot: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
-        public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
-        flag: { invisible: boolean, noncull: boolean, lod: boolean}
-        __home__() {
-            forever(() => {
-                const delta = control.eventContext().deltaTime
-    
-                // Acceleration angle of this mesh
-                if (this.rot.ax !== 0) this.rot.vx += this.rot.ax * delta
-                if (this.rot.ay !== 0) this.rot.vy += this.rot.ay * delta
-                if (this.rot.az !== 0) this.rot.vz += this.rot.az * delta
-    
-                // Friction angle of this mesh
-                if (this.rot.fx !== 0) this.rot.vx = this.rot.vx < 0 ? Math.min(this.rot.vx + Math.abs(this.rot.fx) * delta, 0) : Math.max(this.rot.vx - Math.abs(this.rot.fx) * delta, 0)
-                if (this.rot.fy !== 0) this.rot.vy = this.rot.vy < 0 ? Math.min(this.rot.vy + Math.abs(this.rot.fy) * delta, 0) : Math.max(this.rot.vy - Math.abs(this.rot.fy) * delta, 0)
-                if (this.rot.fz !== 0) this.rot.vz = this.rot.vz < 0 ? Math.min(this.rot.vz + Math.abs(this.rot.fz) * delta, 0) : Math.max(this.rot.vz - Math.abs(this.rot.fz) * delta, 0)
-    
-                // Velocity angle of this mesh
-                if (this.rot.vx !== 0) this.rot.x += this.rot.vx * delta;
-                if (this.rot.vy !== 0) this.rot.y += this.rot.vy * delta;
-                if (this.rot.vz !== 0) this.rot.z += this.rot.vz * delta;
-    
-                // Acceleration position of this mesh
-                if (this.pos.ax !== 0) this.pos.vx += this.pos.ax * delta
-                if (this.pos.ay !== 0) this.pos.vy += this.pos.ay * delta
-                if (this.pos.az !== 0) this.pos.vz += this.pos.az * delta
-    
-                // Friction position of this mesh
-                if (this.pos.fx !== 0) this.pos.vx = this.pos.vx < 0 ? Math.min(this.pos.vx + Math.abs(this.pos.fx) * delta, 0) : Math.max(this.pos.vx - Math.abs(this.pos.fx) * delta, 0)
-                if (this.pos.fy !== 0) this.pos.vy = this.pos.vy < 0 ? Math.min(this.pos.vy + Math.abs(this.pos.fy) * delta, 0) : Math.max(this.pos.vy - Math.abs(this.pos.fy) * delta, 0)
-                if (this.pos.fz !== 0) this.pos.vz = this.pos.vz < 0 ? Math.min(this.pos.vz + Math.abs(this.pos.fz) * delta, 0) : Math.max(this.pos.vz - Math.abs(this.pos.fz) * delta, 0)
-    
-                // Velocity position of this mesh
-                if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
-                if (this.pos.vy !== 0) this.pos.y += this.pos.vy * delta;
-                if (this.pos.vz !== 0) this.pos.z += this.pos.vz * delta;
-            })
-        }
-
-        constructor() {
-            this.faces = []
-            this.points = []
-            this.pivot = { x: 0, y: 0, z: 0 }
-            this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 }
-            this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 }
-            this.flag = { invisible: false, noncull: false, lod: false }
-
-            this.__home__()
-        }
-
-        //% blockId=poly_dist_z
-        //% block="get $this depth of z"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="Mesh util"
-        //% weight=7
-        public zDepth() {
-            return meshDepthZ(this)
-        }
-
-        //% blockId=poly_dist_camera
-        //% block="get $this distance from camera"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="Mesh util"
-        //% weight=8
-        public distFromCamera() {
-            const distPos = { x: camx - this.pos.x , y: camy - this.pos.y , z: camz - this.pos.z }
-            return 1 / fisqrt((distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z))
-        }
-
-        //% blockId=poly_dist_othermesh
-        //% block="get $this distance from $otherMesh"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% otherMesh.shadow=variables_get otherMesh.defl=otherMesh
-        //% group="Mesh util"
-        //% weight=9
-        public distBetween(otherMesh: mesh) {
-            const distPos = { x: otherMesh.pos.x - this.pos.x, y: otherMesh.pos.y - this.pos.y, z: otherMesh.pos.z - this.pos.z }
-            return 1 / fisqrt((distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z))
-        }
-
-        //% blockId=poly_normal_speed
-        //% block="get $this normal speed"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="Mesh util"
-        //% weight=10
-        public normalSpeed() {
-            const distPosV = { vx: this.pos.vx, vy: this.pos.vy, vz: this.pos.vz }
-            return 1 / fisqrt((distPosV.vx * distPosV.vx) + (distPosV.vy * distPosV.vy) + (distPosV.vz * distPosV.vz))
-        }
-
-        //% blockId=poly_flag_set
-        //% block=" $this set flag of $flag right? $ok=toggleYesNo"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="Flag mesh"
-        //% weight=10
-        public setFlag(flag: MeshFlags, ok: boolean) {
-            switch (flag) {
-                case 0: default: this.flag.invisible = ok; break
-                case 1: this.flag.noncull = ok; break
-                case 2: this.flag.lod = ok; break
-            }
-        }
-
-        //% blockId=poly_flag_get
-        //% block=" $this get flag of $flag"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="Flag mesh"
-        //% weight=5
-        public getFlag(flag: MeshFlags) {
-            switch (flag) {
-                case 0: default: return this.flag.invisible;
-                case 1: return this.flag.noncull;
-                case 2: return this.flag.lod;
-            }
-            return false
-        }
-
-        //% blockId=poly_vertice_set
-        //% block=" $this set vertice at $idx to $point3"
-        //% point3.shadow=poly_shadow_point3
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh property"
-        //% weight=10
-        public setVertice(idx: number, point3: shadowPoint3) {
-            if (isOutOfRange(idx, this.points.length + 1)) return;
-            this.points[idx] = { x: point3.x, y: point3.y, z: point3.z } }
-
-        //% blockId=poly_vertice_add
-        //% block=" $this add vertice to $point3"
-        //% point3.shadow=poly_shadow_point3
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh property"
-        //% weight=9
-        public addVertice(point3: shadowPoint3) { this.points.push({ x: point3.x, y: point3.y, z: point3.z }) }
-
-        //% blockId=poly_vertice_del
-        //% block=" $this remove vertice|| at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh remover"
-        //% weight=10
-        public delVertice(idx?: number) {
-            if (idx) this.points.removeAt(idx);
-            else this.points.pop();
-        }
-
-        //% blockId=poly_face_set
-        //% block=" $this set face at $idx to color $c=colorindexpicker and $inds $clface=poly_shadow_offsetface $billscale=poly_shadow_billscale|| and texture $img=screen_image_picker"
-        //% inds.shadow=poly_shadow_indices
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh property"
-        //% weight=8
-        public setFace(idx: number, c: number, inds: shadowIndices, clface: shadowOffsetFace, billscale: shadowBillSize, img?: Image) {
-            if (isOutOfRange(idx, this.faces.length + 1)) return;
-            if (!billscale.scale) billscale.scale = 1
-            if (!clface.oface) clface.oface = 0
-            const indice = [inds.i1]
-            if (inds.i2) indice.push(inds.i2);
-            if (inds.i3) indice.push(inds.i3);
-            if (inds.i4) indice.push(inds.i4);
-            if (img) this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img };
-            else this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale };
-        }
-
-        //% blockId=poly_face_add
-        //% block=" $this add face to color $c=colorindexpicker and $inds $clface=poly_shadow_offsetface $billscale=poly_shadow_billscale|| and texture $img=screen_image_picker"
-        //% inds.shadow=poly_shadow_indices
-        //% oface.min=-1 oface.max=1
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh property"
-        //% weight=7
-        public addFace(c: number, inds: shadowIndices, clface: shadowOffsetFace, billscale: shadowBillSize, img?: Image) {
-            if (!billscale.scale) billscale.scale = 1
-            if (!clface.oface) clface.oface = 0
-            const indice = [inds.i1]
-            if (inds.i2) indice.push(inds.i2);
-            if (inds.i3) indice.push(inds.i3);
-            if (inds.i4) indice.push(inds.i4);
-            if (img) this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img });
-            else this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale });
-        }
-
-        //% blockId=poly_face_del
-        //% block=" $this remove face|| at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh remover"
-        //% weight=9
-        public delFace(idx?: number) {
-            if (idx) this.faces.removeAt(idx);
-            else this.faces.pop();
-        }
-
-        //% blockId=poly_getfacecolor
-        //% block=" $this get face color at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=10
-        public getFaceColor(idx: number) {
-            if (!this.faces[idx].color) return NaN
-            return this.faces[idx].color
-        }
-
-        //% blockId=poly_setfacecolor
-        //% block=" $this set face color at $idx to $c=colorindexpicker"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=9
-        public setFaceColor(idx: number, c: number) {
-            if (this.faces[idx].color === c) return;
-            this.faces[idx].color = c
-        }
-
-        //% blockId=poly_getfaceimage
-        //% block=" $this get face image at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=8
-        public getFaceImage(idx: number) {
-            if (!this.faces[idx].img) return null
-            return this.faces[idx].img
-        }
-
-        //% blockId=poly_setfaceimage
-        //% block=" $this set face image at $idx to $img=screen_image_picker"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=7
-        public setFaceImage(idx: number, img: Image) {
-            if (this.faces[idx].img && this.faces[idx].img.equals(img)) return;
-            this.faces[idx].img = img
-        }
-
-        //% blockId=poly_clearfaceimage
-        //% block=" $this clear face image at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=6
-        public clearFaceImage(idx: number) {
-            if (!this.faces[idx].img) return;
-            this.faces[idx].img = null
-        }
-
-        //% blockId=poly_getfaceoffset
-        //% block=" $this get face offset at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=5
-        public getFaceOffset(idx: number) {
-            if (!this.faces[idx].offset) return NaN
-            return this.faces[idx].offset
-        }
-
-        //% blockId=poly_setfaceoffset
-        //% block=" $this set face offset at $idx to $oface"
-        //% oface.min=-1 oface.max=1
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=4
-        public setFaceOffset(idx: number, oface: number) {
-            if (this.faces[idx].offset === oface) return;
-            this.faces[idx].offset = oface
-        }
-
-        //% blockId=poly_getfacescale
-        //% block=" $this get face scale at $idx"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=5
-        public getFaceScale(idx: number) {
-            if (!this.faces[idx].scale) return NaN
-            return this.faces[idx].scale
-        }
-
-        //% blockId=poly_setfacescale
-        //% block=" $this set face scale at $idx to $scale"
-        //% oface.min=-1 oface.max=1
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh face property"
-        //% weight=4
-        public setFaceScale(idx: number, scale: number) {
-            if (this.faces[idx].scale === scale) return;
-            this.faces[idx].scale = scale
-        }
-
-        //% blockId=poly_mesh_pivot_set
-        //% block=" $this set $choice to $x"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh pivot"
-        //% weight=10
-        public setPivot(choice: PivotPos, x: number) {
-            switch(choice) {
-                case 0: this.pivot.x = x; break
-                case 1: this.pivot.y = x; break
-                case 2: this.pivot.z = x; break
-            }
-        }
-
-        //% blockId=poly_mesh_pivot_change
-        //% block=" $this change $choice by $x"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh pivot"
-        //% weight=5
-        public changePivot(choice: PivotPos, x: number) {
-            switch (choice) {
-                case 0: this.pivot.x += x; break
-                case 1: this.pivot.y += x; break
-                case 2: this.pivot.z += x; break
-            }
-        }
-
-        //% blockId=poly_mesh_pivot_get
-        //% block=" $this get $choice"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh pivot"
-        //% weight=4
-        public getPivot(choice: PivotPos) {
-            switch (choice) {
-                case 0: return this.pivot.x
-                case 1: return this.pivot.y
-                case 2: return this.pivot.z
-            }
-            return NaN
-        }
-
-        //% blockId=poly_mesh_rot_set
-        //% block=" $this set $choice to $x"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh angle"
-        //% weight=100
-        public setAngle(choice: Angles, x: number) {
-            switch (choice) {
-                case 0: this.rot.x = x; break
-                case 1: this.rot.y = x; break
-                case 2: this.rot.z = x; break
-                case 3: this.rot.vx = x; break
-                case 4: this.rot.vy = x; break
-                case 5: this.rot.vz = x; break
-                case 6: this.rot.ax = x; break
-                case 7: this.rot.ay = x; break
-                case 8: this.rot.az = x; break
-                case 9: this.rot.fx = x; break
-                case 10: this.rot.fy = x; break
-                case 11: this.rot.fz = x; break
-            }
-        }
-
-        //% blockId=poly_mesh_rot_change
-        //% block=" $this change $choice by $x"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh angle"
-        //% weight=5
-        public changeAngle(choice: Angles, x: number) {
-            switch (choice) {
-                case 0: this.rot.x += x; break
-                case 1: this.rot.y += x; break
-                case 2: this.rot.z += x; break
-                case 3: this.rot.vx += x; break
-                case 4: this.rot.vy += x; break
-                case 5: this.rot.vz += x; break
-                case 6: this.rot.ax += x; break
-                case 7: this.rot.ay += x; break
-                case 8: this.rot.az += x; break
-                case 9: this.rot.fx += x; break
-                case 10: this.rot.fy += x; break
-                case 11: this.rot.fz += x; break
-            }
-        }
-
-        //% blockId=poly_mesh_rot_get
-        //% block=" $this get $choice"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh angle"
-        //% weight=4
-        public getAngle(choice: Angles) {
-            switch (choice) {
-                case 0: return this.rot.x
-                case 1: return this.rot.y
-                case 2: return this.rot.z
-                case 3: return this.rot.vx
-                case 4: return this.rot.vy
-                case 5: return this.rot.vz
-                case 6: return this.rot.ax
-                case 7: return this.rot.ay
-                case 8: return this.rot.az
-                case 9: return this.rot.fx
-                case 10: return this.rot.fy
-                case 11: return this.rot.fz
-            }
-            return NaN
-        }
-
-        //% blockId=poly_mesh_pos_set
-        //% block=" $this set $choice to $x"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh position property"
-        //% weight=10
-        public setPos(choice: PointProp, x: number) {
-            switch (choice) {
-                case 0: this.pos.x = x; break
-                case 1: this.pos.y = x; break
-                case 2: this.pos.z = x; break
-                case 3: this.pos.vx = x; break
-                case 4: this.pos.vy = x; break
-                case 5: this.pos.vz = x; break
-                case 6: this.pos.ax = x; break
-                case 7: this.pos.ay = x; break
-                case 8: this.pos.az = x; break
-                case 9: this.pos.fx = x; break
-                case 10: this.pos.fy = x; break
-                case 11: this.pos.fz = x; break
-            }
-        }
-
-        //% blockId=poly_mesh_pos_change
-        //% block=" $this change $choice by $x"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh position property"
-        //% weight=9
-        public changePos(choice: PointProp, x: number) {
-            switch (choice) {
-                case 0: this.pos.x += x; break
-                case 1: this.pos.y += x; break
-                case 2: this.pos.z += x; break
-                case 3: this.pos.vx += x; break
-                case 4: this.pos.vy += x; break
-                case 5: this.pos.vz += x; break
-                case 6: this.pos.ax += x; break
-                case 7: this.pos.ay += x; break
-                case 8: this.pos.az += x; break
-                case 9: this.pos.fx += x; break
-                case 10: this.pos.fy += x; break
-                case 11: this.pos.fz += x; break
-            }
-        }
-
-        //% blockId=poly_mesh_pos_get
-        //% block=" $this get $choice"
-        //% this.shadow=variables_get this.defl=myMesh
-        //% group="mesh position property"
-        //% weight=8
-        public getPos(choice: PointProp) {
-            switch (choice) {
-                case 0: return this.pos.x
-                case 1: return this.pos.y
-                case 2: return this.pos.z
-                case 3: return this.pos.vx
-                case 4: return this.pos.vy
-                case 5: return this.pos.vz
-                case 6: return this.pos.ax
-                case 7: return this.pos.ay
-                case 8: return this.pos.az
-                case 9: return this.pos.fx
-                case 10: return this.pos.fy
-                case 11: return this.pos.fz
-            }
-            return NaN
-        }
-
-    }
-
-    function rotatePoint3D(point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) {
-
-        // move point with pivot to 1st place
-        let dx = point.x - pivot.x;
-        let dy = point.y - pivot.y;
-        let dz = point.z - pivot.z;
-
-        // --- rotate around x ---
-        let dy1 = dy * Math.cos(angle.x) - dz * Math.sin(angle.x);
-        let dz1 = dy * Math.sin(angle.x) + dz * Math.cos(angle.x);
-        dy = dy1;
-        dz = dz1;
-
-        // --- rotate around y ---
-        let dx1 = dx * Math.cos(angle.y) + dz * Math.sin(angle.y);
-        dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
-        dx = dx1;
-        dz = dz1;
-
-        // --- rotate around z ---
-        dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
-        dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
-        dx = dx1;
-        dy = dy1;
-
-        // move back to real position
-        return {
-            x: dx + pivot.x,
-            y: dy + pivot.y,
-            z: dz + pivot.z
-        };
-    }
-
-    //% blockId=poly_rendermesh_all
-    //% block=" $plms render all meshes to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
-    //% plms.shadow=variables_get plms.defl=myMeshes
-    //% group="render"
-    //% weight=9
-    export function renderAll(plms: mesh[], output: Image, linecolor?: number) {
-        if (!plms || !output || plms.length <= 0) return;
-        if (inProcess[1]) return;
-        inProcess[1] = true
-        const depths = plms.map(plm => meshDepthZ(plm));
-        const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
-        switch (sort) {
-            case 0: sorted.sort((a, b) => b.depth - a.depth); break
-            case 1: introSort(sorted, (a, b) => b.depth - a.depth); break
-        }
-        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
-        inProcess[1] = false
-    }
-
-    //% blockId=poly_rendermesh
-    //% block=" $plm render to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
-    //% plm.shadow=variables_get plm.defl=myMesh
-    //% group="render"
-    //% weight=10
-    export function render(plm: mesh, output: Image, linecolor?: number) {
-        if (!plm || !output || plm.points.length <= 0 || plm.faces.length <= 0) return;
-        if (plm.flag.invisible) return;
-        
-        if (inProcess[0]) return;
-        inProcess[0] = true
-
-        const centerX = output.width >> 1;
-        const centerY = output.height >> 1;
-
-        const cosX = Math.cos(ax), sinX = Math.sin(ax);
-        const cosY = Math.cos(ay), sinY = Math.sin(ay);
-        const cosZ = Math.cos(az), sinZ = Math.sin(az);
-
-        // Transform vertices
-        const rotated = plm.points.map(v => {
-            const vpoint: { x: number, y: number, z: number } = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z}
-            const vpivot: { x: number, y: number, z: number } = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
-            const vpos: {x: number, y: number, z: number} = rotatePoint3D(vpoint, vpivot, plm.rot)
-            // camera offset
-            let x = vpos.x - camx;
-            let y = vpos.y - camy;
-            let z = vpos.z - camz;
-
-            // rotate camera
-            let tx = x * cosY + z * sinY;
-            z = -x * sinY + z * cosY;
-            x = tx;
-
-            let ty = y * cosX - z * sinX;
-            z = y * sinX + z * cosX;
-            y = ty;
-
-            tx = x * cosZ - y * sinZ;
-            y = x * sinZ + y * cosZ;
-            x = tx;
-
-            // Perspective
-            const scale = Math.abs(dist) / (Math.abs(dist) + z);
-            return {
-                scale: scale,
-                x: centerX + x * scale * zoom,
-                y: centerY + y * scale * zoom,
-                z: z,
-            };
-        })
-
-        const maxDist = Math.abs(dist) / (Math.abs(dist) + (zoom / Math.PI))
-
-        // Sort triangles
-        const tris = plm.faces.slice();
-        switch (sort) {
-            case 0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-            case 1: default: introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-        }
-        
-        // Render
-        for (const t of tris) {
-            const inds = t.indices;
-            if (inds.some(i => rotated[i].z < -Math.abs(dist) || rotated[i].z > Math.abs(dist ** 1.42 / zoom))) continue;
-            let idx: number, pt: {scale: number, x: number, y: number, z: number}, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
-            // LOD calculating?
-            let mydist = Math.abs(dist * Math.E / 2) / (Math.abs(dist) - avgZ(rotated, inds))
-            if (t.indices.length === 1) {
-                idx = t.indices[0];
-                pt = rotated[idx];
-    
-                im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
-    
-                // center image
-                cx = pt.x;
-                cy = pt.y;
-    
-                const bq = [
-                    { x: cx, y: cy },
-                    { x: cx, y: cy },
-                    { x: cx, y: cy },
-                    { x: cx, y: cy },
-                ]
-    
-                scale = pt.scale;
-                square = 1.5 * scale * t.scale * zoom
-                if (im) {
-                    // set scale image from camera distance
-                    baseW = im.width;
-                    baseH = im.height;
-    
-                    halfW = (baseW / 3) * scale * t.scale * zoom;
-                    halfH = (baseH / 3) * scale * t.scale * zoom;
-                    bq[0].x += halfW, bq[0].y += halfH
-                    bq[1].x -= halfW, bq[1].y += halfH
-                    bq[2].x += halfW, bq[2].y -= halfH
-                    bq[3].x -= halfW, bq[3].y -= halfH
-                    if (bq.every(v => (isOutOfArea(v.x, v.y, output.width, output.height)))) continue;
-                } else {
-                    bq[0].x += square, bq[0].y += square
-                    bq[1].x -= square, bq[1].y += square
-                    bq[2].x += square, bq[2].y -= square
-                    bq[3].x -= square, bq[3].y -= square
-                    if (bq.every(v => (isOutOfArea(v.x, v.y, output.width, output.height)))) continue;
-                }
-            } else if (isOutOfAreaOnFace(rotated, inds, output.width, output.height)) if (inds.every(i => isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height))) continue;
-            
-            // Backface culling
-            if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
-                
-            idx = t.indices[0];
-            pt = rotated[idx];
-            scale = pt.scale;
-            // center image
-            cx = pt.x;
-            cy = pt.y;
-    
-            square = 1.5 * scale * t.scale * zoom
-    
-            if (t.img) {
-                im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
-                // set scale image from camera distance
-                baseW = im.width;
-                baseH = im.height;
-    
-                halfW = (baseW / 3) * scale * t.scale * zoom;
-                halfH = (baseH / 3) * scale * t.scale * zoom;
-    
-                square = Math.min(halfW, halfH)
-            }
-            // when have 2D image billboard (indices.length == 1 and img)
-            if (t.indices.length === 1) {
-                if (pt.z < -Math.abs(dist)) continue;
-    
-                // when no image
-                if (!t.img) {
-                    fillCircleImage(output, cx, cy, scale * zoom / 2.2, t.color)
-                    continue;
-                }
-    
-                // fill circle if image is empty
-                if (isEmptyImage(t.img)) {
-                    fillCircleImage(output, cx, cy, Math.floor(square), t.color)
-                    continue;
-                }
-    
-                halfW /= 1.1
-                halfH /= 1.1
-                
-                // Draw Simple 2D image (billboard) as quad pixel on image
-                // use distortImage or drawing without perspective distortion
-                // I will use distortImage draw as vertex quad
-                distortImage(im.clone(), output,
-                    cx - halfW, cy - halfH,
-                    cx + halfW, cy - halfH,
-                    cx - halfW, cy + halfH,
-                    cx + halfW, cy + halfH,
-                    1, true, true);
-                continue;
-            }
-    
-            if (inds.length < 2) continue;
-            mydist = (Math.abs(dist) / (Math.abs(dist) - Math.floor((avgZ(rotated, inds) + Math.abs((Math.abs(dist / 0.8) + 0.6180339887))) / Math.abs(dist * scale / zoom))))
-            // Draw line canvas when have line color index
-            if (linecolor && linecolor > 0) {
-                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
-                if (inds.length < 3) continue;
-                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
-                if (inds.length > 3) helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor), helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
-                else helpers.imageDrawLine(output, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
-                continue;
-            }
-            
-            // Draw line when no shape
-            helpers.imageDrawLine( output,
-                rotated[inds[0]].x, rotated[inds[0]].y,
-                rotated[inds[1]].x, rotated[inds[1]].y,
-                t.color
-            );
-            // Draw solid when is vertice shape
-            if (inds.length > 3) {
-                /*
-                helpers.imageFillTriangle( output,
-                    rotated[inds[3]].x, rotated[inds[3]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
-                    t.color
-                );
-                */
-                helpers.imageFillPolygon4(output,
-                    rotated[inds[3]].x, rotated[inds[3]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
-                    rotated[inds[0]].x, rotated[inds[0]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    t.color
-                );
-            } else if (inds.length > 2) {
-                helpers.imageFillTriangle(output,
-                    rotated[inds[0]].x, rotated[inds[0]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
-                    t.color
-                );
-            }
-    
-            // Draw texture over
-            if (inds.length === 4 && t.img) {
-                distortImage(t.img.clone(), output,
-                    rotated[inds[0]].x, rotated[inds[0]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
-                    rotated[inds[3]].x, rotated[inds[3]].y,
-                    plm.flag.lod ? mydist : 1, false, false
-                );
-            }
-    
-        }
-        
-        inProcess[0] = false
-    }
-
-    function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
-        let src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
-        if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
-        else {
-            src.fill(c)
-            dest.drawTransparentImage(src, x, y)
-            return
-        }
-        let src0 = src.clone()
-        src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
-        src0.flipY(), src.drawTransparentImage(src0.clone(), 0, 0)
-        src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
-        dest.drawTransparentImage(src, x - r, y - r)
-    }
-
-    function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
-
-    function isOutOfArea(x: number, y: number, width: number, height: number, scale?: number) {
-        return (isOutOfRange(x, width, scale) || isOutOfRange(y, height, scale))
-    }
-
-    function isOutOfAreaOnFace(rotated: {x: number, y: number}[], ind: number[], width: number, height: number) {
-        const avgXYs = { x: ind.reduce((cur, i) => cur + rotated[i].x, 0) / ind.length, y: ind.reduce((cur, i) => cur + rotated[i].y, 0) / ind.length}
-        return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
-    }
-
-    function isOutOfAreaOnAvg(point2s: { x: number, y: number }[], width: number, height: number) {
-        const avgXYs = { x: point2s.reduce((cur, val) => cur + val.x, 0) / point2s.length, y: point2s.reduce((cur, val) => cur + val.y, 0) / point2s.length }
-        return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
-    }
-
-    function isOutOfRange(x: number, range: number, scale?: number) { return scale ? x < -(range * scale) || x >= range + (range * scale) : x < 0 || x >= range }
-
-    function isCull(b: boolean, x: number, y: number) { return b ? x < y : x > y }
-
-    function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number): boolean {
-        // Simple normal calculation for culling
-        if (indices.length > 0) {
-            const xyzs = indices.map(ind => rotated[ind])
-
-            // Average depth comparison
-            const avgZ = xyzs.reduce((sum, v) => sum + v.z, 0) / xyzs.length;
-            // const avgY = xyzs.reduce((sum, v) => sum + v.y, 0) / xyzs.length;
-            // const avgX = xyzs.reduce((sum, v) => sum + v.x, 0) / xyzs.length;
-
-            const otherXYZs: {xs: number[] , ys: number[] , zs: number[] } = { xs: [], ys: [], zs: []}
-            // otherXYZs.xs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.x);
-            // otherXYZs.ys = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.y);
-            otherXYZs.zs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.z);
-            
-            if (otherXYZs.xs.length <= 0 || otherXYZs.ys.length <= 0 || otherXYZs.zs.length <= 0) return true;
-            // const otherAvgX = otherXYZs.xs.reduce((sum, x) => sum + x, 0) / otherXYZs.xs.length;
-            // const otherAvgY = otherXYZs.ys.reduce((sum, y) => sum + y, 0) / otherXYZs.ys.length;
-            const otherAvgZ = otherXYZs.zs.reduce((sum, z) => sum + z, 0) / otherXYZs.zs.length;
-            
-            if (oface < 0) return avgZ < otherAvgZ
-            if (oface > 0) return avgZ > otherAvgZ
-            return true
-            // return (inner ? avgZ < otherAvgZ && (avgX !== otherAvgX && avgY !== otherAvgY) : avgZ > otherAvgZ && (avgX === otherAvgX && avgY === otherAvgY));
-        }
-        return true;
-    }
-
-    function meshDepthZ(plm: mesh): number {
-        let x = plm.pos.x - camx;
-        let y = plm.pos.y - camy;
-        let z = plm.pos.z - camz;
-
-        // rotate camera
-        let tx = x * Math.cos(ay) + z * Math.sin(ay);
-        z = -x * Math.sin(ay) + z * Math.cos(ay);
-        x = tx;
-
-        let ty = y * Math.cos(ax) - z * Math.sin(ax);
-        z = y * Math.sin(ax) + z * Math.cos(ax);
-        y = ty;
-
-        tx = x * Math.cos(az) - y * Math.sin(az);
-        y = x * Math.sin(az) + y * Math.cos(az);
-        x = tx;
-
-        return z;
-    }
+    export function newmesh() { return new polymesh() }
 
     export function introSort<T>(
         arr: T[],
@@ -1224,7 +298,7 @@ namespace Polymesh {
         }
     }
 
-    function avgZ(rot: { z: number }[], inds: number[]): number { return inds.reduce((s, i) => s + rot[i].z, 0) / inds.length; }
+    export function avgZ(rot: { z: number }[], inds: number[]): number { return inds.reduce((s, i) => s + rot[i].z, 0) / inds.length; }
 
     function gapAround(n: number, r: number, g: number) { n -= Math.round(r / 2), n /= g, n += Math.round(r / 2); return Math.round(n) }
     
@@ -1235,7 +309,7 @@ namespace Polymesh {
         return x
     }
 
-    function pixelessImage(from: Image, srink: number) {
+    export function pixelessImage(from: Image, srink: number) {
         if (srink <= 1) return from
         srink = Math.max(srink, 1)
         const to = image.create(Math.max(1, Math.floor(from.width / srink)), Math.max(1, Math.floor(from.height / srink)))
@@ -1255,7 +329,7 @@ namespace Polymesh {
         return to
     }
 
-    function distortImage(src: Image, dest: Image,
+    export function distortImage(src: Image, dest: Image,
         x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
         srink: number, revX?: boolean, revY?: boolean) {
         let p0 = { x: x0, y: y0 }, p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 }, p3 = { x: x3, y: y3 }
@@ -1265,7 +339,7 @@ namespace Polymesh {
     interface Pt { x: number; y: number; }
 
     // check if two points is cross
-    function segmentsIntersect(p1: Pt, p2: Pt, p3: Pt, p4: Pt): boolean {
+    export function segmentsIntersect(p1: Pt, p2: Pt, p3: Pt, p4: Pt): boolean {
         function ccw(a: Pt, b: Pt, c: Pt): boolean {
             return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
         }
@@ -1274,7 +348,7 @@ namespace Polymesh {
     }
 
     // fix quad if intersect
-    function fixQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt): [Pt, Pt, Pt, Pt] {
+    export function fixQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt): [Pt, Pt, Pt, Pt] {
         if (segmentsIntersect(p0, p1, p2, p3) || segmentsIntersect(p1, p2, p3, p0)) {
             // get swapped
             return [p3, p2, p0, p1];
@@ -1283,7 +357,7 @@ namespace Polymesh {
     }
 
     // Bilinear interpolation on quad
-    function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
+    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
         const x0 = p0.x + (p1.x - p0.x) * u;
         const y0 = p0.y + (p1.y - p0.y) * u;
         const x1 = p3.x + (p2.x - p3.x) * u;
@@ -1295,7 +369,7 @@ namespace Polymesh {
     }
 
     // main distortImage function
-    function distortImageUtil(
+    export function distortImageUtil(
         src: Image, dest: Image,
         p0: Pt, p1: Pt, p2: Pt, p3: Pt,
         revX?: boolean, revY?: boolean
@@ -1341,11 +415,11 @@ namespace Polymesh {
         }
     }
 
-    function minPosArr(xyarr: { x: number, y: number}[]) {
+    export function minPosArr(xyarr: { x: number, y: number}[]) {
         return { x: xyarr.reduce((cur, val) => Math.min(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.min(cur, val.y), xyarr[0].y)}
     }
 
-    function maxPosArr(xyarr: { x: number, y: number }[]) {
+    export function maxPosArr(xyarr: { x: number, y: number }[]) {
         return { x: xyarr.reduce((cur, val) => Math.max(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.max(cur, val.y), xyarr[0].y) }
     }
 
