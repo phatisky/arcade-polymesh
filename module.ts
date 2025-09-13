@@ -293,4 +293,26 @@ namespace Polymesh {
 
         return z;
     }
+
+    export function meshDistZ(plm: polymesh): number {
+        let x = plm.pos.x - camx;
+        let y = plm.pos.y - camy;
+        let z = plm.pos.z - camz;
+
+        // rotate camera
+        let tx = x * Math.cos(ay) + z * Math.sin(ay);
+        z = -x * Math.sin(ay) + z * Math.cos(ay);
+        x = tx;
+
+        let ty = y * Math.cos(ax) - z * Math.sin(ax);
+        z = y * Math.sin(ax) + z * Math.cos(ax);
+        y = ty;
+
+        tx = x * Math.cos(az) - y * Math.sin(az);
+        y = x * Math.sin(az) + y * Math.cos(az);
+        x = tx;
+
+        return Math.abs(dist) / (Math.abs(dist) + z);
+    }
+    
 }
