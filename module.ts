@@ -105,8 +105,6 @@ namespace Polymesh {
             };
         })
 
-        const maxDist = Math.abs(dist) / (Math.abs(dist) + (zoom / Math.PI))
-
         // Sort triangles
         const tris = plm.faces.slice();
         switch (sort) {
