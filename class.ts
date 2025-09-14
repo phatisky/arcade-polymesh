@@ -60,9 +60,9 @@ class polymesh {
     //% weight=7
     public zDepth() {
         const zDist = Polymesh.meshDistZ(this)
-        const dist = Polymesh.dist, distLog = Math.round(dist / Math.log(dist / Math.round(dist / 2.5)))
+        const dist = Polymesh.dist, distLog = Math.round(dist / Math.log(dist / Math.round(dist * Math.LOG10E)))
         const fi = 0.6180339887
-        return (zDist + (fi - (distLog / 50 / 10))) * distLog
+        return ((zDist + (fi - (distLog / 50 / 5))) * distLog)
     }
 
     //% blockId=poly_dist_camera
