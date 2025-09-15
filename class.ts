@@ -1,43 +1,95 @@
 class polymesh {
     public faces: { indices: number[], color: number, offset: number, scale: number, img?: Image }[]
     public points: { x: number, y: number, z: number }[]
-    public pivot: { x: number, y: number, z: number }
-    public rot: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
-    public pos: { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
+
+    protected pivot_x: Fx8; protected pivot_y: Fx8; protected pivot_z: Fx8;
+    set pivot(v: { x: number, y: number, z: number }) {
+        this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z)
+    }
+    get pivot() {
+        return { x: Fx.toFloat(this.pivot_x), y: Fx.toFloat(this.pivot_y), z: Fx.toFloat(this.pivot_z) }
+    }
+    
+    protected rot_x: Fx8; protected rot_y: Fx8; protected rot_z: Fx8;
+    protected rot_vx: Fx8; protected rot_vy: Fx8; protected rot_vz: Fx8;
+    protected rot_ax: Fx8; protected rot_ay: Fx8; protected rot_az: Fx8;
+    protected rot_fx: Fx8; protected rot_fy: Fx8; protected rot_fz: Fx8;
+    set rot(v: {
+        x: number, y: number, z: number,
+        vx: number, vy: number, vz: number,
+        ax: number, ay: number, az: number,
+        fx: number, fy: number, fz: number
+    }) {
+        this.rot_x = Fx8(v.x), this.rot_y = Fx8(v.y), this.rot_z = Fx8(v.z)
+        this.rot_vx = Fx8(v.vx), this.rot_vy = Fx8(v.vy), this.rot_vz = Fx8(v.vz)
+        this.rot_ax = Fx8(v.ax), this.rot_ay = Fx8(v.ay), this.rot_az = Fx8(v.az)
+        this.rot_fx = Fx8(v.fx), this.rot_fy = Fx8(v.fy), this.rot_fz = Fx8(v.fz)
+    }
+    get rot() {
+        return {
+            x: Fx.toFloat(this.rot_x), y: Fx.toFloat(this.rot_y), z: Fx.toFloat(this.rot_z),
+            vx: Fx.toFloat(this.rot_vx), vy: Fx.toFloat(this.rot_vy), vz: Fx.toFloat(this.rot_vz),
+            ax: Fx.toFloat(this.rot_ax), ay: Fx.toFloat(this.rot_ay), az: Fx.toFloat(this.rot_az),
+            fx: Fx.toFloat(this.rot_fx), fy: Fx.toFloat(this.rot_fy), fz: Fx.toFloat(this.rot_fz),
+        }
+    }
+
+    protected pos_x: Fx8; protected pos_y: Fx8; protected pos_z: Fx8;
+    protected pos_vx: Fx8; protected pos_vy: Fx8; protected pos_vz: Fx8;
+    protected pos_ax: Fx8; protected pos_ay: Fx8; protected pos_az: Fx8;
+    protected pos_fx: Fx8; protected pos_fy: Fx8; protected pos_fz: Fx8;
+    set pos(v: { x: number, y: number, z: number,
+        vx: number, vy: number, vz: number,
+        ax: number, ay: number, az: number,
+        fx: number, fy: number, fz: number }) {
+        this.pos_x = Fx8(v.x), this.pos_y = Fx8(v.y), this.pos_z = Fx8(v.z)
+        this.pos_vx = Fx8(v.vx), this.pos_vy = Fx8(v.vy), this.pos_vz = Fx8(v.vz)
+        this.pos_ax = Fx8(v.ax), this.pos_ay = Fx8(v.ay), this.pos_az = Fx8(v.az)
+        this.pos_fx = Fx8(v.fx), this.pos_fy = Fx8(v.fy), this.pos_fz = Fx8(v.fz)
+    }
+    get pos() {
+        return {
+            x: Fx.toFloat(this.pos_x), y: Fx.toFloat(this.pos_y), z: Fx.toFloat(this.pos_z),
+            vx: Fx.toFloat(this.pos_vx), vy: Fx.toFloat(this.pos_vy), vz: Fx.toFloat(this.pos_vz),
+            ax: Fx.toFloat(this.pos_ax), ay: Fx.toFloat(this.pos_ay), az: Fx.toFloat(this.pos_az),
+            fx: Fx.toFloat(this.pos_fx), fy: Fx.toFloat(this.pos_fy), fz: Fx.toFloat(this.pos_fz),
+        }
+    }
+
     flag: { invisible: boolean, noncull: boolean, lod: boolean }
     __home__() {
         forever(() => {
-            const delta = control.eventContext().deltaTime
+            const delta = Fx8(control.eventContext().deltaTime)
 
             // Acceleration angle of this mesh
-            if (this.rot.ax !== 0) this.rot.vx += this.rot.ax * delta
-            if (this.rot.ay !== 0) this.rot.vy += this.rot.ay * delta
-            if (this.rot.az !== 0) this.rot.vz += this.rot.az * delta
+            if (this.rot_ax !== Fx8(0)) this.rot_vx = Fx.add(this.rot_vx, Fx.mul(this.rot_ax, delta))
+            if (this.rot_ay !== Fx8(0)) this.rot_vy = Fx.add(this.rot_vy, Fx.mul(this.rot_ay, delta))
+            if (this.rot_az !== Fx8(0)) this.rot_vz = Fx.add(this.rot_vz, Fx.mul(this.rot_az, delta))
 
             // Friction angle of this mesh
-            if (this.rot.fx !== 0) this.rot.vx = this.rot.vx < 0 ? Math.min(this.rot.vx + Math.abs(this.rot.fx) * delta, 0) : Math.max(this.rot.vx - Math.abs(this.rot.fx) * delta, 0)
-            if (this.rot.fy !== 0) this.rot.vy = this.rot.vy < 0 ? Math.min(this.rot.vy + Math.abs(this.rot.fy) * delta, 0) : Math.max(this.rot.vy - Math.abs(this.rot.fy) * delta, 0)
-            if (this.rot.fz !== 0) this.rot.vz = this.rot.vz < 0 ? Math.min(this.rot.vz + Math.abs(this.rot.fz) * delta, 0) : Math.max(this.rot.vz - Math.abs(this.rot.fz) * delta, 0)
+            if (this.rot_fx !== Fx8(0)) this.rot_vx = this.rot_vx < Fx8(0) ? Fx.min(Fx.add(this.rot_vx, Fx.mul(Fx.abs(this.rot_fx), delta)), Fx8(0)) : Fx.max(Fx.sub(this.rot_vx, Fx.mul(Fx.abs(this.rot_fx), delta)), Fx8(0))
+            if (this.rot_fy !== Fx8(0)) this.rot_vy = this.rot_vy < Fx8(0) ? Fx.min(Fx.add(this.rot_vy, Fx.mul(Fx.abs(this.rot_fy), delta)), Fx8(0)) : Fx.max(Fx.sub(this.rot_vy, Fx.mul(Fx.abs(this.rot_fy), delta)), Fx8(0))
+            if (this.rot_fz !== Fx8(0)) this.rot_vz = this.rot_vz < Fx8(0) ? Fx.min(Fx.add(this.rot_vz, Fx.mul(Fx.abs(this.rot_fz), delta)), Fx8(0)) : Fx.max(Fx.sub(this.rot_vz, Fx.mul(Fx.abs(this.rot_fz), delta)), Fx8(0))
 
             // Velocity angle of this mesh
-            if (this.rot.vx !== 0) this.rot.x += this.rot.vx * delta;
-            if (this.rot.vy !== 0) this.rot.y += this.rot.vy * delta;
-            if (this.rot.vz !== 0) this.rot.z += this.rot.vz * delta;
+            if (this.rot_vx !== Fx8(0)) this.rot_x = Fx.add(this.rot_x, Fx.mul(this.rot_vx, delta));
+            if (this.rot_vy !== Fx8(0)) this.rot_y = Fx.add(this.rot_y, Fx.mul(this.rot_vy, delta));
+            if (this.rot_vz !== Fx8(0)) this.rot_z = Fx.add(this.rot_z, Fx.mul(this.rot_vz, delta));
 
             // Acceleration position of this mesh
-            if (this.pos.ax !== 0) this.pos.vx += this.pos.ax * delta
-            if (this.pos.ay !== 0) this.pos.vy += this.pos.ay * delta
-            if (this.pos.az !== 0) this.pos.vz += this.pos.az * delta
+            if (this.pos_ax !== Fx8(0)) this.pos_vx = Fx.add(this.pos_vx, Fx.mul(this.pos_ax, delta))
+            if (this.pos_ay !== Fx8(0)) this.pos_vy = Fx.add(this.pos_vy, Fx.mul(this.pos_ay, delta))
+            if (this.pos_az !== Fx8(0)) this.pos_vz = Fx.add(this.pos_vz, Fx.mul(this.pos_az, delta))
 
             // Friction position of this mesh
-            if (this.pos.fx !== 0) this.pos.vx = this.pos.vx < 0 ? Math.min(this.pos.vx + Math.abs(this.pos.fx) * delta, 0) : Math.max(this.pos.vx - Math.abs(this.pos.fx) * delta, 0)
-            if (this.pos.fy !== 0) this.pos.vy = this.pos.vy < 0 ? Math.min(this.pos.vy + Math.abs(this.pos.fy) * delta, 0) : Math.max(this.pos.vy - Math.abs(this.pos.fy) * delta, 0)
-            if (this.pos.fz !== 0) this.pos.vz = this.pos.vz < 0 ? Math.min(this.pos.vz + Math.abs(this.pos.fz) * delta, 0) : Math.max(this.pos.vz - Math.abs(this.pos.fz) * delta, 0)
+            if (this.pos_fx !== Fx8(0)) this.pos_vx = this.pos_vx < Fx8(0) ? Fx.min(Fx.add(this.pos_vx, Fx.mul(Fx.abs(this.pos_fx), delta)), Fx8(0)) : Fx.max(Fx.sub(this.pos_vx, Fx.mul(Fx.abs(this.pos_fx), delta)), Fx8(0))
+            if (this.pos_fy !== Fx8(0)) this.pos_vy = this.pos_vy < Fx8(0) ? Fx.min(Fx.add(this.pos_vy, Fx.mul(Fx.abs(this.pos_fy), delta)), Fx8(0)) : Fx.max(Fx.sub(this.pos_vy, Fx.mul(Fx.abs(this.pos_fy), delta)), Fx8(0))
+            if (this.pos_fz !== Fx8(0)) this.pos_vz = this.pos_vz < Fx8(0) ? Fx.min(Fx.add(this.pos_vz, Fx.mul(Fx.abs(this.pos_fz), delta)), Fx8(0)) : Fx.max(Fx.sub(this.pos_vz, Fx.mul(Fx.abs(this.pos_fz), delta)), Fx8(0))
 
             // Velocity position of this mesh
-            if (this.pos.vx !== 0) this.pos.x += this.pos.vx * delta;
-            if (this.pos.vy !== 0) this.pos.y += this.pos.vy * delta;
-            if (this.pos.vz !== 0) this.pos.z += this.pos.vz * delta;
+            if (this.pos_vx !== Fx8(0)) this.pos_x = Fx.add(this.pos_x, Fx.mul(this.pos_vx, delta));
+            if (this.pos_vy !== Fx8(0)) this.pos_y = Fx.add(this.pos_y, Fx.mul(this.pos_vy, delta));
+            if (this.pos_vz !== Fx8(0)) this.pos_z = Fx.add(this.pos_z, Fx.mul(this.pos_vz, delta));
         })
     }
 
@@ -318,9 +370,9 @@ class polymesh {
     //% weight=10
     public setPivot(choice: PolyPivot, x: number) {
         switch (choice) {
-            case 0: this.pivot.x = x; break
-            case 1: this.pivot.y = x; break
-            case 2: this.pivot.z = x; break
+            case 0: this.pivot_x = Fx8(x); break
+            case 1: this.pivot_y = Fx8(x); break
+            case 2: this.pivot_z = Fx8(x); break
         }
     }
 
@@ -332,9 +384,9 @@ class polymesh {
     //% weight=5
     public changePivot(choice: PolyPivot, x: number) {
         switch (choice) {
-            case 0: this.pivot.x += x; break
-            case 1: this.pivot.y += x; break
-            case 2: this.pivot.z += x; break
+            case 0: this.pivot_x = Fx.add(this.pivot_x, Fx8(x)); break
+            case 1: this.pivot_y = Fx.add(this.pivot_y, Fx8(x)); break
+            case 2: this.pivot_z = Fx.add(this.pivot_z, Fx8(x)); break
         }
     }
 
@@ -346,9 +398,9 @@ class polymesh {
     //% weight=4
     public getPivot(choice: PolyPivot) {
         switch (choice) {
-            case 0: return this.pivot.x
-            case 1: return this.pivot.y
-            case 2: return this.pivot.z
+            case 0: return Fx.toFloat(this.pivot_x)
+            case 1: return Fx.toFloat(this.pivot_y)
+            case 2: return Fx.toFloat(this.pivot_z)
         }
         return NaN
     }
@@ -361,18 +413,18 @@ class polymesh {
     //% weight=100
     public setAngle(choice: PolyAngle, x: number) {
         switch (choice) {
-            case 0: this.rot.x = x; break
-            case 1: this.rot.y = x; break
-            case 2: this.rot.z = x; break
-            case 3: this.rot.vx = x; break
-            case 4: this.rot.vy = x; break
-            case 5: this.rot.vz = x; break
-            case 6: this.rot.ax = x; break
-            case 7: this.rot.ay = x; break
-            case 8: this.rot.az = x; break
-            case 9: this.rot.fx = x; break
-            case 10: this.rot.fy = x; break
-            case 11: this.rot.fz = x; break
+            case  0: this.rot_x  = Fx8(x); break
+            case  1: this.rot_y  = Fx8(x); break
+            case  2: this.rot_z  = Fx8(x); break
+            case  3: this.rot_vx = Fx8(x); break
+            case  4: this.rot_vy = Fx8(x); break
+            case  5: this.rot_vz = Fx8(x); break
+            case  6: this.rot_ax = Fx8(x); break
+            case  7: this.rot_ay = Fx8(x); break
+            case  8: this.rot_az = Fx8(x); break
+            case  9: this.rot_fx = Fx8(x); break
+            case 10: this.rot_fy = Fx8(x); break
+            case 11: this.rot_fz = Fx8(x); break
         }
     }
 
@@ -384,18 +436,18 @@ class polymesh {
     //% weight=5
     public changeAngle(choice: PolyAngle, x: number) {
         switch (choice) {
-            case 0: this.rot.x += x; break
-            case 1: this.rot.y += x; break
-            case 2: this.rot.z += x; break
-            case 3: this.rot.vx += x; break
-            case 4: this.rot.vy += x; break
-            case 5: this.rot.vz += x; break
-            case 6: this.rot.ax += x; break
-            case 7: this.rot.ay += x; break
-            case 8: this.rot.az += x; break
-            case 9: this.rot.fx += x; break
-            case 10: this.rot.fy += x; break
-            case 11: this.rot.fz += x; break
+            case  0: this.rot_x  = Fx.add(this.rot_x, Fx8(x)); break
+            case  1: this.rot_y  = Fx.add(this.rot_y, Fx8(x)); break
+            case  2: this.rot_z  = Fx.add(this.rot_z, Fx8(x)); break
+            case  3: this.rot_vx = Fx.add(this.rot_vx, Fx8(x)); break
+            case  4: this.rot_vy = Fx.add(this.rot_vy, Fx8(x)); break
+            case  5: this.rot_vz = Fx.add(this.rot_vz, Fx8(x)); break
+            case  6: this.rot_ax = Fx.add(this.rot_ax, Fx8(x)); break
+            case  7: this.rot_ay = Fx.add(this.rot_ay, Fx8(x)); break
+            case  8: this.rot_az = Fx.add(this.rot_az, Fx8(x)); break
+            case  9: this.rot_fx = Fx.add(this.rot_fx, Fx8(x)); break
+            case 10: this.rot_fy = Fx.add(this.rot_fy, Fx8(x)); break
+            case 11: this.rot_fz = Fx.add(this.rot_fz, Fx8(x)); break
         }
     }
 
@@ -407,18 +459,18 @@ class polymesh {
     //% weight=4
     public getAngle(choice: PolyAngle) {
         switch (choice) {
-            case 0: return this.rot.x
-            case 1: return this.rot.y
-            case 2: return this.rot.z
-            case 3: return this.rot.vx
-            case 4: return this.rot.vy
-            case 5: return this.rot.vz
-            case 6: return this.rot.ax
-            case 7: return this.rot.ay
-            case 8: return this.rot.az
-            case 9: return this.rot.fx
-            case 10: return this.rot.fy
-            case 11: return this.rot.fz
+            case  0: return Fx.toFloat(this.rot_x )
+            case  1: return Fx.toFloat(this.rot_y )
+            case  2: return Fx.toFloat(this.rot_z )
+            case  3: return Fx.toFloat(this.rot_vx)
+            case  4: return Fx.toFloat(this.rot_vy)
+            case  5: return Fx.toFloat(this.rot_vz)
+            case  6: return Fx.toFloat(this.rot_ax)
+            case  7: return Fx.toFloat(this.rot_ay)
+            case  8: return Fx.toFloat(this.rot_az)
+            case  9: return Fx.toFloat(this.rot_fx)
+            case 10: return Fx.toFloat(this.rot_fy)
+            case 11: return Fx.toFloat(this.rot_fz)
         }
         return NaN
     }
@@ -431,18 +483,18 @@ class polymesh {
     //% weight=10
     public setPos(choice: PolyPos, x: number) {
         switch (choice) {
-            case 0: this.pos.x = x; break
-            case 1: this.pos.y = x; break
-            case 2: this.pos.z = x; break
-            case 3: this.pos.vx = x; break
-            case 4: this.pos.vy = x; break
-            case 5: this.pos.vz = x; break
-            case 6: this.pos.ax = x; break
-            case 7: this.pos.ay = x; break
-            case 8: this.pos.az = x; break
-            case 9: this.pos.fx = x; break
-            case 10: this.pos.fy = x; break
-            case 11: this.pos.fz = x; break
+            case  0: this.pos_x  = Fx8(x); break
+            case  1: this.pos_y  = Fx8(x); break
+            case  2: this.pos_z  = Fx8(x); break
+            case  3: this.pos_vx = Fx8(x); break
+            case  4: this.pos_vy = Fx8(x); break
+            case  5: this.pos_vz = Fx8(x); break
+            case  6: this.pos_ax = Fx8(x); break
+            case  7: this.pos_ay = Fx8(x); break
+            case  8: this.pos_az = Fx8(x); break
+            case  9: this.pos_fx = Fx8(x); break
+            case 10: this.pos_fy = Fx8(x); break
+            case 11: this.pos_fz = Fx8(x); break
         }
     }
 
@@ -454,18 +506,18 @@ class polymesh {
     //% weight=9
     public changePos(choice: PolyPos, x: number) {
         switch (choice) {
-            case 0: this.pos.x += x; break
-            case 1: this.pos.y += x; break
-            case 2: this.pos.z += x; break
-            case 3: this.pos.vx += x; break
-            case 4: this.pos.vy += x; break
-            case 5: this.pos.vz += x; break
-            case 6: this.pos.ax += x; break
-            case 7: this.pos.ay += x; break
-            case 8: this.pos.az += x; break
-            case 9: this.pos.fx += x; break
-            case 10: this.pos.fy += x; break
-            case 11: this.pos.fz += x; break
+            case  0: this.pos_x  = Fx.add(this.pos_x, Fx8(x)); break
+            case  1: this.pos_y  = Fx.add(this.pos_y, Fx8(x)); break
+            case  2: this.pos_z  = Fx.add(this.pos_z, Fx8(x)); break
+            case  3: this.pos_vx = Fx.add(this.pos_vx, Fx8(x)); break
+            case  4: this.pos_vy = Fx.add(this.pos_vy, Fx8(x)); break
+            case  5: this.pos_vz = Fx.add(this.pos_vz, Fx8(x)); break
+            case  6: this.pos_ax = Fx.add(this.pos_ax, Fx8(x)); break
+            case  7: this.pos_ay = Fx.add(this.pos_ay, Fx8(x)); break
+            case  8: this.pos_az = Fx.add(this.pos_az, Fx8(x)); break
+            case  9: this.pos_fx = Fx.add(this.pos_fx, Fx8(x)); break
+            case 10: this.pos_fy = Fx.add(this.pos_fy, Fx8(x)); break
+            case 11: this.pos_fz = Fx.add(this.pos_fz, Fx8(x)); break
         }
     }
 
@@ -477,18 +529,18 @@ class polymesh {
     //% weight=8
     public getPos(choice: PolyPos) {
         switch (choice) {
-            case 0: return this.pos.x
-            case 1: return this.pos.y
-            case 2: return this.pos.z
-            case 3: return this.pos.vx
-            case 4: return this.pos.vy
-            case 5: return this.pos.vz
-            case 6: return this.pos.ax
-            case 7: return this.pos.ay
-            case 8: return this.pos.az
-            case 9: return this.pos.fx
-            case 10: return this.pos.fy
-            case 11: return this.pos.fz
+            case  0: return Fx.toFloat(this.pos_x )
+            case  1: return Fx.toFloat(this.pos_y )
+            case  2: return Fx.toFloat(this.pos_z )
+            case  3: return Fx.toFloat(this.pos_vx)
+            case  4: return Fx.toFloat(this.pos_vy)
+            case  5: return Fx.toFloat(this.pos_vz)
+            case  6: return Fx.toFloat(this.pos_ax)
+            case  7: return Fx.toFloat(this.pos_ay)
+            case  8: return Fx.toFloat(this.pos_az)
+            case  9: return Fx.toFloat(this.pos_fx)
+            case 10: return Fx.toFloat(this.pos_fy)
+            case 11: return Fx.toFloat(this.pos_fz)
         }
         return NaN
     }
