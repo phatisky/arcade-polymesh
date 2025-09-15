@@ -111,8 +111,8 @@ class polymesh {
     //% group="Mesh util"
     //% weight=7
     public zDepth() {
-        const zDist = Polymesh.meshDistZ(this)
-        return zDist
+        const zDist = Polymesh.meshDistZ(this), phi = 1.6180339887
+        return zDist * phi
     }
 
     //% blockId=poly_dist_camera
