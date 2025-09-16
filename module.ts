@@ -4,27 +4,27 @@ namespace Polymesh {
     function rotatePoint3D(point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) {
 
         // move point with pivot to 1st place
-        let dx = point.x - pivot.x;
-        let dy = point.y - pivot.y;
-        let dz = point.z - pivot.z;
+        let dx  = point.x - pivot.x;
+        let dy  = point.y - pivot.y;
+        let dz  = point.z - pivot.z;
 
         // --- rotate around x ---
         let dy1 = dy * Math.cos(angle.x) - dz * Math.sin(angle.x);
         let dz1 = dy * Math.sin(angle.x) + dz * Math.cos(angle.x);
-        dy = dy1;
-        dz = dz1;
+            dy  = dy1;
+            dz  = dz1;
 
         // --- rotate around y ---
         let dx1 = dx * Math.cos(angle.y) + dz * Math.sin(angle.y);
-        dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
-        dx = dx1;
-        dz = dz1;
+            dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
+            dx  = dx1;
+            dz  = dz1;
 
         // --- rotate around z ---
-        dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
-        dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
-        dx = dx1;
-        dy = dy1;
+            dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
+            dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
+            dx  = dx1;
+            dy  = dy1;
 
         // move back to real position
         return {
@@ -46,7 +46,7 @@ namespace Polymesh {
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
         switch (sort) {
-            case 0x0: sorted.sort((a, b) => b.depth - a.depth); break
+            case 0x0: sorted.sort((a, b) => b.depth - a.depth)      ; break
             case 0x1: introSort(sorted, (a, b) => b.depth - a.depth); break
         }
         for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
@@ -65,7 +65,7 @@ namespace Polymesh {
         if (inProcess[0]) return;
         inProcess[0] = true
 
-        const centerX = output.width >> 1;
+        const centerX = output.width  >> 1;
         const centerY = output.height >> 1;
 
         const cosX = Math.cos(ax), sinX = Math.sin(ax);
@@ -76,24 +76,24 @@ namespace Polymesh {
         const rotated = plm.points.map(v => {
             const vpoint: { x: number, y: number, z: number } = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z }
             const vpivot: { x: number, y: number, z: number } = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
-            const vpos: { x: number, y: number, z: number } = rotatePoint3D(vpoint, vpivot, plm.rot)
+            const vpos:   { x: number, y: number, z: number } = rotatePoint3D(vpoint, vpivot, plm.rot)
             // camera offset
-            let x = vpos.x - camx;
-            let y = vpos.y - camy;
-            let z = vpos.z - camz;
+            let x  = vpos.x - camx;
+            let y  = vpos.y - camy;
+            let z  = vpos.z - camz;
 
             // rotate camera
             let tx = x * cosY + z * sinY;
-            z = -x * sinY + z * cosY;
-            x = tx;
+                z  = -x * sinY + z * cosY;
+                x  = tx;
 
             let ty = y * cosX - z * sinX;
-            z = y * sinX + z * cosX;
-            y = ty;
+                z  = y * sinX + z * cosX;
+                y  = ty;
 
-            tx = x * cosZ - y * sinZ;
-            y = x * sinZ + y * cosZ;
-            x = tx;
+                tx = x * cosZ - y * sinZ;
+                y  = x * sinZ + y * cosZ;
+                x  = tx;
 
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
@@ -115,19 +115,19 @@ namespace Polymesh {
         // Render
         for (const t of tris) {
             const inds = t.indices;
-            if (inds.some(i => rotated[i].z < -Math.abs(dist) || rotated[i].z > Math.abs(fardist) + Math.abs(dist))) continue;
+            if (inds.some(i => rotated[i].z < -Math.abs(dist) || rotated[i].z > Math.abs(fardist))) continue;
             let idx: number, pt: { scale: number, x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
             // LOD calculating?
             let mydist = Math.abs(dist * Math.E / 2) / (Math.abs(dist) - avgZ(rotated, inds))
             if (t.indices.length === 1) {
                 idx = t.indices[0];
-                pt = rotated[idx];
+                pt  = rotated[idx];
 
-                im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
+                im  = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
 
                 // center image
-                cx = pt.x;
-                cy = pt.y;
+                cx  = pt.x;
+                cy  = pt.y;
 
                 const bq = [
                     { x: cx, y: cy },
@@ -140,11 +140,11 @@ namespace Polymesh {
                 square = 1.5 * scale * t.scale * zoom
                 if (im) {
                     // set scale image from camera distance
-                    baseW = im.width;
-                    baseH = im.height;
+                    baseW    = im.width;
+                    baseH    = im.height;
 
-                    halfW = (baseW / 3) * scale * t.scale * zoom;
-                    halfH = (baseH / 3) * scale * t.scale * zoom;
+                    halfW    = (baseW / 3) * scale * t.scale * zoom;
+                    halfH    = (baseH / 3) * scale * t.scale * zoom;
                     bq[0].x += halfW, bq[0].y += halfH
                     bq[1].x -= halfW, bq[1].y += halfH
                     bq[2].x += halfW, bq[2].y -= halfH
@@ -162,23 +162,23 @@ namespace Polymesh {
             // Backface culling
             if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
 
-            idx = t.indices[0];
-            pt = rotated[idx];
+            idx   = t.indices[0];
+            pt    = rotated[idx];
             scale = pt.scale;
             // center image
-            cx = pt.x;
-            cy = pt.y;
+            cx    = pt.x;
+            cy    = pt.y;
 
             square = 1.5 * scale * t.scale * zoom
 
             if (t.img) {
                 im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
                 // set scale image from camera distance
-                baseW = im.width;
-                baseH = im.height;
+                baseW  = im.width;
+                baseH  = im.height;
 
-                halfW = (baseW / 3) * scale * t.scale * zoom;
-                halfH = (baseH / 3) * scale * t.scale * zoom;
+                halfW  = (baseW / 3) * scale * t.scale * zoom;
+                halfH  = (baseH / 3) * scale * t.scale * zoom;
 
                 square = Math.min(halfW, halfH)
             }

@@ -1,5 +1,4 @@
 class polymesh {
-    protected phi: number = 1.6180339887
 
     protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[];
     set faces(vals: { indices: number[], color: number, offset: number, scale: number, img?: Image }[]) {
@@ -135,8 +134,7 @@ class polymesh {
     //% group="Mesh util"
     //% weight=7
     public zDist() {
-        const zd = Polymesh.meshDistZ(this)
-        return zd * this.phi
+        return Math.max(0, Polymesh.meshDistZ(this) * Polymesh.doubleNine)
     }
 
     //% blockId=poly_dist_camera
@@ -147,7 +145,8 @@ class polymesh {
     //% weight=8
     public distFromCamera() {
         const distPos = { x: Polymesh.camx - this.pos.x, y: Polymesh.camy - this.pos.y, z: Polymesh.camz - this.pos.z }
-        return 1 / Polymesh.fisqrt((distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z))
+        const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
+        return distSum * Polymesh.fisqrt(distSum)
     }
 
     //% blockId=poly_dist_othermesh
@@ -159,7 +158,8 @@ class polymesh {
     //% weight=9
     public distBetween(otherMesh: polymesh) {
         const distPos = { x: otherMesh.pos.x - this.pos.x, y: otherMesh.pos.y - this.pos.y, z: otherMesh.pos.z - this.pos.z }
-        return 1 / Polymesh.fisqrt((distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z))
+        const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
+        return distSum * Polymesh.fisqrt(distSum)
     }
 
     //% blockId=poly_normal_speed
@@ -170,7 +170,8 @@ class polymesh {
     //% weight=10
     public normalSpeed() {
         const distPosV = { vx: this.pos.vx, vy: this.pos.vy, vz: this.pos.vz }
-        return 1 / Polymesh.fisqrt((distPosV.vx * distPosV.vx) + (distPosV.vy * distPosV.vy) + (distPosV.vz * distPosV.vz))
+        const distSum = (distPosV.vx * distPosV.vx) + (distPosV.vy * distPosV.vy) + (distPosV.vz * distPosV.vz)
+        return distSum * Polymesh.fisqrt(distSum)
     }
 
     //% blockId=poly_flag_set
@@ -182,8 +183,8 @@ class polymesh {
     public setFlag(flag: MeshFlags, ok: boolean) {
         switch (flag) {
             case 0x0: default: this.flag.invisible = ok; break
-            case 0x1: this.flag.noncull = ok; break
-            case 0x2: this.flag.lod = ok; break
+            case 0x1:          this.flag.noncull   = ok; break
+            case 0x2:          this.flag.lod       = ok; break
         }
     }
 
@@ -196,8 +197,8 @@ class polymesh {
     public getFlag(flag: MeshFlags) {
         switch (flag) {
             case 0x0: default: return this.flag.invisible;
-            case 0x1: return this.flag.noncull;
-            case 0x2: return this.flag.lod;
+            case 0x1:          return this.flag.noncull;
+            case 0x2:          return this.flag.lod;
         }
         return false
     }
@@ -253,14 +254,12 @@ class polymesh {
         if (inds.i4) indice.push(Fx8(inds.i4));
         if (img) this.faces_indices[idx] = indice, this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = img;
         else this.faces_indices[idx] = indice, this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = null;
-        /*
-        const indice = [inds.i1]
-        if (inds.i2) indice.push(inds.i2);
-        if (inds.i3) indice.push(inds.i3);
-        if (inds.i4) indice.push(inds.i4);
-        if (img) this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img };
-        else this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale };
-        */
+        // const indice = [inds.i1]
+        // if (inds.i2) indice.push(inds.i2);
+        // if (inds.i3) indice.push(inds.i3);
+        // if (inds.i4) indice.push(inds.i4);
+        // if (img) this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img };
+        // else this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale };
     }
 
     //% blockId=poly_face_add
@@ -280,14 +279,12 @@ class polymesh {
         if (inds.i4) indice.push(Fx8(inds.i4));
         if (img) this.faces_indices.push(indice), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(img);
         else this.faces_indices.push(indice), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(null);
-        /*
-        const indice = [inds.i1]
-        if (inds.i2) indice.push(inds.i2);
-        if (inds.i3) indice.push(inds.i3);
-        if (inds.i4) indice.push(inds.i4);
-        if (img) this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img });
-        else this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale });
-        */
+        // const indice = [inds.i1]
+        // if (inds.i2) indice.push(inds.i2);
+        // if (inds.i3) indice.push(inds.i3);
+        // if (inds.i4) indice.push(inds.i4);
+        // if (img) this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img });
+        // else this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale });
     }
 
     //% blockId=poly_face_del
@@ -476,9 +473,9 @@ class polymesh {
     //% weight=5
     public changeAngle(choice: PolyAngle, x: number) {
         switch (choice) {
-            case 0x0: this.rot_x  = Fx.add(this.rot_x, Fx8(x)) ; break
-            case 0x1: this.rot_y  = Fx.add(this.rot_y, Fx8(x)) ; break
-            case 0x2: this.rot_z  = Fx.add(this.rot_z, Fx8(x)) ; break
+            case 0x0: this.rot_x  = Fx.add(this.rot_x , Fx8(x)); break
+            case 0x1: this.rot_y  = Fx.add(this.rot_y , Fx8(x)); break
+            case 0x2: this.rot_z  = Fx.add(this.rot_z , Fx8(x)); break
             case 0x3: this.rot_vx = Fx.add(this.rot_vx, Fx8(x)); break
             case 0x4: this.rot_vy = Fx.add(this.rot_vy, Fx8(x)); break
             case 0x5: this.rot_vz = Fx.add(this.rot_vz, Fx8(x)); break
@@ -546,9 +543,9 @@ class polymesh {
     //% weight=9
     public changePos(choice: PolyPos, x: number) {
         switch (choice) {
-            case 0x0: this.pos_x  = Fx.add(this.pos_x, Fx8(x)) ; break
-            case 0x1: this.pos_y  = Fx.add(this.pos_y, Fx8(x)) ; break
-            case 0x2: this.pos_z  = Fx.add(this.pos_z, Fx8(x)) ; break
+            case 0x0: this.pos_x  = Fx.add(this.pos_x , Fx8(x)); break
+            case 0x1: this.pos_y  = Fx.add(this.pos_y , Fx8(x)); break
+            case 0x2: this.pos_z  = Fx.add(this.pos_z , Fx8(x)); break
             case 0x3: this.pos_vx = Fx.add(this.pos_vx, Fx8(x)); break
             case 0x4: this.pos_vy = Fx.add(this.pos_vy, Fx8(x)); break
             case 0x5: this.pos_vz = Fx.add(this.pos_vz, Fx8(x)); break

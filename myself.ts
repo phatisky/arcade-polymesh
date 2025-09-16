@@ -47,9 +47,9 @@ namespace Polymesh {
     //% weight=5
     export function changeAngle(choice: PolyAngle, x: number) {
         switch (choice) {
-            case 0x0: ax += x; break
-            case 0x1: ay += x; break
-            case 0x2: az += x; break
+            case 0x0: ax  += x; break
+            case 0x1: ay  += x; break
+            case 0x2: az  += x; break
             case 0x3: avx += x; break
             case 0x4: avy += x; break
             case 0x5: avz += x; break
@@ -67,21 +67,21 @@ namespace Polymesh {
     //% weight=5
     export function changeCam(choice: PolyCam, x: number) {
         switch (choice) {
-            case 0x0: default: zoom += x; break
-            case 0x1: dist += x; break
-            case 0x2: fardist += x; break
-            case 0x3: camx += x; break
-            case 0x4: camy += x; break
-            case 0x5: camz += x; break
-            case 0x6: camvx += x; break
-            case 0x7: camvy += x; break
-            case 0x8: camvz += x; break
-            case 0x9: camax += x; break
-            case 0xA: camay += x; break
-            case 0xB: camaz += x; break
-            case 0xC: camfx += x; break
-            case 0xD: camfy += x; break
-            case 0xE: camfz += x; break
+            case 0x0: default: zoom    += x; break
+            case 0x1:          dist    += x; break
+            case 0x2:          fardist += x; break
+            case 0x3:          camx    += x; break
+            case 0x4:          camy    += x; break
+            case 0x5:          camz    += x; break
+            case 0x6:          camvx   += x; break
+            case 0x7:          camvy   += x; break
+            case 0x8:          camvz   += x; break
+            case 0x9:          camax   += x; break
+            case 0xA:          camay   += x; break
+            case 0xB:          camaz   += x; break
+            case 0xC:          camfx   += x; break
+            case 0xD:          camfy   += x; break
+            case 0xE:          camfz   += x; break
         }
     }
     //% blockId=poly_angle_set
@@ -90,9 +90,9 @@ namespace Polymesh {
     //% weight=10
     export function setAngle(choice: PolyAngle, x: number) {
         switch (choice) {
-            case 0x0: ax = x; break
-            case 0x1: ay = x; break
-            case 0x2: az = x; break
+            case 0x0: ax  = x; break
+            case 0x1: ay  = x; break
+            case 0x2: az  = x; break
             case 0x3: avx = x; break
             case 0x4: avy = x; break
             case 0x5: avz = x; break
@@ -110,21 +110,21 @@ namespace Polymesh {
     //% weight=10
     export function setCam(choice: PolyCam, x: number) {
         switch (choice) {
-            case 0x0: default: zoom = x; break
-            case 0x1: dist = x; break
-            case 0x2: fardist = x; break
-            case 0x3: camx = x; break
-            case 0x4: camy = x; break
-            case 0x5: camz = x; break
-            case 0x6: camvx = x; break
-            case 0x7: camvy = x; break
-            case 0x8: camvz = x; break
-            case 0x9: camax = x; break
-            case 0xA: camay = x; break
-            case 0xB: camaz = x; break
-            case 0xC: camfx = x; break
-            case 0xD: camfy = x; break
-            case 0xE: camfz = x; break
+            case 0x0: default: zoom    = x; break
+            case 0x1:          dist    = x; break
+            case 0x2:          fardist = x; break
+            case 0x3:          camx    = x; break
+            case 0x4:          camy    = x; break
+            case 0x5:          camz    = x; break
+            case 0x6:          camvx   = x; break
+            case 0x7:          camvy   = x; break
+            case 0x8:          camvz   = x; break
+            case 0x9:          camax   = x; break
+            case 0xA:          camay   = x; break
+            case 0xB:          camaz   = x; break
+            case 0xC:          camfx   = x; break
+            case 0xD:          camfy   = x; break
+            case 0xE:          camfz   = x; break
         }
     }
 
@@ -157,20 +157,20 @@ namespace Polymesh {
     export function getCam(choice: PolyCam) {
         switch (choice) {
             case 0x0: default: return zoom
-            case 0x1: return dist
-            case 0x2: return fardist
-            case 0x3: return camx
-            case 0x4: return camy
-            case 0x5: return camz
-            case 0x6: return camvx
-            case 0x7: return camvy
-            case 0x8: return camvz
-            case 0x9: return camax
-            case 0xA: return camay
-            case 0xB: return camaz
-            case 0xC: return camfx
-            case 0xD: return camfy
-            case 0xE: return camfz
+            case 0x1:          return dist
+            case 0x2:          return fardist
+            case 0x3:          return camx
+            case 0x4:          return camy
+            case 0x5:          return camz
+            case 0x6:          return camvx
+            case 0x7:          return camvy
+            case 0x8:          return camvz
+            case 0x9:          return camax
+            case 0xA:          return camay
+            case 0xB:          return camaz
+            case 0xC:          return camfx
+            case 0xD:          return camfy
+            case 0xE:          return camfz
         }
         return NaN
     }

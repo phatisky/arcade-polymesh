@@ -35,13 +35,9 @@ namespace Polymesh {
 
     export function avgZ(rot: { z: number }[], inds: number[]): number { return inds.reduce((s, i) => s + rot[i].z, 0) / inds.length; }
 
-    function gapAround(n: number, r: number, g: number) { n -= Math.round(r / 2), n /= g, n += Math.round(r / 2); return Math.round(n) }
-
-    function allAroundValue(x: number, r: number, g: number) {
-        x -= Math.round(r / 2)
-        x = Math.round(x / g)
-        x += Math.round(r / 2)
-        return x
+    function gapAround(n: number, r: number, g: number) {
+        n -= Math.round(r / 2), n /= g, n += Math.round(r / 2);
+        return Math.round(n)
     }
 
     export function pixelessImage(from: Image, srink: number) {
@@ -54,9 +50,9 @@ namespace Polymesh {
             return to
         }
         for (let xi = 0; xi < to.width; xi++) {
-            const xj = allAroundValue(xi, from.width, srink)
+            const xj = gapAround(xi, from.width, srink)
             for (let yi = 0; yi < to.height; yi++) {
-                const yj = allAroundValue(yi, from.height, srink)
+                const yj = gapAround(yi, from.height, srink)
                 const col = from.getPixel(xj, yj)
                 if (col > 0) to.setPixel(xi, yi, col)
             }
@@ -110,7 +106,7 @@ namespace Polymesh {
         revX?: boolean, revY?: boolean
     ) {
         // fix quad of intersect
-        [p0, p1, p2, p3] = fixQuad(p0, p1, p2, p3);
+        [p0, p1, p2, p3] = [p3, p2, p0, p1];
 
         const w = src.width;
         const h = src.height;
