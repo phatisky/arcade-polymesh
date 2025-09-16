@@ -1,14 +1,37 @@
 class polymesh {
-    public faces: { indices: number[], color: number, offset: number, scale: number, img?: Image }[]
-    public points: { x: number, y: number, z: number }[]
+    protected phi: number = 1.6180339887
+
+    protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[];
+    set faces(vals: { indices: number[], color: number, offset: number, scale: number, img?: Image }[]) {
+        this.faces_indices = vals.map( vs => vs.indices.map( v => Fx8(v)))
+        this.faces_color = vals.map(v => Fx8(v.color)), this.faces_offset = vals.map(v => Fx8(v.offset)), this.faces_scale = vals.map(v => Fx8(v.scale))
+        this.faces_img = vals.map(v => v.img ? v.img : null)
+    }
+    get faces() {
+        return this.faces_indices.map((_, i) => ({
+            indices: this.faces_indices[i].map( v => Fx.toFloat(v)),
+            color: Fx.toInt(this.faces_color[i]),
+            offset: Fx.toFloat(this.faces_offset[i]),
+            scale: Fx.toFloat(this.faces_scale[i]),
+            img: this.faces_img[i],
+        }))
+    }
+
+    protected points_xs: Fx8[]; protected points_ys: Fx8[]; protected points_zs: Fx8[];
+    set points(vals: { x: number, y: number, z: number}[]) {
+        this.points_xs = vals.map(v => Fx8(v.x)), this.points_ys = vals.map(v => Fx8(v.y)), this.points_zs = vals.map(v => Fx8(v.z))
+    }
+    get points() {
+        return this.points_xs.map((_, i) => ({
+            x: Fx.toFloat(this.points_xs[i]),
+            y: Fx.toFloat(this.points_ys[i]),
+            z: Fx.toFloat(this.points_zs[i]),
+        }))
+    }
 
     protected pivot_x: Fx8; protected pivot_y: Fx8; protected pivot_z: Fx8;
-    set pivot(v: { x: number, y: number, z: number }) {
-        this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z)
-    }
-    get pivot() {
-        return { x: Fx.toFloat(this.pivot_x), y: Fx.toFloat(this.pivot_y), z: Fx.toFloat(this.pivot_z) }
-    }
+    set pivot(v: { x: number, y: number, z: number }) { this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z) }
+    get pivot() { return { x: Fx.toFloat(this.pivot_x), y: Fx.toFloat(this.pivot_y), z: Fx.toFloat(this.pivot_z) } }
     
     protected rot_x : Fx8; protected rot_y : Fx8; protected rot_z : Fx8;
     protected rot_vx: Fx8; protected rot_vy: Fx8; protected rot_vz: Fx8;
@@ -41,7 +64,8 @@ class polymesh {
     set pos(v: { x: number, y: number, z: number,
         vx: number, vy: number, vz: number,
         ax: number, ay: number, az: number,
-        fx: number, fy: number, fz: number }) {
+        fx: number, fy: number, fz: number
+    }) {
         this.pos_x  = Fx8(v.x) , this.pos_y  = Fx8(v.y) , this.pos_z  = Fx8(v.z)
         this.pos_vx = Fx8(v.vx), this.pos_vy = Fx8(v.vy), this.pos_vz = Fx8(v.vz)
         this.pos_ax = Fx8(v.ax), this.pos_ay = Fx8(v.ay), this.pos_az = Fx8(v.az)
@@ -111,8 +135,8 @@ class polymesh {
     //% group="Mesh util"
     //% weight=7
     public zDist() {
-        const zd = Polymesh.meshDistZ(this), phi = 1.6180339887
-        return zd * phi
+        const zd = Polymesh.meshDistZ(this)
+        return zd * this.phi
     }
 
     //% blockId=poly_dist_camera
@@ -187,7 +211,7 @@ class polymesh {
     //% weight=10
     public setVertice(idx: number, point3: Polymesh.shadowPoint3) {
         if (Polymesh.isOutOfRange(idx, this.points.length + 1)) return;
-        this.points[idx] = { x: point3.x, y: point3.y, z: point3.z }
+        this.points_xs[idx] = Fx8(point3.x), this.points_ys[idx] = Fx8(point3.y), this.points_zs[idx] = Fx8(point3.z);// this.points[idx] = { x: point3.x, y: point3.y, z: point3.z }
     }
 
     //% blockId=poly_vertice_add
@@ -197,7 +221,9 @@ class polymesh {
     //% this.shadow=variables_get this.defl=myMesh
     //% group="mesh property"
     //% weight=9
-    public addVertice(point3: Polymesh.shadowPoint3) { this.points.push({ x: point3.x, y: point3.y, z: point3.z }) }
+    public addVertice(point3: Polymesh.shadowPoint3) {
+        this.points_xs.push(Fx8(point3.x)), this.points_ys.push(Fx8(point3.y)), this.points_zs.push(Fx8(point3.z));// this.points.push({ x: point3.x, y: point3.y, z: point3.z })
+    }
 
     //% blockId=poly_vertice_del
     //% blockNamespace=Polymesh
@@ -206,8 +232,8 @@ class polymesh {
     //% group="mesh remover"
     //% weight=10
     public delVertice(idx?: number) {
-        if (idx) this.points.removeAt(idx);
-        else this.points.pop();
+        if (idx) this.points_xs.removeAt(idx), this.points_ys.removeAt(idx), this.points_zs.removeAt(idx);// this.points.removeAt(idx);
+        else this.points_xs.pop(), this.points_ys.pop(), this.points_zs.pop();// this.points.pop();
     }
 
     //% blockId=poly_face_set
@@ -221,12 +247,20 @@ class polymesh {
         if (Polymesh.isOutOfRange(idx, this.faces.length + 1)) return;
         if (!billscale.scale) billscale.scale = 1
         if (!clface.oface) clface.oface = 0
+        const indice = [Fx8(inds.i1)]
+        if (inds.i2) indice.push(Fx8(inds.i2));
+        if (inds.i3) indice.push(Fx8(inds.i3));
+        if (inds.i4) indice.push(Fx8(inds.i4));
+        if (img) this.faces_indices[idx] = indice, this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = img;
+        else this.faces_indices[idx] = indice, this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = null;
+        /*
         const indice = [inds.i1]
         if (inds.i2) indice.push(inds.i2);
         if (inds.i3) indice.push(inds.i3);
         if (inds.i4) indice.push(inds.i4);
         if (img) this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img };
         else this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale };
+        */
     }
 
     //% blockId=poly_face_add
@@ -240,12 +274,20 @@ class polymesh {
     public addFace(c: number, inds: Polymesh.shadowIndices, clface: Polymesh.shadowOffsetFace, billscale: Polymesh.shadowBillSize, img?: Image) {
         if (!billscale.scale) billscale.scale = 1
         if (!clface.oface) clface.oface = 0
+        const indice = [Fx8(inds.i1)]
+        if (inds.i2) indice.push(Fx8(inds.i2));
+        if (inds.i3) indice.push(Fx8(inds.i3));
+        if (inds.i4) indice.push(Fx8(inds.i4));
+        if (img) this.faces_indices.push(indice), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(img);
+        else this.faces_indices.push(indice), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(null);
+        /*
         const indice = [inds.i1]
         if (inds.i2) indice.push(inds.i2);
         if (inds.i3) indice.push(inds.i3);
         if (inds.i4) indice.push(inds.i4);
         if (img) this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img });
         else this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale });
+        */
     }
 
     //% blockId=poly_face_del
@@ -255,8 +297,8 @@ class polymesh {
     //% group="mesh remover"
     //% weight=9
     public delFace(idx?: number) {
-        if (idx) this.faces.removeAt(idx);
-        else this.faces.pop();
+        if (idx) this.faces_indices.removeAt(idx), this.faces_offset.removeAt(idx), this.faces_scale.removeAt(idx), this.faces_img.removeAt(idx);// this.faces.removeAt(idx);
+        else this.faces_indices.pop(), this.faces_offset.pop(), this.faces_scale.pop(), this.faces_img.pop();// this.faces.pop();
     }
 
     //% blockId=poly_getfacecolor
@@ -266,8 +308,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=10
     public getFaceColor(idx: number) {
-        if (!this.faces[idx].color) return NaN
-        return this.faces[idx].color
+        if (!this.faces_color[idx]) return NaN
+        return Fx.toInt(this.faces_color[idx])
     }
 
     //% blockId=poly_setfacecolor
@@ -277,8 +319,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=9
     public setFaceColor(idx: number, c: number) {
-        if (this.faces[idx].color === c) return;
-        this.faces[idx].color = c
+        if (this.faces_color[idx] === Fx8(c)) return;
+        this.faces_color[idx] = Fx8(c)
     }
 
     //% blockId=poly_getfaceimage
@@ -288,8 +330,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=8
     public getFaceImage(idx: number) {
-        if (!this.faces[idx].img) return null
-        return this.faces[idx].img
+        if (!this.faces_img[idx]) return null
+        return this.faces_img[idx]
     }
 
     //% blockId=poly_setfaceimage
@@ -299,8 +341,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=7
     public setFaceImage(idx: number, img: Image) {
-        if (this.faces[idx].img && this.faces[idx].img.equals(img)) return;
-        this.faces[idx].img = img
+        if (this.faces_img[idx] && this.faces_img[idx].equals(img)) return;
+        this.faces_img[idx] = img
     }
 
     //% blockId=poly_clearfaceimage
@@ -310,8 +352,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=6
     public clearFaceImage(idx: number) {
-        if (!this.faces[idx].img) return;
-        this.faces[idx].img = null
+        if (!this.faces_img[idx]) return;
+        this.faces_img[idx] = null
     }
 
     //% blockId=poly_getfaceoffset
@@ -321,8 +363,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=5
     public getFaceOffset(idx: number) {
-        if (!this.faces[idx].offset) return NaN
-        return this.faces[idx].offset
+        if (!this.faces_offset[idx]) return NaN
+        return Fx.toFloat(this.faces_offset[idx])
     }
 
     //% blockId=poly_setfaceoffset
@@ -333,8 +375,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=4
     public setFaceOffset(idx: number, oface: number) {
-        if (this.faces[idx].offset === oface) return;
-        this.faces[idx].offset = oface
+        if (this.faces_offset[idx] === Fx8(oface)) return;
+        this.faces_offset[idx] = Fx8(oface)
     }
 
     //% blockId=poly_getfacescale
@@ -344,8 +386,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=5
     public getFaceScale(idx: number) {
-        if (!this.faces[idx].scale) return NaN
-        return this.faces[idx].scale
+        if (!this.faces_scale[idx]) return NaN
+        return Fx.toFloat(this.faces_scale[idx])
     }
 
     //% blockId=poly_setfacescale
@@ -356,8 +398,8 @@ class polymesh {
     //% group="mesh face property"
     //% weight=4
     public setFaceScale(idx: number, scale: number) {
-        if (this.faces[idx].scale === scale) return;
-        this.faces[idx].scale = scale
+        if (this.faces_scale[idx] === Fx8(scale)) return;
+        this.faces_scale[idx] = Fx8(scale)
     }
 
     //% blockId=poly_mesh_pivot_set
