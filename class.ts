@@ -134,7 +134,7 @@ class polymesh {
     //% group="Mesh util"
     //% weight=7
     public zDist() {
-        return Math.max(0, Polymesh.meshDistZ(this) * Polymesh.doubleNine)
+        return Polymesh.meshDistZ(this) * Polymesh.doubleNine
     }
 
     //% blockId=poly_dist_camera
