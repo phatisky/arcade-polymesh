@@ -46,8 +46,9 @@ namespace Polymesh {
         const depths = plms.map(plm => meshDepthZ(plm));
         const sorted = plms.map((m, i) => ({ mesh: m, depth: depths[i] }));
         switch (sort) {
-            case 0x0: sorted.sort((a, b) => b.depth - a.depth)      ; break
-            case 0x1: introSort(sorted, (a, b) => b.depth - a.depth); break
+            case 0x0:          sorted.sort((a, b) => b.depth - a.depth)      ; break
+            case 0x1:          introSort(sorted, (a, b) => b.depth - a.depth); break
+            case 0x2: default: quickSort(sorted, (a, b) => b.depth - a.depth); break
         }
         for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
         inProcess[1] = false
@@ -108,8 +109,9 @@ namespace Polymesh {
         // Sort triangles
         const tris = plm.faces.slice();
         switch (sort) {
-            case 0x0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-            case 0x1: default: introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            case 0x0:          tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices))      ; break
+            case 0x1:          introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            case 0x2: default: quickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
         }
 
         // Render

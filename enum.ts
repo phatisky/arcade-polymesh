@@ -96,6 +96,8 @@ enum SortingMethods {
     accurate = 0x0,
     //% block="quick"
     quick    = 0x1,
+    //% block="fast"
+    fast     = 0x2,
 }
 enum MeshFlags {
     //% block="Invisible"
