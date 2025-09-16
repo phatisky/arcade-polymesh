@@ -1,154 +1,163 @@
 
 namespace Polymesh {
 
-    export function introSort<T>(arr: T[], compare: (a: T, b: T) => number): T[] {
-        const array = arr.slice();
-        const maxDepth = 2 * Math.floor(Math.log(array.length) / Math.log(2));
+    export function introSort<T>(arr: T[], compare: (a: T, b: T) => number): void {
+        const n = arr.length;
+        if (n <= 1) return;
 
-        const isSorted = (low: number, high: number) => {
-            for (let i = low + 1; i <= high; i++) {
-                if (compare(array[i - 1], array[i]) > 0) return false;
+        // ตรวจว่าข้อมูลเรียงแล้วหรือยัง
+        let sorted = true;
+        for (let i = 1; i < n; i++) {
+            if (compare(arr[i - 1], arr[i]) > 0) {
+                sorted = false;
+                break;
             }
-            return true;
-        };
+        }
+        if (sorted) return;
 
-        const insertionSort = (low: number, high: number) => {
-            for (let i = low + 1; i <= high; i++) {
-                const key = array[i];
-                let j = i - 1;
-                while (j >= low && compare(array[j], key) > 0) {
-                    array[j + 1] = array[j];
-                    j--;
-                }
-                array[j + 1] = key;
-            }
-        };
-
-        const heapify = (start: number, end: number) => {
-            const swap = (i: number, j: number) => {
-                [array[i], array[j]] = [array[j], array[i]];
-            };
-            const siftDown = (root: number, size: number) => {
-                let largest = root;
-                const left = 2 * root + 1 - start;
-                const right = 2 * root + 2 - start;
-                if (left < size && compare(array[start + left], array[start + largest]) > 0)
-                    largest = left;
-                if (right < size && compare(array[start + right], array[start + largest]) > 0)
-                    largest = right;
-                if (largest !== root) {
-                    swap(start + root, start + largest);
-                    siftDown(largest, size);
-                }
-            };
-            const size = end - start + 1;
-            for (let i = Math.floor(size / 2) - 1; i >= 0; i--) {
-                siftDown(i, size);
-            }
-            for (let i = size - 1; i > 0; i--) {
-                swap(start, start + i);
-                siftDown(0, i);
-            }
-        };
-
-        // Non-recursive stack-based IntroSort
-        const stack: { low: number; high: number; depth: number }[] = [
-            { low: 0, high: array.length - 1, depth: maxDepth },
-        ];
+        const maxDepth = 2 * Math.floor(Math.log(n) / Math.LOG2E);
+        const stack: { left: number, right: number, depth: number }[] = [];
+        stack.push({ left: 0, right: n - 1, depth: maxDepth });
 
         while (stack.length) {
-            const { low, high, depth } = stack[stack.length-1];
-            stack.pop();
-            if (low >= high || isSorted(low, high)) continue;
+            const { left, right, depth } = stack.pop();
+            if (left >= right) continue;
 
-            const size = high - low + 1;
-            // use Insertion Sort for short
+            const size = right - left + 1;
+
+            // ใช้ Insertion sort สำหรับขนาดเล็ก
             if (size <= 16) {
-                insertionSort(low, high);
+                for (let i = left + 1; i <= right; i++) {
+                    const key = arr[i];
+                    let j = i - 1;
+                    while (j >= left && compare(arr[j], key) > 0) {
+                        arr[j + 1] = arr[j];
+                        j--;
+                    }
+                    arr[j + 1] = key;
+                }
                 continue;
             }
 
-            // use HeapSort on depth is empty
+            // ถ้าเกินความลึก → ใช้ HeapSort กัน worst-case
             if (depth === 0) {
-                heapify(low, high);
+                heapSort(arr, left, right, compare);
                 continue;
             }
 
-            // QuickSort partition as median-of-three
-            const mid = Math.floor((low + high) / 2);
-            let a = array[low], b = array[mid], c = array[high];
-            if (compare(a, b) > 0) [a, b] = [b, a];
-            if (compare(b, c) > 0) [b, c] = [c, b];
-            if (compare(a, b) > 0) [a, b] = [b, a];
-            const pivot = b;
+            // เลือก pivot แบบ median-of-three
+            const mid = left + ((right - left) >> 1);
+            const pivotIndex = medianOfThree(arr, left, mid, right, compare);
+            const pivot = arr[pivotIndex];
 
-            let i = low, j = high;
-            while (i <= j) {
-                while (compare(array[i], pivot) < 0) i++;
-                while (compare(array[j], pivot) > 0) j--;
-                if (i <= j) {
-                    [array[i], array[j]] = [array[j], array[i]];
+            // Partition (สามทาง รองรับค่าซ้ำ)
+            let i = left, lt = left, gt = right;
+            while (i <= gt) {
+                const cmp = compare(arr[i], pivot);
+                if (cmp < 0) {
+                    swap(arr, lt++, i++);
+                } else if (cmp > 0) {
+                    swap(arr, i, gt--);
+                } else {
                     i++;
-                    j--;
                 }
             }
 
-            if (low < j) stack.push({ low, high: j, depth: depth - 1 });
-            if (i < high) stack.push({ low: i, high, depth: depth - 1 });
+            // Push subproblems (เรียง stack ใหญ่ก่อนเล็กทีหลัง)
+            if (lt - 1 - left > right - (gt + 1)) {
+                stack.push({ left, right: lt - 1, depth: depth - 1 });
+                stack.push({ left: gt + 1, right, depth: depth - 1 });
+            } else {
+                stack.push({ left: gt + 1, right, depth: depth - 1 });
+                stack.push({ left, right: lt - 1, depth: depth - 1 });
+            }
         }
 
-        return array;
-    }
+        function swap(arr: T[], i: number, j: number) {
+            const tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
 
-    export function quickSort<T>(arr: T[], compare: (a: T, b: T) => number): T[] {
-        const array = arr.slice(); // make copy to not edit original array
-        const stack: [number, number][] = [[0, array.length - 1]];
-
-        // check sorted function
-        const isSorted = (low: number, high: number) => {
-            for (let i = low + 1; i <= high; i++) {
-                if (compare(array[i - 1], array[i]) > 0) return false;
-            }
-            return true;
-        };
-
-        // choose pivot function as median-of-three
-        const choosePivot = (low: number, high: number): T => {
-            const mid = Math.floor((low + high) / 2);
-            let a = array[low], b = array[mid], c = array[high];
-            // find median-of-three
-            if (compare(a, b) > 0) [a, b] = [b, a];
-            if (compare(b, c) > 0) [b, c] = [c, b];
-            if (compare(a, b) > 0) [a, b] = [b, a];
+        function medianOfThree(arr: T[], a: number, b: number, c: number, compare: (x: T, y: T) => number): number {
+            if (compare(arr[a], arr[b]) > 0) swap(arr, a, b);
+            if (compare(arr[a], arr[c]) > 0) swap(arr, a, c);
+            if (compare(arr[b], arr[c]) > 0) swap(arr, b, c);
             return b;
-        };
+        }
 
-        while (stack.length) {
-            const [low, high] = stack[stack.length-1];
-            stack.pop();
-            if (low >= high || isSorted(low, high)) continue;
+        function heapSort(arr: T[], left: number, right: number, compare: (x: T, y: T) => number) {
+            const n = right - left + 1;
+            // build max heap
+            for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(i, n);
+            for (let end = n - 1; end > 0; end--) {
+                swap(arr, left, left + end);
+                siftDown(0, end);
+            }
 
-            const pivot = choosePivot(low, high);
-            let i = low, j = high;
+            function heapify(i: number, n: number) {
+                siftDown(i, n);
+            }
 
-            // Lomuto-style partition
+            function siftDown(i: number, n: number) {
+                while (true) {
+                    let largest = i;
+                    const l = 2 * i + 1, r = 2 * i + 2;
+                    if (l < n && compare(arr[left + l], arr[left + largest]) > 0) largest = l;
+                    if (r < n && compare(arr[left + r], arr[left + largest]) > 0) largest = r;
+                    if (largest === i) break;
+                    swap(arr, left + i, left + largest);
+                    i = largest;
+                }
+            }
+        }
+    }
+
+
+    export function quickSort<T>(arr: T[], compare: (a: T, b: T) => number): void {
+        if (arr.length <= 1) return;
+
+        type Range = { left: number; right: number };
+        const stack: Range[] = [{ left: 0, right: arr.length - 1 }];
+
+        while (stack.length > 0) {
+            const { left, right } = stack.pop();
+            if (left >= right) continue;
+
+            let i = left, j = right;
+            const mid = (left + right) >> 1;
+            const pivot = arr[mid];
+
+            // ตรวจว่าช่วงนี้เรียงแล้วหรือไม่
+            let sorted = true;
+            for (let k = left; k < right; k++) {
+                if (compare(arr[k], arr[k + 1]) > 0) {
+                    sorted = false;
+                    break;
+                }
+            }
+            if (sorted) continue;
+
+            // Partition (3-way partitioning)
             while (i <= j) {
-                while (compare(array[i], pivot) < 0) i++;
-                while (compare(array[j], pivot) > 0) j--;
+                while (compare(arr[i], pivot) < 0) i++;
+                while (compare(arr[j], pivot) > 0) j--;
                 if (i <= j) {
-                    [array[i], array[j]] = [array[j], array[i]];
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
                     i++;
                     j--;
                 }
             }
 
-            // Push subset for non-sorting in stack
-            if (low < j) stack.push([low, j]);
-            if (i < high) stack.push([i, high]);
+            // จัดลำดับความลึก (stack-based, หลีกเลี่ยง pivot แย่)
+            if (j - left < right - i) {
+                if (left < j) stack.push({ left, right: j });
+                if (i < right) stack.push({ left: i, right });
+            } else {
+                if (i < right) stack.push({ left: i, right });
+                if (left < j) stack.push({ left, right: j });
+            }
         }
-
-        return array;
     }
-
 
 }
