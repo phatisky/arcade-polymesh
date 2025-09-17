@@ -243,8 +243,8 @@ class polymesh {
     //% weight=8
     public setFace(idx: number, c: number, inds: Polymesh.shadowIndices, clface?: Polymesh.shadowOffsetFace, billscale?: Polymesh.shadowBillSize, img?: Image) {
         if (Polymesh.isOutOfRange(idx, this.faces.length + 1)) return;
-        if (!billscale.scale) billscale.scale = 1
-        if (!clface.oface) clface.oface = 0
+        if (!billscale) billscale = new Polymesh.shadowBillSize(1)
+        if (!clface) clface = new Polymesh.shadowOffsetFace(0)
         const indice = [Fx8(inds.i1)]
         if (inds.i2) indice.push(Fx8(inds.i2));
         if (inds.i3) indice.push(Fx8(inds.i3));
@@ -268,8 +268,8 @@ class polymesh {
     //% group="mesh property"
     //% weight=7
     public addFace(c: number, inds: Polymesh.shadowIndices, clface?: Polymesh.shadowOffsetFace, billscale?: Polymesh.shadowBillSize, img?: Image) {
-        if (!billscale.scale) billscale.scale = 1
-        if (!clface.oface) clface.oface = 0
+        if (!billscale) billscale = new Polymesh.shadowBillSize(1)
+        if (!clface) clface = new Polymesh.shadowOffsetFace(0)
         const indice = [Fx8(inds.i1)]
         if (inds.i2) indice.push(Fx8(inds.i2));
         if (inds.i3) indice.push(Fx8(inds.i3));
