@@ -91,13 +91,13 @@ enum PolyPivot {
     //% block="Pivot z"
     z = 0x2,
 }
-enum SortingMethods {
+enum PolySort {
     //% block="accurate"
-    accurate  = 0x0,
-    //% block="normal"
-    normal    = 0x1,
+    accurate = 0x0,
     //% block="quick"
-    quick     = 0x2,
+    quick    = 0x1,
+    //% block="quick accurate"
+    quicka   = 0x2,
 }
 enum MeshFlags {
     //% block="Invisible"

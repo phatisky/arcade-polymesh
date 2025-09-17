@@ -13,7 +13,7 @@ namespace Polymesh {
     //% block="set sorting method to $method"
     //% group="sorting"
     //% weight=10
-    export function sortingMethod(method: SortingMethods) {
+    export function sortingMethod(method: PolySort) {
         sort = method
     }
 
