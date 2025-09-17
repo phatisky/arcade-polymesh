@@ -3,7 +3,7 @@ class polymesh {
     protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[];
     set faces(vals: { indices: number[], color: number, offset?: number, scale?: number, img?: Image }[]) {
         this.faces_indices = vals.map( vs => vs.indices.map( v => Fx8(v))), this.faces_color = vals.map(v => Fx8(v.color))
-        this.faces_offset = vals.map(v => v.offset ? Fx8(v.offset) : null), this.faces_scale = vals.map(v => v.scale ? Fx8(v.scale) : null)
+        this.faces_offset = vals.map(v => v.offset ? Fx8(v.offset) : Fx8(0)), this.faces_scale = vals.map(v => v.scale ? Fx8(v.scale) : Fx8(1))
         this.faces_img = vals.map(v => v.img ? v.img : null)
     }
     get faces() {
