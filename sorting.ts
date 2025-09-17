@@ -4,7 +4,7 @@ namespace Polymesh {
     export function introSort<T>(
         arr: T[],
         compare: (a: T, b: T) => number,
-        quickSort?: boolean
+        quick?: boolean,
     ) {
         const maxDepth = 2 * Math.floor(Math.log(arr.length) / Math.LOG2E);
         if (isSorted(arr, compare)) return; // check if array is sorted
@@ -21,7 +21,7 @@ namespace Polymesh {
                 continue;
             }
     
-            if (depth === 0) {
+            if (!quick && depth === 0) {
                 heapSort(arr, start, end, compare);
                 continue;
             }
@@ -31,29 +31,6 @@ namespace Polymesh {
 
             if (p - 1 > start) stack.push({ start, end: p - 1, depth: depth - 1 });
             if (p < end) stack.push({ start: p, end, depth: depth - 1 });
-        }
-    }
-
-    export function quickSort<T>(arr: T[], compare: (a: T, b: T) => number) {
-        if (isSorted(arr, compare)) return; // check if array is sorted
-
-        const stack: { start: number, end: number }[] = [];
-        stack.push({ start: 0, end: arr.length - 1 });
-
-        while (stack.length) {
-            const { start, end } = stack.pop();
-            const size = end - start + 1;
-
-            if (size <= 16) {
-                insertionSort(arr, start, end, compare);
-                continue;
-            }
-
-            const pivot = medianOfThree(arr, start, start + (size >> 1), end, compare);
-            const p = partition(arr, start, end, pivot, compare);
-
-            if (p - 1 > start) stack.push({ start, end: p - 1 });
-            if (p < end) stack.push({ start: p, end });
         }
     }
 
