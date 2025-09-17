@@ -1,18 +1,15 @@
 class polymesh {
 
     protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[];
-    set faces(vals: { indices: number[], color: number, offset: number, scale: number, img?: Image }[]) {
-        this.faces_indices = vals.map( vs => vs.indices.map( v => Fx8(v)))
-        this.faces_color = vals.map(v => Fx8(v.color)), this.faces_offset = vals.map(v => Fx8(v.offset)), this.faces_scale = vals.map(v => Fx8(v.scale))
+    set faces(vals: { indices: number[], color: number, offset?: number, scale?: number, img?: Image }[]) {
+        this.faces_indices = vals.map( vs => vs.indices.map( v => Fx8(v))), this.faces_color = vals.map(v => Fx8(v.color))
+        this.faces_offset = vals.map(v => v.offset ? Fx8(v.offset) : null), this.faces_scale = vals.map(v => v.scale ? Fx8(v.scale) : null)
         this.faces_img = vals.map(v => v.img ? v.img : null)
     }
     get faces() {
         return this.faces_indices.map((_, i) => ({
-            indices: this.faces_indices[i].map( v => Fx.toFloat(v)),
-            color: Fx.toInt(this.faces_color[i]),
-            offset: Fx.toFloat(this.faces_offset[i]),
-            scale: Fx.toFloat(this.faces_scale[i]),
-            img: this.faces_img[i],
+            indices: this.faces_indices[i].map( v => Fx.toFloat(v)), color: Fx.toInt(this.faces_color[i]),
+            offset: Fx.toFloat(this.faces_offset[i]),                scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i],
         }))
     }
 
@@ -239,12 +236,12 @@ class polymesh {
 
     //% blockId=poly_face_set
     //% blockNamespace=Polymesh
-    //% block=" $this set face at $idx to color $c=colorindexpicker and $inds $clface=poly_shadow_offsetface $billscale=poly_shadow_billscale|| and texture $img=screen_image_picker"
+    //% block=" $this set face at $idx to color $c=colorindexpicker and $inds|| $clface=poly_shadow_offsetface $billscale=poly_shadow_billscale and texture $img=screen_image_picker"
     //% inds.shadow=poly_shadow_indices
     //% this.shadow=variables_get this.defl=myMesh
     //% group="mesh property"
     //% weight=8
-    public setFace(idx: number, c: number, inds: Polymesh.shadowIndices, clface: Polymesh.shadowOffsetFace, billscale: Polymesh.shadowBillSize, img?: Image) {
+    public setFace(idx: number, c: number, inds: Polymesh.shadowIndices, clface?: Polymesh.shadowOffsetFace, billscale?: Polymesh.shadowBillSize, img?: Image) {
         if (Polymesh.isOutOfRange(idx, this.faces.length + 1)) return;
         if (!billscale.scale) billscale.scale = 1
         if (!clface.oface) clface.oface = 0
@@ -252,8 +249,8 @@ class polymesh {
         if (inds.i2) indice.push(Fx8(inds.i2));
         if (inds.i3) indice.push(Fx8(inds.i3));
         if (inds.i4) indice.push(Fx8(inds.i4));
-        if (img) this.faces_indices[idx] = indice, this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = img;
-        else this.faces_indices[idx] = indice, this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = null;
+        if (img) this.faces_indices[idx] = indice, this.faces_color[idx] = Fx8(c), this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = img;
+        else this.faces_indices[idx] = indice, this.faces_color[idx] = Fx8(c), this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = null;
         // const indice = [inds.i1]
         // if (inds.i2) indice.push(inds.i2);
         // if (inds.i3) indice.push(inds.i3);
@@ -264,21 +261,21 @@ class polymesh {
 
     //% blockId=poly_face_add
     //% blockNamespace=Polymesh
-    //% block=" $this add face to color $c=colorindexpicker and $inds $clface=poly_shadow_offsetface $billscale=poly_shadow_billscale|| and texture $img=screen_image_picker"
+    //% block=" $this add face to color $c=colorindexpicker and $inds|| $clface=poly_shadow_offsetface $billscale=poly_shadow_billscale and texture $img=screen_image_picker"
     //% inds.shadow=poly_shadow_indices
     //% oface.min=-1 oface.max=1
     //% this.shadow=variables_get this.defl=myMesh
     //% group="mesh property"
     //% weight=7
-    public addFace(c: number, inds: Polymesh.shadowIndices, clface: Polymesh.shadowOffsetFace, billscale: Polymesh.shadowBillSize, img?: Image) {
+    public addFace(c: number, inds: Polymesh.shadowIndices, clface?: Polymesh.shadowOffsetFace, billscale?: Polymesh.shadowBillSize, img?: Image) {
         if (!billscale.scale) billscale.scale = 1
         if (!clface.oface) clface.oface = 0
         const indice = [Fx8(inds.i1)]
         if (inds.i2) indice.push(Fx8(inds.i2));
         if (inds.i3) indice.push(Fx8(inds.i3));
         if (inds.i4) indice.push(Fx8(inds.i4));
-        if (img) this.faces_indices.push(indice), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(img);
-        else this.faces_indices.push(indice), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(null);
+        if (img) this.faces_indices.push(indice), this.faces_color.push(Fx8(c)), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(img);
+        else this.faces_indices.push(indice), this.faces_color.push(Fx8(c)), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(null);
         // const indice = [inds.i1]
         // if (inds.i2) indice.push(inds.i2);
         // if (inds.i3) indice.push(inds.i3);
@@ -294,8 +291,8 @@ class polymesh {
     //% group="mesh remover"
     //% weight=9
     public delFace(idx?: number) {
-        if (idx) this.faces_indices.removeAt(idx), this.faces_offset.removeAt(idx), this.faces_scale.removeAt(idx), this.faces_img.removeAt(idx);// this.faces.removeAt(idx);
-        else this.faces_indices.pop(), this.faces_offset.pop(), this.faces_scale.pop(), this.faces_img.pop();// this.faces.pop();
+        if (idx) this.faces_indices.removeAt(idx), this.faces_color.removeAt(idx), this.faces_offset.removeAt(idx), this.faces_scale.removeAt(idx), this.faces_img.removeAt(idx);// this.faces.removeAt(idx);
+        else this.faces_indices.pop(), this.faces_color.pop(), this.faces_offset.pop(), this.faces_scale.pop(), this.faces_img.pop();// this.faces.pop();
     }
 
     //% blockId=poly_getfacecolor
