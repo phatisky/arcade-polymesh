@@ -1,163 +1,221 @@
 
 namespace Polymesh {
 
-    export function introSort<T>(arr: T[], compare: (a: T, b: T) => number): void {
-        const n = arr.length;
-        if (n <= 1) return;
+    export function introSort<T>(
+        arr: T[],
+        compare: (a: T, b: T) => number
+    ): void {
+        if (arr.length <= 1) return;
 
-        // ตรวจว่าข้อมูลเรียงแล้วหรือยัง
-        let sorted = true;
-        for (let i = 1; i < n; i++) {
-            if (compare(arr[i - 1], arr[i]) > 0) {
-                sorted = false;
-                break;
-            }
-        }
-        if (sorted) return;
+        // if sorted will not run it
+        if (isSorted(arr, compare)) return;
 
-        const maxDepth = 2 * Math.floor(Math.log(n) / Math.LOG2E);
-        const stack: { left: number, right: number, depth: number }[] = [];
-        stack.push({ left: 0, right: n - 1, depth: maxDepth });
+        const maxDepth = 2 * Math.floor(Math.log(arr.length) / Math.LOG2E);
+        introsortUtil(arr, 0, arr.length - 1, maxDepth, compare);
+    }
 
-        while (stack.length) {
-            const { left, right, depth } = stack.pop();
-            if (left >= right) continue;
+    function introsortUtil<T>(
+        arr: T[],
+        start: number,
+        end: number,
+        depthLimit: number,
+        compare: (a: T, b: T) => number
+    ): void {
+        while (end > start) {
+            const size = end - start + 1;
 
-            const size = right - left + 1;
-
-            // ใช้ Insertion sort สำหรับขนาดเล็ก
+            // use insertion sort on small array
             if (size <= 16) {
-                for (let i = left + 1; i <= right; i++) {
-                    const key = arr[i];
-                    let j = i - 1;
-                    while (j >= left && compare(arr[j], key) > 0) {
-                        arr[j + 1] = arr[j];
-                        j--;
-                    }
-                    arr[j + 1] = key;
-                }
-                continue;
+                insertionSort(arr, start, end, compare);
+                return;
             }
 
-            // ถ้าเกินความลึก → ใช้ HeapSort กัน worst-case
-            if (depth === 0) {
-                heapSort(arr, left, right, compare);
-                continue;
+            // if too depth use fallback on heapSort
+            if (depthLimit === 0) {
+                heapSort(arr, start, end, compare);
+                return;
             }
 
-            // เลือก pivot แบบ median-of-three
-            const mid = left + ((right - left) >> 1);
-            const pivotIndex = medianOfThree(arr, left, mid, right, compare);
-            const pivot = arr[pivotIndex];
+            // choose pivot as median-of-three
+            const pivot = medianOfThree(
+                arr,
+                start,
+                start + ((end - start) >> 1),
+                end,
+                compare
+            );
 
-            // Partition (สามทาง รองรับค่าซ้ำ)
-            let i = left, lt = left, gt = right;
-            while (i <= gt) {
-                const cmp = compare(arr[i], pivot);
-                if (cmp < 0) {
-                    swap(arr, lt++, i++);
-                } else if (cmp > 0) {
-                    swap(arr, i, gt--);
-                } else {
-                    i++;
-                }
-            }
+            const p = partition(arr, start, end, pivot, compare);
 
-            // Push subproblems (เรียง stack ใหญ่ก่อนเล็กทีหลัง)
-            if (lt - 1 - left > right - (gt + 1)) {
-                stack.push({ left, right: lt - 1, depth: depth - 1 });
-                stack.push({ left: gt + 1, right, depth: depth - 1 });
+            // manage large item 1st to unstack depth
+            if (p - start < end - p) {
+                introsortUtil(arr, start, p - 1, depthLimit - 1, compare);
+                start = p;
             } else {
-                stack.push({ left: gt + 1, right, depth: depth - 1 });
-                stack.push({ left, right: lt - 1, depth: depth - 1 });
-            }
-        }
-
-        function swap(arr: T[], i: number, j: number) {
-            const tmp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = tmp;
-        }
-
-        function medianOfThree(arr: T[], a: number, b: number, c: number, compare: (x: T, y: T) => number): number {
-            if (compare(arr[a], arr[b]) > 0) swap(arr, a, b);
-            if (compare(arr[a], arr[c]) > 0) swap(arr, a, c);
-            if (compare(arr[b], arr[c]) > 0) swap(arr, b, c);
-            return b;
-        }
-
-        function heapSort(arr: T[], left: number, right: number, compare: (x: T, y: T) => number) {
-            const n = right - left + 1;
-            // build max heap
-            for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(i, n);
-            for (let end = n - 1; end > 0; end--) {
-                swap(arr, left, left + end);
-                siftDown(0, end);
-            }
-
-            function heapify(i: number, n: number) {
-                siftDown(i, n);
-            }
-
-            function siftDown(i: number, n: number) {
-                while (true) {
-                    let largest = i;
-                    const l = 2 * i + 1, r = 2 * i + 2;
-                    if (l < n && compare(arr[left + l], arr[left + largest]) > 0) largest = l;
-                    if (r < n && compare(arr[left + r], arr[left + largest]) > 0) largest = r;
-                    if (largest === i) break;
-                    swap(arr, left + i, left + largest);
-                    i = largest;
-                }
+                introsortUtil(arr, p, end, depthLimit - 1, compare);
+                end = p - 1;
             }
         }
     }
 
-
-    export function quickSort<T>(arr: T[], compare: (a: T, b: T) => number): void {
+    export function quickSort<T>(
+        arr: T[],
+        compare: (a: T, b: T) => number
+    ): void {
         if (arr.length <= 1) return;
 
-        type Range = { left: number; right: number };
-        const stack: Range[] = [{ left: 0, right: arr.length - 1 }];
+        // if sorted will not run it
+        if (isSorted(arr, compare)) return;
 
-        while (stack.length > 0) {
-            const { left, right } = stack.pop();
-            if (left >= right) continue;
+        quickSortUtil(arr, 0, arr.length - 1, compare);
+    }
 
-            let i = left, j = right;
-            const mid = (left + right) >> 1;
-            const pivot = arr[mid];
+    function quickSortUtil<T>(
+        arr: T[],
+        start: number,
+        end: number,
+        compare: (a: T, b: T) => number
+    ): void {
+        while (start < end) {
+            const size = end - start + 1;
 
-            // ตรวจว่าช่วงนี้เรียงแล้วหรือไม่
-            let sorted = true;
-            for (let k = left; k < right; k++) {
-                if (compare(arr[k], arr[k + 1]) > 0) {
-                    sorted = false;
-                    break;
-                }
-            }
-            if (sorted) continue;
-
-            // Partition (3-way partitioning)
-            while (i <= j) {
-                while (compare(arr[i], pivot) < 0) i++;
-                while (compare(arr[j], pivot) > 0) j--;
-                if (i <= j) {
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                    i++;
-                    j--;
-                }
+            // if small array use insertion sort
+            if (size <= 16) {
+                insertionSort(arr, start, end, compare);
+                return;
             }
 
-            // จัดลำดับความลึก (stack-based, หลีกเลี่ยง pivot แย่)
-            if (j - left < right - i) {
-                if (left < j) stack.push({ left, right: j });
-                if (i < right) stack.push({ left: i, right });
+            // choose pivot as median-of-three
+            const pivot = medianOfThree(
+                arr,
+                start,
+                start + ((end - start) >> 1),
+                end,
+                compare
+            );
+
+            // split zone by partition
+            const p = partition(arr, start, end, pivot, compare);
+
+            // select small to resume (tail recursion elimination)
+            if (p - start < end - p) {
+                quickSortUtil(arr, start, p - 1, compare);
+                start = p; // use right area
             } else {
-                if (i < right) stack.push({ left: i, right });
-                if (left < j) stack.push({ left, right: j });
+                quickSortUtil(arr, p, end, compare);
+                end = p - 1; // use left area
             }
         }
+    }
+
+    function isSorted<T>(arr: T[], compare: (a: T, b: T) => number): boolean {
+        for (let i = 1; i < arr.length; i++) {
+            if (compare(arr[i - 1], arr[i]) > 0) return false;
+        }
+        return true;
+    }
+
+    function insertionSort<T>(
+        arr: T[],
+        start: number,
+        end: number,
+        compare: (a: T, b: T) => number
+    ): void {
+        for (let i = start + 1; i <= end; i++) {
+            const key = arr[i];
+            let j = i - 1;
+            while (j >= start && compare(arr[j], key) > 0) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = key;
+        }
+    }
+
+    function heapSort<T>(
+        arr: T[],
+        start: number,
+        end: number,
+        compare: (a: T, b: T) => number
+    ): void {
+        const size = end - start + 1;
+
+        for (let i = Math.floor(size / 2) - 1; i >= 0; i--) {
+            heapify(arr, i, size, start, compare);
+        }
+
+        for (let i = size - 1; i > 0; i--) {
+            swap(arr, start, start + i);
+            heapify(arr, 0, i, start, compare);
+        }
+    }
+
+    function heapify<T>(
+        arr: T[],
+        i: number,
+        size: number,
+        offset: number,
+        compare: (a: T, b: T) => number
+    ): void {
+        while (true) {
+            let largest = i;
+            const left = 2 * i + 1;
+            const right = 2 * i + 2;
+
+            if (left < size && compare(arr[offset + left], arr[offset + largest]) > 0) {
+                largest = left;
+            }
+            if (right < size && compare(arr[offset + right], arr[offset + largest]) > 0) {
+                largest = right;
+            }
+            if (largest === i) break;
+
+            swap(arr, offset + i, offset + largest);
+            i = largest;
+        }
+    }
+
+    function partition<T>(
+        arr: T[],
+        low: number,
+        high: number,
+        pivot: T,
+        compare: (a: T, b: T) => number
+    ): number {
+        while (low <= high) {
+            while (compare(arr[low], pivot) < 0) low++;
+            while (compare(arr[high], pivot) > 0) high--;
+            if (low <= high) {
+                swap(arr, low, high);
+                low++;
+                high--;
+            }
+        }
+        return low;
+    }
+
+    function medianOfThree<T>(
+        arr: T[],
+        a: number,
+        b: number,
+        c: number,
+        compare: (a: T, b: T) => number
+    ): T {
+        if (compare(arr[a], arr[b]) < 0) {
+            if (compare(arr[b], arr[c]) < 0) return arr[b];
+            else if (compare(arr[a], arr[c]) < 0) return arr[c];
+            else return arr[a];
+        } else {
+            if (compare(arr[a], arr[c]) < 0) return arr[a];
+            else if (compare(arr[b], arr[c]) < 0) return arr[c];
+            else return arr[b];
+        }
+    }
+
+    function swap<T>(arr: T[], i: number, j: number): void {
+        const tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
     }
 
 }
