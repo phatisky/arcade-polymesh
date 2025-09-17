@@ -47,18 +47,18 @@ namespace Polymesh {
     //% weight=5
     export function changeAngle(choice: PolyAngle, x: number) {
         switch (choice) {
-            case 0x0: ax  += x; break
-            case 0x1: ay  += x; break
-            case 0x2: az  += x; break
-            case 0x3: avx += x; break
-            case 0x4: avy += x; break
-            case 0x5: avz += x; break
-            case 0x6: aax += x; break
-            case 0x7: aay += x; break
-            case 0x8: aaz += x; break
-            case 0x9: afx += x; break
-            case 0xA: afy += x; break
-            case 0xB: afz += x; break
+            case 0x0: if (ax  !== ax  + x) ax  += x; break
+            case 0x1: if (ay  !== ay  + x) ay  += x; break
+            case 0x2: if (az  !== az  + x) az  += x; break
+            case 0x3: if (avx !== avx + x) avx += x; break
+            case 0x4: if (avy !== avy + x) avy += x; break
+            case 0x5: if (avz !== avz + x) avz += x; break
+            case 0x6: if (aax !== aax + x) aax += x; break
+            case 0x7: if (aay !== aay + x) aay += x; break
+            case 0x8: if (aaz !== aaz + x) aaz += x; break
+            case 0x9: if (afx !== afx + x) afx += x; break
+            case 0xA: if (afy !== afy + x) afy += x; break
+            case 0xB: if (afz !== afz + x) afz += x; break
         }
     }
     //% blockId=poly_camera_change
@@ -67,21 +67,21 @@ namespace Polymesh {
     //% weight=5
     export function changeCam(choice: PolyCam, x: number) {
         switch (choice) {
-            case 0x0: default: zoom    += x; break
-            case 0x1:          dist    += x; break
-            case 0x2:          fardist += x; break
-            case 0x3:          camx    += x; break
-            case 0x4:          camy    += x; break
-            case 0x5:          camz    += x; break
-            case 0x6:          camvx   += x; break
-            case 0x7:          camvy   += x; break
-            case 0x8:          camvz   += x; break
-            case 0x9:          camax   += x; break
-            case 0xA:          camay   += x; break
-            case 0xB:          camaz   += x; break
-            case 0xC:          camfx   += x; break
-            case 0xD:          camfy   += x; break
-            case 0xE:          camfz   += x; break
+            case 0x0: default: if (zoom    !== zoom    + x) zoom    += x; break
+            case 0x1:          if (dist    !== dist    + x) dist    += x; break
+            case 0x2:          if (fardist !== fardist + x) fardist += x; break
+            case 0x3:          if (camx    !== camx    + x) camx    += x; break
+            case 0x4:          if (camy    !== camy    + x) camy    += x; break
+            case 0x5:          if (camz    !== camz    + x) camz    += x; break
+            case 0x6:          if (camvx   !== camvx   + x) camvx   += x; break
+            case 0x7:          if (camvy   !== camvy   + x) camvy   += x; break
+            case 0x8:          if (camvz   !== camvz   + x) camvz   += x; break
+            case 0x9:          if (camax   !== camax   + x) camax   += x; break
+            case 0xA:          if (camay   !== camay   + x) camay   += x; break
+            case 0xB:          if (camaz   !== camaz   + x) camaz   += x; break
+            case 0xC:          if (camfx   !== camfx   + x) camfx   += x; break
+            case 0xD:          if (camfy   !== camfy   + x) camfy   += x; break
+            case 0xE:          if (camfz   !== camfz   + x) camfz   += x; break
         }
     }
     //% blockId=poly_angle_set
@@ -90,18 +90,18 @@ namespace Polymesh {
     //% weight=10
     export function setAngle(choice: PolyAngle, x: number) {
         switch (choice) {
-            case 0x0: ax  = x; break
-            case 0x1: ay  = x; break
-            case 0x2: az  = x; break
-            case 0x3: avx = x; break
-            case 0x4: avy = x; break
-            case 0x5: avz = x; break
-            case 0x6: aax = x; break
-            case 0x7: aay = x; break
-            case 0x8: aaz = x; break
-            case 0x9: afx = x; break
-            case 0xA: afy = x; break
-            case 0xB: afz = x; break
+            case 0x0: if (ax  !== x) ax  = x; break
+            case 0x1: if (ay  !== x) ay  = x; break
+            case 0x2: if (az  !== x) az  = x; break
+            case 0x3: if (avx !== x) avx = x; break
+            case 0x4: if (avy !== x) avy = x; break
+            case 0x5: if (avz !== x) avz = x; break
+            case 0x6: if (aax !== x) aax = x; break
+            case 0x7: if (aay !== x) aay = x; break
+            case 0x8: if (aaz !== x) aaz = x; break
+            case 0x9: if (afx !== x) afx = x; break
+            case 0xA: if (afy !== x) afy = x; break
+            case 0xB: if (afz !== x) afz = x; break
         }
     }
     //% blockId=poly_camera_set
@@ -110,21 +110,21 @@ namespace Polymesh {
     //% weight=10
     export function setCam(choice: PolyCam, x: number) {
         switch (choice) {
-            case 0x0: default: zoom    = x; break
-            case 0x1:          dist    = x; break
-            case 0x2:          fardist = x; break
-            case 0x3:          camx    = x; break
-            case 0x4:          camy    = x; break
-            case 0x5:          camz    = x; break
-            case 0x6:          camvx   = x; break
-            case 0x7:          camvy   = x; break
-            case 0x8:          camvz   = x; break
-            case 0x9:          camax   = x; break
-            case 0xA:          camay   = x; break
-            case 0xB:          camaz   = x; break
-            case 0xC:          camfx   = x; break
-            case 0xD:          camfy   = x; break
-            case 0xE:          camfz   = x; break
+            case 0x0: default: if (zoom    !== x) zoom    = x; break
+            case 0x1:          if (dist    !== x) dist    = x; break
+            case 0x2:          if (fardist !== x) fardist = x; break
+            case 0x3:          if (camx    !== x) camx    = x; break
+            case 0x4:          if (camy    !== x) camy    = x; break
+            case 0x5:          if (camz    !== x) camz    = x; break
+            case 0x6:          if (camvx   !== x) camvx   = x; break
+            case 0x7:          if (camvy   !== x) camvy   = x; break
+            case 0x8:          if (camvz   !== x) camvz   = x; break
+            case 0x9:          if (camax   !== x) camax   = x; break
+            case 0xA:          if (camay   !== x) camay   = x; break
+            case 0xB:          if (camaz   !== x) camaz   = x; break
+            case 0xC:          if (camfx   !== x) camfx   = x; break
+            case 0xD:          if (camfy   !== x) camfy   = x; break
+            case 0xE:          if (camfz   !== x) camfz   = x; break
         }
     }
 
