@@ -225,37 +225,38 @@ namespace Polymesh {
                 else helpers.imageDrawLine(output, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
                 continue;
             }
-
-            // Draw line when no shape
-            helpers.imageDrawLine(output,
-                rotated[inds[0]].x, rotated[inds[0]].y,
-                rotated[inds[1]].x, rotated[inds[1]].y,
-                t.color
-            );
-            // Draw solid when is vertice shape
-            if (inds.length > 3) {
-                /*
-                helpers.imageFillTriangle( output,
-                    rotated[inds[3]].x, rotated[inds[3]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
-                    t.color
-                );
-                */
-                helpers.imageFillPolygon4(output,
-                    rotated[inds[3]].x, rotated[inds[3]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
+            if (t.color > 0) {
+                // Draw line when no shape
+                helpers.imageDrawLine(output,
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     t.color
                 );
-            } else if (inds.length > 2) {
-                helpers.imageFillTriangle(output,
-                    rotated[inds[0]].x, rotated[inds[0]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
-                    t.color
-                );
+                // Draw solid when is vertice shape
+                if (inds.length > 3) {
+                    /*
+                    helpers.imageFillTriangle( output,
+                        rotated[inds[3]].x, rotated[inds[3]].y,
+                        rotated[inds[1]].x, rotated[inds[1]].y,
+                        rotated[inds[2]].x, rotated[inds[2]].y,
+                        t.color
+                    );
+                    */
+                    helpers.imageFillPolygon4(output,
+                        rotated[inds[3]].x, rotated[inds[3]].y,
+                        rotated[inds[2]].x, rotated[inds[2]].y,
+                        rotated[inds[0]].x, rotated[inds[0]].y,
+                        rotated[inds[1]].x, rotated[inds[1]].y,
+                        t.color
+                    );
+                } else if (inds.length > 2) {
+                    helpers.imageFillTriangle(output,
+                        rotated[inds[0]].x, rotated[inds[0]].y,
+                        rotated[inds[1]].x, rotated[inds[1]].y,
+                        rotated[inds[2]].x, rotated[inds[2]].y,
+                        t.color
+                    );
+                }
             }
 
             // Draw texture over
