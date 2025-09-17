@@ -16,12 +16,14 @@ namespace Polymesh {
     export class shadowOffsetFace { constructor(public oface?: number) { } }
     //% blockId=poly_shadow_offsetface
     //% block="||offset face of $oface"
+    //% oface.defl=0
     //% blockHidden
     export function offsetFaceShadow(oface?: number) { return new shadowOffsetFace(oface) }
 
     export class shadowBillSize { constructor(public scale?: number) { } }
     //% blockId=poly_shadow_billscale
     //% block="||bill size of $scale"
+    //% scale.defl=1
     //% blockHidden
     export function billSizeShadow(scale?: number) { return new shadowBillSize(scale) }
 
