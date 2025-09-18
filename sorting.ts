@@ -8,7 +8,22 @@ namespace Polymesh {
     ): void {
         if (isSorted(arr, compare)) return;
         const maxDepth = 2 * Math.floor(Math.log(arr.length) / Math.LOG2E);
-        introsortUtil(arr, 0, arr.length - 1, maxDepth, compare, quick);
+        
+        const stack: { start: number, end: number, depth: number }[] = [];
+        stack.push({ start: 0, end: arr.length - 1, depth: maxDepth });
+
+        while (stack.length) {
+            const { start, end, depth } = stack.pop(), size = end - start + 1;
+
+            if (size <= 16) { insertionSort(arr, start, end, compare);
+            continue; }
+            if (!quick && depth === 0) { heapSort(arr, start, end, compare);
+            continue; }
+
+            const pivot = medianOfThree(arr, start, start + ((size - 1) >> 1), end, compare), p = partition(arr, start, end, pivot, compare);
+            if (p - 1 > start) stack.push({ start, end: p - 1, depth: depth - 1 });
+            if (p < end) stack.push({ start: p, end, depth: depth - 1 });
+        }
     }
 
     function introsortUtil<T>(
@@ -19,21 +34,7 @@ namespace Polymesh {
         compare: (a: T, b: T) => number,
         quick?: boolean
     ): void {
-        const size = end - start + 1;
-        if (size <= 16) {
-            insertionSort(arr, start, end, compare);
-            return;
-        }
-
-        if (!quick && depthLimit === 0) {
-            heapSort(arr, start, end, compare);
-            return;
-        }
-
-        const pivot = medianOfThree(arr, start, start + ((end - start) >> 1), end, compare);
-        const p = partition(arr, start, end, pivot, compare);
-        introsortUtil(arr, start, p - 1, depthLimit - 1, compare, quick);
-        introsortUtil(arr, p + 1, end, depthLimit - 1, compare, quick);
+        
     }
 
     function insertionSort<T>(arr: T[], start: number, end: number, compare: (a: T, b: T) => number) {
