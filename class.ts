@@ -140,7 +140,7 @@ class polymesh {
         this.__home__()
     }
 
-    //% blockId=poly_dist_zdepth
+    //% blockId=poly_dist_zdist
     //% blockNamespace=Polymesh
     //% block=" $this get view distance"
     //% this.shadow=variables_get this.defl=myMesh
@@ -148,6 +148,16 @@ class polymesh {
     //% weight=7
     public zDist() {
         return Polymesh.meshDistZ(this) * Polymesh.doubleNine
+    }
+
+    //% blockId=poly_dist_zdepth
+    //% blockNamespace=Polymesh
+    //% block=" $this as Z of depth"
+    //% this.shadow=variables_get this.defl=myMesh
+    //% group="Mesh util"
+    //% weight=6
+    public zDepth() {
+        return Polymesh.meshDepthZ(this)
     }
 
     //% blockId=poly_dist_camera
@@ -159,7 +169,7 @@ class polymesh {
     public distFromCamera() {
         const distPos = { x: Polymesh.camx - this.pos.x, y: Polymesh.camy - this.pos.y, z: Polymesh.camz - this.pos.z }
         const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
-        return distSum * Polymesh.fisqrt(distSum)
+        return distSum * Polymesh.q_rsqrt(distSum)
     }
 
     //% blockId=poly_dist_othermesh
@@ -172,7 +182,7 @@ class polymesh {
     public distBetween(otherMesh: polymesh) {
         const distPos = { x: otherMesh.pos.x - this.pos.x, y: otherMesh.pos.y - this.pos.y, z: otherMesh.pos.z - this.pos.z }
         const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
-        return distSum * Polymesh.fisqrt(distSum)
+        return distSum * Polymesh.q_rsqrt(distSum)
     }
 
     //% blockId=poly_normal_speed
@@ -184,7 +194,7 @@ class polymesh {
     public normalSpeed() {
         const distPosV = { vx: this.pos.vx, vy: this.pos.vy, vz: this.pos.vz }
         const distSum = (distPosV.vx * distPosV.vx) + (distPosV.vy * distPosV.vy) + (distPosV.vz * distPosV.vz)
-        return distSum * Polymesh.fisqrt(distSum)
+        return distSum * Polymesh.q_rsqrt(distSum)
     }
 
     //% blockId=poly_flag_set

@@ -96,8 +96,6 @@ enum PolySort {
     accurate = 0x0,
     //% block="quick"
     quick    = 0x1,
-    //% block="quick accurate"
-    quicka   = 0x2,
 }
 enum MeshFlags {
     //% block="Invisible"

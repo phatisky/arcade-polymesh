@@ -20,7 +20,7 @@ namespace Polymesh {
     export function isOutOfRange(x: number, range: number, scale?: number) { return scale ? x < -(range * scale) || x >= range + (range * scale) : x < 0 || x >= range }
     
     /** Fast inverse square root **/
-    export function fisqrt(x: number): number {
+    export function q_rsqrt(x: number): number {
         if (x <= 0) return 0;
         const buf = pins.createBuffer(4);
         buf.setNumber(NumberFormat.Float32LE, 0, x);
@@ -106,7 +106,9 @@ namespace Polymesh {
         revX?: boolean, revY?: boolean
     ) {
         // fix quad of intersect
-        [p0, p1, p2, p3] = [p3, p2, p0, p1];
+        const tmp_pt = p3;
+        p3 = p1, p1 = p2, p2 = p0, p0 = tmp_pt;
+        // [p0, p1, p2, p3] = [p3, p2, p0, p1];
 
         const w = src.width;
         const h = src.height;

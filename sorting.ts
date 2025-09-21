@@ -3,8 +3,7 @@ namespace Polymesh {
 
     export function introSort<T>(
         arr: T[],
-        compare: (a: T, b: T) => number,
-        quick?: boolean
+        compare: (a: T, b: T) => number
     ): void {
         if (isSorted(arr, compare)) return;
         const maxDepth = 2 * Math.floor(Math.log(arr.length) / Math.LOG2E);
@@ -15,26 +14,13 @@ namespace Polymesh {
         while (stack.length) {
             const { start, end, depth } = stack.pop(), size = end - start + 1;
 
-            if (size <= 16) { insertionSort(arr, start, end, compare);
-            continue; }
-            if (!quick && depth === 0) { heapSort(arr, start, end, compare);
-            continue; }
+            if (size <= 16) { insertionSort(arr, start, end, compare); continue; }
+            if (depth === 0) { heapSort(arr, start, end, compare); continue; }
 
             const pivot = medianOfThree(arr, start, start + ((size - 1) >> 1), end, compare), p = partition(arr, start, end, pivot, compare);
             if (p - 1 > start) stack.push({ start, end: p - 1, depth: depth - 1 });
             if (p < end) stack.push({ start: p, end, depth: depth - 1 });
         }
-    }
-
-    function introsortUtil<T>(
-        arr: T[],
-        start: number,
-        end: number,
-        depthLimit: number,
-        compare: (a: T, b: T) => number,
-        quick?: boolean
-    ): void {
-        
     }
 
     function insertionSort<T>(arr: T[], start: number, end: number, compare: (a: T, b: T) => number) {
@@ -53,7 +39,7 @@ namespace Polymesh {
             if (left < max && compare(arr[start + left], arr[start + largest]) > 0) largest = left;
             if (right < max && compare(arr[start + right], arr[start + largest]) > 0) largest = right;
             if (largest === i) break;
-            [arr[start + i], arr[start + largest]] = [arr[start + largest], arr[start + i]]
+            const tmp_n = arr[start + i]; arr[start + i] = arr[start + largest], arr[start + largest] = tmp_n;// [arr[start + i], arr[start + largest]] = [arr[start + largest], arr[start + i]]
             i = largest, largest = i;
         }
     }
@@ -63,7 +49,10 @@ namespace Polymesh {
 
         for (let i = Math.floor(size / 2) - 1; i >= 0; i--) heapify(arr, i, size, start, compare);
 
-        for (let i = size - 1; i > 0; i--) [arr[start], arr[start + i]] = [arr[start + i], arr[start]], heapify(arr, 0, i, start, compare);
+        for (let i = size - 1; i > 0; i--) {
+            const tmp_n = arr[start + i]; arr[start + i] = arr[start], arr[start] = tmp_n;// [arr[start], arr[start + i]] = [arr[start + i], arr[start]]
+            heapify(arr, 0, i, start, compare);
+        }
     }
 
     function partition<T>(
