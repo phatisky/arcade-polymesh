@@ -9,6 +9,7 @@ namespace Polymesh {
             const { low, high } = stack.pop();
             if (low >= high) continue;
 
+            // start: partition
             let tmp: T, i = low;
             const pivot = arr[high];
 
@@ -19,15 +20,11 @@ namespace Polymesh {
                 }
             }
             tmp = arr[i]; arr[i] = arr[high]; arr[high] = tmp; // place pivot
+            //   end: partition
 
             // push item left to stack
-            if (i - low < high - i) {
-                stack.push({ low, high: i - 1 });
-                stack.push({ low: i + 1, high });
-            } else {
-                stack.push({ low: i + 1, high });
-                stack.push({ low, high: i - 1 });
-            }
+            if (i - low < high - i) stack.push({ low, high: i - 1 }), stack.push({ low: i + 1, high });
+            else stack.push({ low: i + 1, high }), stack.push({ low, high: i - 1 });
         }
     }
 
