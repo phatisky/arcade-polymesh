@@ -17,8 +17,8 @@
         "enum.ts",
         "help.ts",
         "shadow.ts",
-        "sorting-2nd.ts",
-        "sorting-1st.ts"
+        "sorting-introsort.ts",
+        "sorting-quicksort.ts"
     ],
     "testFiles": [
         "test.ts"
