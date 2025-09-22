@@ -11,16 +11,19 @@ namespace Polymesh {
             const { start, end, depth } = stack.pop(), size = end - start + 1;
             if (size <= 1) continue;
 
-            if (size <= 16) { // insertion sort
+            if (size <= 16) {
+                // start: insertion-sort
                 for (let i = start + 1; i <= end; i++) {
                     tmp = arr[i];
                     let j = i - 1;
                     while (j >= start && compare(arr[j], tmp) > 0) arr[j + 1] = arr[j], j--;
                     arr[j + 1] = tmp;
                 }
-            continue; } // end insertion sort
+                //   end: insertion-sort
+            continue; }
 
-            if (depth <= 0) { // heap sort
+            if (depth <= 0) {
+                // start: heap-sort
                 const shiftDown = (size: number, i: number) => {
                     while (true) {
                         let largest = i;
@@ -37,9 +40,11 @@ namespace Polymesh {
                     tmp = arr[start]; arr[start] = arr[start + i], arr[start + i] = tmp;
                     shiftDown(i, 0);
                 }
-            continue; } // end heap sort
+                //   end: heap-sort
+            continue; }
 
-            const pivotIndex = (start + end) >> 1; // partition
+            // start: partition
+            const pivotIndex = (start + end) >> 1;
             tmp = arr[pivotIndex];
             arr[pivotIndex] = arr[end], arr[end] = tmp;
 
@@ -51,8 +56,9 @@ namespace Polymesh {
                 }
             }
 
-            tmp = arr[i]; arr[i] = arr[end], arr[end] = tmp; // end partition
-
+            tmp = arr[i]; arr[i] = arr[end], arr[end] = tmp;
+            //   end: partition
+            
             // Push larger partition first to minimize stack usage
             if ((i - 1) - start > end - (i + 1)) stack.push({ start, end: i - 1, depth: depth - 1 }), stack.push({ start: i + 1, end, depth: depth - 1 });
             else stack.push({ start: i + 1, end, depth: depth - 1 }), stack.push({ start, end: i - 1, depth: depth - 1 });
