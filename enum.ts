@@ -94,10 +94,10 @@ enum PolyPivot {
 enum PolySort {
     //% block="accurate"
     accurate = 0x0,
+    //% block="normal"
+    normal  = 0x1,
     //% block="quick"
-    quick    = 0x1,
-    //% block="quick accurate"
-    quickacr = 0x2,
+    quick   = 0x2,
 }
 enum MeshFlags {
     //% block="Invisible"

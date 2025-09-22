@@ -1,100 +1,64 @@
-
 namespace Polymesh {
 
-    export function introSort1st<T>(
-        arr: T[],
-        compare: (a: T, b: T) => number
-    ): void {
-        if (isSorted(arr, compare)) return;
-        const maxDepth = Math.floor(Math.log(arr.length) / Math.LOG2E) << 1;
-
-        const stack: { start: number, end: number, depth: number }[] = [];
-        stack.push({ start: 0, end: arr.length - 1, depth: maxDepth });
+    export function introSort<T>(arr: T[], compare: (a: T, b: T) => number): void {
+        if (arr.length <= 1 || isSorted(arr, compare)) return;
+        const maxDepth = (Math.floor(Math.log(arr.length) / Math.LOG2E) << 1);
+        const stack: { s: number, e: number, d: number }[] = [{ s: 0, e: arr.length - 1, d: maxDepth }];
+        let tmp: T;
 
         while (stack.length) {
-            const { start, end, depth } = stack.pop(), size = end - start + 1;
+            const { s, e, d } = stack.pop();
+            const size = e - s + 1;
+            if (size <= 16) { insertionSort(arr, s, e, compare); continue; }
+            if (d === 0) { heapSort(arr, s, e, compare); continue; }
 
-            if (size <= 16) { insertionSort(arr, start, end, compare); continue; }
-            if (depth === 0) { heapSort(arr, start, end, compare); continue; }
-
-            const pivot = medianOfThree(arr, start, start + ((size - 1) >> 1), end, compare), p = partition(arr, start, end, pivot, compare);
-            if (p - 1 > start) stack.push({ start, end: p - 1, depth: depth - 1 });
-            if (p < end) stack.push({ start: p, end, depth: depth - 1 });
+            const p = partition(arr, s, e, compare);
+            if ((p - 1) - s < e - (p + 1)) stack.push({ s: p + 1, e, d: d - 1 }), stack.push({ s, e: p - 1, d: d - 1 });
+            else stack.push({ s, e: p - 1, d: d - 1 }), stack.push({ s: p + 1, e, d: d - 1 });
         }
     }
 
-    function insertionSort<T>(arr: T[], start: number, end: number, compare: (a: T, b: T) => number) {
-        for (let i = start + 1; i <= end; i++) {
-            const key = arr[i];
-            let j = i - 1;
-            while (j >= start && compare(arr[j], key) > 0) arr[j + 1] = arr[j], j--;
+    function insertionSort<T>(arr: T[], s: number, e: number, cmp: (a: T, b: T) => number) {
+        for (let i = s + 1; i <= e; i++) {
+            const key = arr[i]; let j = i - 1;
+            while (j >= s && cmp(arr[j], key) > 0) { arr[j + 1] = arr[j]; j--; }
             arr[j + 1] = key;
         }
     }
 
-    function heapify<T>(arr: T[], i: number, max: number, start: number, compare: (a: T, b: T) => number) {
-        let largest = i;
+    function heapify<T>(arr: T[], i: number, n: number, s: number, cmp: (a: T, b: T) => number) {
+        let largest = i, tmp: T;
         while (true) {
-            const left = (i << 1) + 1, right = (i << 1) + 2;
-            if (left < max && compare(arr[start + left], arr[start + largest]) > 0) largest = left;
-            if (right < max && compare(arr[start + right], arr[start + largest]) > 0) largest = right;
+            const l = (i << 1) + 1, r = (i << 1) + 2;
+            if (l < n && cmp(arr[s + l], arr[s + largest]) > 0) largest = l;
+            if (r < n && cmp(arr[s + r], arr[s + largest]) > 0) largest = r;
             if (largest === i) break;
-            const tmp = arr[start + i]; arr[start + i] = arr[start + largest], arr[start + largest] = tmp;// [arr[start + i], arr[start + largest]] = [arr[start + largest], arr[start + i]]
-            i = largest, largest = i;
+            tmp = arr[s + i]; arr[s + i] = arr[s + largest]; arr[s + largest] = tmp;
+            i = largest;
         }
     }
 
-    function heapSort<T>(arr: T[], start: number, end: number, compare: (a: T, b: T) => number) {
-        const size = end - start + 1;
-
-        for (let i = (size >> 1) - 1; i >= 0; i--) heapify(arr, i, size, start, compare);
-
-        for (let i = size - 1; i > 0; i--) {
-            const tmp = arr[start + i]; arr[start + i] = arr[start], arr[start] = tmp;// [arr[start], arr[start + i]] = [arr[start + i], arr[start]]
-            heapify(arr, 0, i, start, compare);
+    function heapSort<T>(arr: T[], s: number, e: number, cmp: (a: T, b: T) => number) {
+        const n = e - s + 1; let tmp: T;
+        for (let i = (n >> 1) - 1; i >= 0; i--) heapify(arr, i, n, s, cmp);
+        for (let i = n - 1; i > 0; i--) {
+            tmp = arr[s]; arr[s] = arr[s + i]; arr[s + i] = tmp;
+            heapify(arr, 0, i, s, cmp);
         }
     }
 
-    function partition<T>(
-        arr: T[],
-        low: number,
-        high: number,
-        pivot: T,
-        compare: (a: T, b: T) => number
-    ): number {
-        while (low <= high) {
-            while (compare(arr[low], pivot) < 0) low++;
-            while (compare(arr[high], pivot) > 0) high--;
-            if (low <= high) {
-                const tmp = arr[low];
-                arr[low] = arr[high], arr[high] = tmp;// [arr[low], arr[high]] = [arr[high], arr[low]]
-                low++, high--;
+    function partition<T>(arr: T[], lo: number, hi: number, cmp: (a: T, b: T) => number): number {
+        const mid = (lo + hi) >> 1, pivot = arr[mid]; let tmp: T;
+        tmp = arr[mid]; arr[mid] = arr[hi]; arr[hi] = tmp;
+        let i = lo;
+        for (let j = lo; j < hi; j++) {
+            if (cmp(arr[j], pivot) < 0) {
+                tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+                i++;
             }
         }
-        return low;
-    }
-
-    function medianOfThree<T>(
-        arr: T[],
-        a: number,
-        b: number,
-        c: number,
-        compare: (a: T, b: T) => number
-    ): T {
-        if (compare(arr[a], arr[b]) < 0) {
-            if (compare(arr[b], arr[c]) < 0) return arr[b];
-            else if (compare(arr[a], arr[c]) < 0) return arr[c];
-            else return arr[a];
-        } else {
-            if (compare(arr[a], arr[c]) < 0) return arr[a];
-            else if (compare(arr[b], arr[c]) < 0) return arr[c];
-            else return arr[b];
-        }
-    }
-
-    function isSorted<T>(arr: T[], compare: (a: T, b: T) => number): boolean {
-        for (let i = 1; i < arr.length; i++) if (compare(arr[i - 1], arr[i]) > 0) return false;
-        return true;
+        tmp = arr[i]; arr[i] = arr[hi]; arr[hi] = tmp;
+        return i;
     }
 
 }

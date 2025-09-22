@@ -1,6 +1,11 @@
 
 namespace Polymesh {
 
+    export function isSorted<T>(arr: T[], cmp: (a: T, b: T) => number): boolean {
+        for (let i = 1; i < arr.length; i++) if (cmp(arr[i - 1], arr[i]) > 0) return false;
+        return true;
+    }
+
     export function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
 
     export function isOutOfArea(x: number, y: number, width: number, height: number, scale?: number) {
