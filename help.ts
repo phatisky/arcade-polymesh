@@ -1,6 +1,12 @@
 
 namespace Polymesh {
 
+    export function blog(x: number) {
+        let r = 0;
+        while (x > 1) x >>= 1, r++;
+        return r;
+    };
+
     export function isSorted<T>(arr: T[], cmp: (a: T, b: T) => number): boolean {
         for (let i = 1; i < arr.length; i++) if (cmp(arr[i - 1], arr[i]) > 0) return false;
         return true;

@@ -18,13 +18,14 @@
         "help.ts",
         "shadow.ts",
         "sorting-introsort.ts",
-        "sorting-quicksort.ts"
+        "sorting-quicksort.ts",
+        "sorting-help.ts"
     ],
     "testFiles": [
         "test.ts"
     ],
     "targetVersions": {
-        "target": "2.0.56",
+        "target": "2.0.57",
         "targetId": "arcade"
     },
     "supportedTargets": [
