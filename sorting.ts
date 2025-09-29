@@ -31,6 +31,24 @@ namespace Polymesh {
         }
     };
 
+    const heapify = <T>(arr: T[], cmp: (a: T, b: T) => number, start: number, end: number) => {
+        let root = start;
+        while ((root << 1) + 1 <= end) {
+            let child = (root << 1) + 1, swapIdx = root;
+            if (cmp(arr[swapIdx], arr[child]) < 0) swapIdx = child;
+            if (child + 1 <= end && cmp(arr[swapIdx], arr[child + 1]) < 0) swapIdx = child + 1;
+            if (swapIdx === root) return;
+            swap(arr, root, swapIdx); root = swapIdx;
+        }
+    };
+
+    export const heapSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
+        // Build heap
+        for (let i = (lo + ((hi - lo + 1) >> 1)) - 1; i >= (!lo ? 0 : lo); i--) heapify(arr, cmp, i, hi);
+        // Heap sort
+        for (let end = hi; end > lo; end--) swap(arr, lo, end), heapify(arr, cmp, lo, end - 1);
+    }
+
     export function introSort<T>(arr: T[], cmp: (a: T, b: T) => number) {
         if (isSorted(arr, cmp)) return;
         // Stack 2D: [lo, hi, depth]
@@ -48,25 +66,6 @@ namespace Polymesh {
                 else stack.push([p + 1, hi]), hi = p - 1;
             }
         }
-    }
-
-    const heapify = <T>(arr: T[], cmp: (a: T, b: T) => number, start: number, end: number) => {
-        let root = start;
-        while ((root << 1) + 1 <= end) {
-            let child = (root << 1) + 1, swapIdx = root;
-            if (cmp(arr[swapIdx], arr[child]) < 0) swapIdx = child;
-            if (child + 1 <= end && cmp(arr[swapIdx], arr[child + 1]) < 0) swapIdx = child + 1;
-            if (swapIdx === root) return;
-            swap(arr, root, swapIdx); root = swapIdx;
-        }
-    };
-
-    export function heapSort<T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) {
-        if (!lo) lo = 0; if (!hi) hi = arr.length - 1;
-        // Build heap
-        for (let i = (lo + ((hi - lo + 1) >> 1)) - 1; i >= (!lo ? 0 : lo); i--) heapify(arr, cmp, i, hi);
-        // Heap sort
-        for (let end = hi; end > lo; end--) swap(arr, lo, end), heapify(arr, cmp, lo, end - 1);
     }
 
 }
