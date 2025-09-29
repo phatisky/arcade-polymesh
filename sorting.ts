@@ -50,11 +50,8 @@ namespace Polymesh {
         while (stack.length > 0) {
             const prop = stack.pop(); if (!prop) continue;
             let lo = prop[0], hi = prop[1], depth = prop[2], size = hi - lo + 1;
-            if (!quick) {
-                if (size <= 16) { insertionSort(arr, cmp, lo, hi); continue; }
-                if (depth <= 0) { heapSort(arr, cmp, lo, hi);      continue; }
-            }
             while (lo < hi) {
+                if (!quick) { if (size <= 16) { insertionSort(arr, cmp, lo, hi); break; }; if (depth <= 0) { heapSort(arr, cmp, lo, hi); break; }; };
                 // Partition for iterative
                 const p = partition(arr, cmp, lo, hi); depth--;
                 // Push subarrays
