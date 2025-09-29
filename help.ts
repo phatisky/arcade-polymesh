@@ -7,18 +7,7 @@ namespace Polymesh {
 
     export function avgZ(rot: { z: number }[], inds: number[]) { return (inds.reduce((s, i) => s + rot[i].z, 0) / inds.length); }
 
-    export const isEmptyImage = (img: Image) => img.equals(image.create(img.width, img.height))
-
-    export const blog = (x: number) => {
-        let r = 0;
-        while (x > 1) x >>= 1, r++;
-        return r;
-    };
-
-    export const isSorted = <T>(arr: T[], cmp: (a: T, b: T) => number) => {
-        for (let i = 1; i < arr.length; i++) if (cmp(arr[i - 1], arr[i]) > 0) return false;
-        return true;
-    }
+    export function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)); }
 
     export function isOutOfAreaOnFace(rotated: { x: number, y: number }[], ind: number[], width: number, height: number) {
         const avgXYs = { x: ind.reduce((cur, i) => cur + rotated[i].x, 0) / ind.length, y: ind.reduce((cur, i) => cur + rotated[i].y, 0) / ind.length }
@@ -28,20 +17,6 @@ namespace Polymesh {
     export function isOutOfAreaOnAvg (point2s: { x: number, y: number }[], width: number, height: number) {
         const avgXYs = { x: point2s.reduce((cur, val) => cur + val.x, 0) / point2s.length, y: point2s.reduce((cur, val) => cur + val.y, 0) / point2s.length }
         return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
-    }
-    
-    /** Fast inverse square root **/
-    export const q_rsqrt = (x: number) => {
-        if (x <= 0) return 0;
-        const buf = pins.createBuffer(4);
-        buf.setNumber(NumberFormat.Float32LE, 0, x);
-        let i = buf.getNumber(NumberFormat.Int32LE, 0);
-        i = 0x5f3759df - (i >> 1);
-        buf.setNumber(NumberFormat.Int32LE, 0, i);
-        let y = buf.getNumber(NumberFormat.Float32LE, 0);
-        // One iteration Newton-Raphson
-        y = y * (1.5 - (0.5 * x * y * y));
-        return y;
     }
 
     function gapAround(n: number, r: number, g: number) {
@@ -207,6 +182,31 @@ namespace Polymesh {
             // return (inner ? avgZ < otherAvgZ && (avgX !== otherAvgX && avgY !== otherAvgY) : avgZ > otherAvgZ && (avgX === otherAvgX && avgY === otherAvgY));
         }
         return true;
+    }
+
+    export const logb = (x: number) => {
+        let r = 0;
+        while (x > 1) x >>= 1, r++;
+        return r;
+    };
+
+    export const isSorted = <T>(arr: T[], cmp: (a: T, b: T) => number) => {
+        for (let i = 1; i < arr.length; i++) if (cmp(arr[i - 1], arr[i]) > 0) return false;
+        return true;
+    }
+
+    /** Fast inverse square root **/
+    export const q_rsqrt = (x: number) => {
+        if (x <= 0) return 0;
+        const buf = pins.createBuffer(4);
+        buf.setNumber(NumberFormat.Float32LE, 0, x);
+        let i = buf.getNumber(NumberFormat.Int32LE, 0);
+        i = 0x5f3759df - (i >> 1);
+        buf.setNumber(NumberFormat.Int32LE, 0, i);
+        let y = buf.getNumber(NumberFormat.Float32LE, 0);
+        // One iteration Newton-Raphson
+        y = y * (1.5 - (0.5 * x * y * y));
+        return y;
     }
 
     export const meshDepthZ = (plm: polymesh) => {

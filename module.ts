@@ -4,27 +4,27 @@ namespace Polymesh {
     const rotatePoint3D = (point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) => {
 
         // move point with pivot to 1st place
-        let dx = point.x - pivot.x;
-        let dy = point.y - pivot.y;
-        let dz = point.z - pivot.z;
+        let dx  = point.x - pivot.x;
+        let dy  = point.y - pivot.y;
+        let dz  = point.z - pivot.z;
 
         // --- rotate around x ---
         let dy1 = dy * Math.cos(angle.x) - dz * Math.sin(angle.x);
         let dz1 = dy * Math.sin(angle.x) + dz * Math.cos(angle.x);
-        dy = dy1;
-        dz = dz1;
+            dy  = dy1;
+            dz  = dz1;
 
         // --- rotate around y ---
         let dx1 = dx * Math.cos(angle.y) + dz * Math.sin(angle.y);
-        dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
-        dx = dx1;
-        dz = dz1;
+            dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
+            dx  = dx1;
+            dz  = dz1;
 
         // --- rotate around z ---
-        dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
-        dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
-        dx = dx1;
-        dy = dy1;
+            dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
+            dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
+            dx  = dx1;
+            dy  = dy1;
 
         // move back to real position
         return {
@@ -45,9 +45,10 @@ namespace Polymesh {
         inProcess[1] = true
         const sorted = plms.map(plm => ({ mesh: plm, depth: meshDepthZ(plm) }));
         switch (sort) {
-            case 0x0:          sorted.sort((a, b) => b.depth - a.depth)      ; break
-            case 0x1:          introSort(sorted, (a, b) => b.depth - a.depth); break
-            case 0x2: default: quickSort(sorted, (a, b) => b.depth - a.depth); break
+            case 0x0:          sorted.sort(      (a, b) => b.depth - a.depth); break
+            case 0x1:          heapSort( sorted, (a, b) => b.depth - a.depth); break
+            case 0x2:          introSort(sorted, (a, b) => b.depth - a.depth); break
+            case 0x3: default: quickSort(sorted, (a, b) => b.depth - a.depth); break
         }
         for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
         inProcess[1] = false
@@ -74,9 +75,9 @@ namespace Polymesh {
 
         // Transform vertices
         const rotated = plm.points.map(v => {
-            const vpoint: { x: number, y: number, z: number } = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z }
-            const vpivot: { x: number, y: number, z: number } = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
-            const vpos:   { x: number, y: number, z: number } = rotatePoint3D(vpoint, vpivot, plm.rot)
+            const vpoint = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z }
+            const vpivot = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
+            const vpos   = rotatePoint3D(vpoint, vpivot, plm.rot)
             // camera offset
             let x  = vpos.x - camx;
             let y  = vpos.y - camy;
@@ -108,9 +109,10 @@ namespace Polymesh {
         // Sort triangles
         const tris = plm.faces.slice();
         switch (sort) {
-            case 0x0:          tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices))      ; break
-            case 0x1:          introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
-            case 0x2: default: quickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            case 0x0:          tris.sort(      (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            case 0x1:          heapSort( tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            case 0x2:          introSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
+            case 0x3: default: quickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break
         }
 
         // Render
