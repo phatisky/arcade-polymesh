@@ -5,9 +5,9 @@ namespace Polymesh {
 
     const median3 = <T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) => {
         const m = (l + r) >> 1;
-        if (cmp(arr[l], arr[m]) > 0) swap(l, m);
-        if (cmp(arr[l], arr[r]) > 0) swap(l, r);
-        if (cmp(arr[m], arr[r]) > 0) swap(m, r);
+        if (cmp(arr[l], arr[m]) > 0) swap(arr, l, m);
+        if (cmp(arr[l], arr[r]) > 0) swap(arr, l, r);
+        if (cmp(arr[m], arr[r]) > 0) swap(arr, m, r);
         return m;
     };
 
