@@ -119,12 +119,14 @@ namespace Polymesh {
             if (inds.some(i => rotated[i].z < -Math.abs(dist) || rotated[i].z > Math.abs(fardist))) continue;
             let idx: number, pt: { scale: number, x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
             // LOD calculating?
-            let mydist = Math.abs(dist * Math.E / 2) / (Math.abs(dist) - avgZ(rotated, inds))
+            if (t.img) {
+                const scaleD = (t.scale * Polymesh.XDIST) / 5
+                im = image.create(Math.min(t.img.width, scaleD * t.img.width), Math.min(t.img.height, scaleD * t.img.height))
+                resizeImage(t.img.clone(), im, true, true)
+            }
             if (t.indices.length === 1) {
                 idx = t.indices[0];
                 pt  = rotated[idx];
-
-                im  = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
 
                 // center image
                 cx  = pt.x;
@@ -173,7 +175,6 @@ namespace Polymesh {
             square = 1.5 * scale * t.scale * zoom
 
             if (t.img) {
-                im = pixelessImage(t.img, plm.flag.lod ? mydist : 1)
                 // set scale image from camera distance
                 baseW  = im.width;
                 baseH  = im.height;
@@ -205,12 +206,12 @@ namespace Polymesh {
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
-                distortImage(im.clone(), output,
+                distortImage(im, output,
                     cx - halfW, cy - halfH,
                     cx + halfW, cy - halfH,
                     cx - halfW, cy + halfH,
                     cx + halfW, cy + halfH,
-                    1, true, true);
+                    true, true);
                 continue;
             }
 
@@ -261,12 +262,12 @@ namespace Polymesh {
 
             // Draw texture over
             if (inds.length === 4 && t.img) {
-                distortImage(t.img.clone(), output,
+                distortImage(im, output,
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[3]].x, rotated[inds[3]].y,
-                    plm.flag.lod ? mydist : 1, false, false
+                    false, false
                 );
             }
 
