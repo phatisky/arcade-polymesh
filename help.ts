@@ -125,9 +125,14 @@ namespace Polymesh {
 
     export function distortImage(src: Image, dest: Image,
         x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
-        srink: number, revX?: boolean, revY?: boolean) {
+        revX?: boolean, revY?: boolean) {
         let p0 = { x: x0, y: y0 }, p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 }, p3 = { x: x3, y: y3 }
-        distortImageUtil(pixelessImage(src.clone(), srink), dest, p0, p1, p2, p3, revX, revY)
+        distortImageUtil(src, dest, p0, p1, p2, p3, revX, revY)
+    }
+
+    export function resizeImage(from: Image, to: Image, revX?: boolean, revY?: boolean) {
+        if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
+        distortImage(from, to, 0, 0, to.width, 0, 0, to.height, to.width, to.height, revX, revY)
     }
 
     export function minPosArr(xyarr: { x: number, y: number }[]) {
