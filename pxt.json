@@ -10,16 +10,16 @@
         "main.ts",
         "README.md",
         "assets.json",
+        "help.ts",
+        "sorting-help.ts",
+        "sorting-introsort.ts",
+        "sorting-quicksort.ts",
         "me.ts",
         "myself.ts",
         "module.ts",
         "class.ts",
         "enum.ts",
-        "help.ts",
-        "shadow.ts",
-        "sorting-introsort.ts",
-        "sorting-quicksort.ts",
-        "sorting-help.ts"
+        "shadow.ts"
     ],
     "testFiles": [
         "test.ts"

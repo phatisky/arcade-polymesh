@@ -1,30 +1,30 @@
 
 namespace Polymesh {
 
-    function rotatePoint3D(point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) {
+    const rotatePoint3D = (point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) => {
 
         // move point with pivot to 1st place
-        let dx  = point.x - pivot.x;
-        let dy  = point.y - pivot.y;
-        let dz  = point.z - pivot.z;
+        let dx = point.x - pivot.x;
+        let dy = point.y - pivot.y;
+        let dz = point.z - pivot.z;
 
         // --- rotate around x ---
         let dy1 = dy * Math.cos(angle.x) - dz * Math.sin(angle.x);
         let dz1 = dy * Math.sin(angle.x) + dz * Math.cos(angle.x);
-            dy  = dy1;
-            dz  = dz1;
+        dy = dy1;
+        dz = dz1;
 
         // --- rotate around y ---
         let dx1 = dx * Math.cos(angle.y) + dz * Math.sin(angle.y);
-            dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
-            dx  = dx1;
-            dz  = dz1;
+        dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
+        dx = dx1;
+        dz = dz1;
 
         // --- rotate around z ---
-            dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
-            dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
-            dx  = dx1;
-            dy  = dy1;
+        dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
+        dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
+        dx = dx1;
+        dy = dy1;
 
         // move back to real position
         return {
@@ -32,7 +32,7 @@ namespace Polymesh {
             y: dy + pivot.y,
             z: dz + pivot.z
         };
-    }
+    };
 
     //% blockId=poly_rendermesh_all
     //% block=" $plms render all meshes to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"

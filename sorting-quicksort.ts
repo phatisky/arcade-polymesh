@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    export function quickSort<T>(arr: T[], cmp: (a: T, b: T) => number) {
+    export const quickSort = <T>(arr: T[], cmp: (a: T, b: T) => number) => {
         if (isSorted(arr, cmp)) return;
         const stack: number[][] = [[0, arr.length - 1]];
         while (stack.length) {

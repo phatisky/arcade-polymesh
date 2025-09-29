@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    export function introSort<T>(arr: T[], cmp: (a: T, b: T) => number) {
+    export const introSort = <T>(arr: T[], cmp: (a: T, b: T) => number) => {
         if (isSorted(arr, cmp)) return;
         // Stack 2D: [lo, hi, depth]
         const stack: number[][] = [[0, arr.length - 1, blog(arr.length) << 1]];

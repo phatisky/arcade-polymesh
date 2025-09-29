@@ -147,7 +147,7 @@ class polymesh {
     //% group="Mesh util"
     //% weight=7
     public zDist() {
-        return Polymesh.meshDistZ(this) * Polymesh.doubleNine
+        return Polymesh.meshDistZ(this) * Polymesh.XDIST
     }
 
     //% blockId=poly_dist_zdepth

@@ -1,37 +1,37 @@
 
 namespace Polymesh {
 
-    export function blog(x: number) {
+    export const isOutOfRange = (x: number, range: number, scale?: number) => (scale ? x < -(range * scale) || x >= range + (range * scale) : x < 0 || x >= range)
+
+    export const isOutOfArea = (x: number, y: number, width: number, height: number, scale?: number) => (isOutOfRange(x, width, scale) || isOutOfRange(y, height, scale))
+
+    export const avgZ = (rot: { z: number }[], inds: number[]) => (inds.reduce((s, i) => s + rot[i].z, 0) / inds.length)
+
+    export const isEmptyImage = (img: Image) => img.equals(image.create(img.width, img.height))
+
+    export const blog = (x: number) => {
         let r = 0;
         while (x > 1) x >>= 1, r++;
         return r;
     };
 
-    export function isSorted<T>(arr: T[], cmp: (a: T, b: T) => number): boolean {
+    export const isSorted = <T>(arr: T[], cmp: (a: T, b: T) => number) => {
         for (let i = 1; i < arr.length; i++) if (cmp(arr[i - 1], arr[i]) > 0) return false;
         return true;
     }
 
-    export function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)) }
-
-    export function isOutOfArea(x: number, y: number, width: number, height: number, scale?: number) {
-        return (isOutOfRange(x, width, scale) || isOutOfRange(y, height, scale))
-    }
-
-    export function isOutOfAreaOnFace(rotated: { x: number, y: number }[], ind: number[], width: number, height: number) {
+    export const isOutOfAreaOnFace = (rotated: { x: number, y: number }[], ind: number[], width: number, height: number) => {
         const avgXYs = { x: ind.reduce((cur, i) => cur + rotated[i].x, 0) / ind.length, y: ind.reduce((cur, i) => cur + rotated[i].y, 0) / ind.length }
         return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
     }
 
-    export function isOutOfAreaOnAvg(point2s: { x: number, y: number }[], width: number, height: number) {
+    export const isOutOfAreaOnAvg = (point2s: { x: number, y: number }[], width: number, height: number) => {
         const avgXYs = { x: point2s.reduce((cur, val) => cur + val.x, 0) / point2s.length, y: point2s.reduce((cur, val) => cur + val.y, 0) / point2s.length }
         return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
     }
-
-    export function isOutOfRange(x: number, range: number, scale?: number) { return scale ? x < -(range * scale) || x >= range + (range * scale) : x < 0 || x >= range }
     
     /** Fast inverse square root **/
-    export function q_rsqrt(x: number): number {
+    export const q_rsqrt = (x: number) => {
         if (x <= 0) return 0;
         const buf = pins.createBuffer(4);
         buf.setNumber(NumberFormat.Float32LE, 0, x);
@@ -43,8 +43,6 @@ namespace Polymesh {
         y = y * (1.5 - (0.5 * x * y * y));
         return y;
     }
-
-    export function avgZ(rot: { z: number }[], inds: number[]): number { return inds.reduce((s, i) => s + rot[i].z, 0) / inds.length; }
 
     function gapAround(n: number, r: number, g: number) {
         n -= Math.round(r / 2), n /= g, n += Math.round(r / 2);
@@ -71,20 +69,11 @@ namespace Polymesh {
         return to
     }
 
-    export function distortImage(src: Image, dest: Image,
-        x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
-        srink: number, revX?: boolean, revY?: boolean) {
-        let p0 = { x: x0, y: y0 }, p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 }, p3 = { x: x3, y: y3 }
-        distortImageUtil(pixelessImage(src.clone(), srink), dest, p0, p1, p2, p3, revX, revY)
-    }
-
     interface Pt { x: number; y: number; }
 
     // check if two points is cross
     export function segmentsIntersect(p1: Pt, p2: Pt, p3: Pt, p4: Pt): boolean {
-        function ccw(a: Pt, b: Pt, c: Pt): boolean {
-            return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
-        }
+        const ccw = (a: Pt, b: Pt, c: Pt) => ((c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x))
         return ccw(p1, p3, p4) != ccw(p2, p3, p4) &&
             ccw(p1, p2, p3) != ccw(p1, p2, p4);
     }
@@ -99,7 +88,7 @@ namespace Polymesh {
     }
 
     // Bilinear interpolation on quad
-    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
+    export const lerpQuad = (p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number) => {
         const x0 = p0.x + (p1.x - p0.x) * u;
         const y0 = p0.y + (p1.y - p0.y) * u;
         const x1 = p3.x + (p2.x - p3.x) * u;
@@ -111,11 +100,11 @@ namespace Polymesh {
     }
 
     // main distortImage function
-    export function distortImageUtil(
+    export const distortImageUtil = (
         src: Image, dest: Image,
         p0: Pt, p1: Pt, p2: Pt, p3: Pt,
         revX?: boolean, revY?: boolean
-    ) {
+    ) => {
         // fix quad of intersect
         const tmp_pt = p3;
         p3 = p1, p1 = p2, p2 = p0, p0 = tmp_pt;
@@ -159,6 +148,13 @@ namespace Polymesh {
         }
     }
 
+    export const distortImage = (src: Image, dest: Image,
+        x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
+        srink: number, revX?: boolean, revY?: boolean) => {
+        let p0 = { x: x0, y: y0 }, p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 }, p3 = { x: x3, y: y3 }
+        distortImageUtil(pixelessImage(src.clone(), srink), dest, p0, p1, p2, p3, revX, revY)
+    }
+
     export function minPosArr(xyarr: { x: number, y: number }[]) {
         return { x: xyarr.reduce((cur, val) => Math.min(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.min(cur, val.y), xyarr[0].y) }
     }
@@ -167,7 +163,7 @@ namespace Polymesh {
         return { x: xyarr.reduce((cur, val) => Math.max(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.max(cur, val.y), xyarr[0].y) }
     }
 
-    export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
+    export const fillCircleImage = (dest: Image, x: number, y: number, r: number, c: number) => {
         let src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
         if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
         else {
@@ -182,7 +178,7 @@ namespace Polymesh {
         dest.drawTransparentImage(src, x - r, y - r)
     }
 
-    function isCull(b: boolean, x: number, y: number) { return b ? x < y : x > y }
+    const isCull = (b: boolean, x: number, y: number) => (b ? x < y : x > y)
 
     export function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number): boolean {
         // Simple normal calculation for culling
@@ -213,7 +209,7 @@ namespace Polymesh {
         return true;
     }
 
-    export function meshDepthZ(plm: polymesh): number {
+    export const meshDepthZ = (plm: polymesh) => {
         let x = plm.pos.x - camx;
         let y = plm.pos.y - camy;
         let z = plm.pos.z - camz;
@@ -234,9 +230,6 @@ namespace Polymesh {
         return z;
     }
 
-    export function meshDistZ(plm: polymesh): number {
-        const depthZ = meshDepthZ(plm)
-        return Math.abs(dist) / (Math.abs(dist) + depthZ);
-    }
+    export const meshDistZ = (plm: polymesh) => (Math.abs(dist) / (Math.abs(dist) + meshDepthZ(plm)))
 
 }

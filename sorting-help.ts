@@ -1,11 +1,11 @@
 
 namespace Polymesh {
 
-    export function swap<T>(arr: T[], i: number, j: number) {
+    export const swap = <T>(arr: T[], i: number, j: number) => {
         const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
     };
 
-    export function partition<T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) {
+    export const partition = <T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) => {
         const pivot = arr[r]; let i = l, j = r - 1;
         while (i <= j) {
             while (i <= j && cmp(arr[i], pivot) < 0) i++;
@@ -15,7 +15,7 @@ namespace Polymesh {
         swap(arr, i, r); return i;
     };
 
-    export function insertionSort<T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) {
+    export const insertionSort = <T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) => {
         for (let i = l + 1; i <= r; i++) {
             const key = arr[i]; let j = i - 1;
             while (j >= l && cmp(arr[j], key) > 0) { arr[j + 1] = arr[j]; j--; }
@@ -23,7 +23,7 @@ namespace Polymesh {
         }
     };
 
-    function heapify<T>(arr: T[], cmp: (a: T, b: T) => number, start: number, end: number) {
+    const heapify = <T>(arr: T[], cmp: (a: T, b: T) => number, start: number, end: number) => {
         let root = start;
         while ((root << 1) + 1 <= end) {
             let child = (root << 1) + 1, swapIdx = root;
@@ -34,7 +34,7 @@ namespace Polymesh {
         }
     };
 
-    export function heapSort<T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) {
+    export const heapSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
         // Build heap
         for (let i = (lo + ((hi - lo + 1) >> 1)) - 1; i >= lo; i--) heapify(arr, cmp, i, hi);
         // Heap sort
