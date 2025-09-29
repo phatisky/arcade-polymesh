@@ -12,7 +12,7 @@ namespace Polymesh {
     };
 
     const partition = <T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) => {
-        const piv = median3(arr, cmp, l, r), pivot = arr[piv]; let i = l; swap(piv, r);
+        const piv = median3(arr, cmp, l, r), pivot = arr[piv]; let i = l; swap(arr, piv, r);
         for (let j = l; j < r; j++) if (cmp(arr[j], pivot) < 0) swap(arr, i++, j);
         swap(arr, i, r); return i;
     };
