@@ -76,33 +76,30 @@ namespace Polymesh {
 
     // main distortImage function
     export function distortImageUtil(
-        src: Image, dest: Image,
+        from: Image, to: Image,
         p0: Pt, p1: Pt, p2: Pt, p3: Pt,
         revX?: boolean, revY?: boolean
     ) {
         // fix quad of intersect
-        const tmp_pt = p3;
-        p3 = p1, p1 = p2, p2 = p0, p0 = tmp_pt;
-        // [p0, p1, p2, p3] = [p3, p2, p0, p1];
+        const tmp_pt = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp_pt; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
 
-        const w = src.width;
-        const h = src.height;
+        const w = from.width;
+        const h = from.height;
 
-        const srcBuf = pins.createBuffer(src.height)
+        const fromBuf = pins.createBuffer(from.height)
 
         for (let sx = 0; sx < w; sx++) {
-            src.getRows(sx, srcBuf)
-            if (srcBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
+            from.getRows(sx, fromBuf)
+            if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
             const u0 = (sx / w);
             const u1 = ((sx + 1) / w);
 
             for (let sy = 0; sy < h; sy++) {
+                const colorIdx = from.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
+                if (colorIdx === 0) continue; // transparent
+
                 const v0 = (sy / h);
                 const v1 = ((sy + 1) / h);
-
-                let colorIdx = src.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
-
-                if (colorIdx === 0) continue; // transparent
 
                 // Map quad on 1 pixel
                 const q = [
@@ -114,23 +111,24 @@ namespace Polymesh {
 
                 const qt = q.map(v => ({ x: Math.trunc(v.x), y: Math.trunc(v.y) }))
 
-                if (isOutOfAreaOnAvg(qt, dest.width, dest.height)) if (qt.every(v => isOutOfArea(v.x, v.y, dest.width, dest.height))) continue; // skipped if out of screen
+                if (isOutOfAreaOnAvg(qt, to.width, to.height)) if (qt.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
-                //helpers.imageFillTriangle(dest, qt[1].x, qt[1].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
-                //helpers.imageFillTriangle(dest, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
-                helpers.imageFillPolygon4(dest, qt[3].x, qt[3].y, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[1].x, qt[1].y, colorIdx);
+                //helpers.imageFillTriangle(to, qt[1].x, qt[1].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
+                //helpers.imageFillTriangle(to, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
+                helpers.imageFillPolygon4(to, qt[3].x, qt[3].y, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[1].x, qt[1].y, colorIdx);
             }
         }
     }
 
-    export function distortImage(src: Image, dest: Image,
+    export function distortImage(from: Image, to: Image,
         x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
         revX?: boolean, revY?: boolean) {
         let p0 = { x: x0, y: y0 }, p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 }, p3 = { x: x3, y: y3 }
-        distortImageUtil(src, dest, p0, p1, p2, p3, revX, revY)
+        distortImageUtil(from, to, p0, p1, p2, p3, revX, revY)
     }
 
     export function resizeImage(from: Image, to: Image, revX?: boolean, revY?: boolean) {
+        if (isEmptyImage(from)) return;
         if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
         distortImage(from, to, 0, 0, to.width, 0, 0, to.height, to.width, to.height, revX, revY)
     }
