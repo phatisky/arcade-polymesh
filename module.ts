@@ -120,9 +120,13 @@ namespace Polymesh {
             let idx: number, pt: { scale: number, x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
             // LOD calculating?
             if (t.img) {
-                const scaleD = (t.scale * Polymesh.XDIST) / 5
-                im = image.create(Math.min(t.img.width, scaleD * t.img.width), Math.min(t.img.height, scaleD * t.img.height))
-                resizeImage(t.img.clone(), im, true, true)
+                im = t.img.clone();
+                if (plm.flag.lod) {
+                    let scaleD = Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, inds))
+                        scaleD = ((scaleD * PHI * zoom) / PHI)
+                    im = image.create(Math.clamp(1, t.img.width, scaleD * t.img.width), Math.clamp(1, t.img.height, scaleD * t.img.height))
+                    resizeImage(t.img.clone(), im, true, true)
+                }
             }
             if (t.indices.length === 1) {
                 idx = t.indices[0];
@@ -216,7 +220,6 @@ namespace Polymesh {
             }
 
             if (inds.length < 2) continue;
-            mydist = (Math.abs(dist) / (Math.abs(dist) - Math.floor((avgZ(rotated, inds) + Math.abs((Math.abs(dist / 0.8) + 0.6180339887))) / Math.abs(dist * scale / zoom))))
             // Draw line canvas when have line color index
             if (linecolor && linecolor > 0) {
                 helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
