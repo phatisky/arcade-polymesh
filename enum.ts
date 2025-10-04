@@ -102,7 +102,7 @@ enum PolySort {
 enum MeshFlags {
     //% block="Invisible"
     invisible = 0x0,
-    //% block="Non culling"
+    //% block="Culling"
     noncull   = 0x1,
     //% block="Level of detail"
     lod       = 0x2,

@@ -143,7 +143,7 @@ namespace Polymesh {
         return { x: xyarr.reduce((cur, val) => Math.max(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.max(cur, val.y), xyarr[0].y) }
     }
 
-    export function fillCircleImage (dest: Image, x: number, y: number, r: number, c: number) {
+    export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
         let src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
         if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
         else {
@@ -160,9 +160,11 @@ namespace Polymesh {
 
     const isCull = (b: boolean, x: number, y: number) => (b ? x < y : x > y)
 
-    export function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number): boolean {
+    export function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number, w?: number, h?: number): boolean {
         // Simple normal calculation for culling
         if (indices.length > 0) {
+            // if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
+            if (oface > -1 && oface < 1) if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
             const xyzs = indices.map(ind => rotated[ind])
 
             // Average depth comparison
@@ -181,9 +183,9 @@ namespace Polymesh {
             // const otherAvgY = otherXYZs.ys.reduce((sum, y) => sum + y, 0) / otherXYZs.ys.length;
             const otherAvgZ = otherXYZs.zs.reduce((sum, z) => sum + z, 0) / otherXYZs.zs.length;
 
-            if (oface < 0) return avgZ < otherAvgZ
+            if (oface < 0) return avgZ < 0
             if (oface > 0) return avgZ > otherAvgZ
-            return false
+            return false;
             // return (inner ? avgZ < otherAvgZ && (avgX !== otherAvgX && avgY !== otherAvgY) : avgZ > otherAvgZ && (avgX === otherAvgX && avgY === otherAvgY));
         }
         return true;
