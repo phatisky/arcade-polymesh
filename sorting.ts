@@ -1,65 +1,103 @@
 
 namespace Polymesh {
 
-    const swap = <T>(arr: T[], i: number, j: number) => { const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp; };
-
-    const median3 = <T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) => {
-        const m = (l + r) >> 1;
-        if (cmp(arr[l], arr[m]) > 0) swap(arr, l, m);
-        if (cmp(arr[l], arr[r]) > 0) swap(arr, l, r);
-        if (cmp(arr[m], arr[r]) > 0) swap(arr, m, r);
-        return m;
-    };
-
-    const partition = <T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) => {
-        const piv = median3(arr, cmp, l, r), pivot = arr[piv]; let i = l; swap(arr, piv, r);
-        for (let j = l; j < r; j++) if (cmp(arr[j], pivot) < 0) swap(arr, i++, j);
-        swap(arr, i, r); return i;
-    };
-
-    const insertionSort = <T>(arr: T[], cmp: (a: T, b: T) => number, l: number, r: number) => {
-        for (let i = l + 1; i <= r; i++) {
-            const key = arr[i]; let j = i - 1;
-            while (j >= l && cmp(arr[j], key) > 0) arr[j + 1] = arr[j], j--;
-            arr[j + 1] = key;
+    // --- Shell Sort ---
+    const shellSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
+        if (isSorted(arr, cmp)) return;
+        if (!lo) lo = 0; if (!hi) hi = arr.length - 1;
+        const n = hi - lo + 1; let gap = n >> 1;
+        while (gap > 0) {
+            for (let i = lo + gap; i <= hi; i++) {
+                const tmp = arr[i]; let j = i;
+                while (j >= lo + gap && cmp(arr[j - gap], tmp) > 0) arr[j] = arr[j - gap], j -= gap;
+                arr[j] = tmp;
+            }
+            gap >>= 1
         }
-    };
-
-    const heapify = <T>(arr: T[], cmp: (a: T, b: T) => number, start: number, end: number) => {
-        let root = start;
-        while ((root << 1) + 1 <= end) {
-            let child = (root << 1) + 1, swapIdx = root;
-            if (cmp(arr[swapIdx], arr[child]) < 0) swapIdx = child;
-            if (child + 1 <= end && cmp(arr[swapIdx], arr[child + 1]) < 0) swapIdx = child + 1;
-            if (swapIdx === root) return;
-            swap(arr, root, swapIdx); root = swapIdx;
-        }
-    };
-
-    const heapSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
-        // Build heap
-        for (let i = (lo + ((hi - lo + 1) >> 1)) - 1; i >= (!lo ? 0 : lo); i--) heapify(arr, cmp, i, hi);
-        // Heap sort
-        for (let end = hi; end > lo; end--) swap(arr, lo, end), heapify(arr, cmp, lo, end - 1);
     }
 
-    export function introSort<T>(arr: T[], cmp: (a: T, b: T) => number, quick?: boolean) {
+    // --- Smooth Sort (simplified, iterative) ---
+    const smoothSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
         if (isSorted(arr, cmp)) return;
-        // Stack 2D: [lo, hi, depth]
+        if (!lo) lo = 0; if (!hi) hi = arr.length - 1;
+        const n = hi - lo + 1, L: number[] = [1, 1];
+        for (let i = 2; i <= n; i++) L[i] = L[i - 1] + L[i - 2] + 1;
+
+        const heapSizes: number[] = [];
+        for (let i = lo; i <= hi; i++) {
+            let size = 1;
+            if (heapSizes.length >= 2 && heapSizes[heapSizes.length - 2] === heapSizes[heapSizes.length - 1] + 1) size = heapSizes.pop() + 1, heapSizes.pop();
+            heapSizes.push(size);
+
+            // Heapify root
+            let root = i, sz = size;
+            while (sz >= 2) {
+                const left = root - L[sz - 2], right = root - 1;
+                let largest = root;
+                if (cmp(arr[left], arr[largest]) > 0) largest = left;
+                if (cmp(arr[right], arr[largest]) > 0) largest = right;
+                if (largest === root) break; swap(arr, root, largest);
+                if (largest === left) root = left, sz -= 2;
+                else root = right, sz -= 1;
+            }
+        }
+    }
+
+    // TypeScript Dual-Pivot QuickSort with Tail Recursion Optimization and Median-of-3/4
+    const median3 = <T>(arr: T[], a: number, b: number, c: number, cmp: (x: T, y: T) => number) => {
+        // Return index of median element
+        if (cmp(arr[a], arr[b]) > 0) swap(arr, a, b);
+        if (cmp(arr[a], arr[c]) > 0) swap(arr, a, c);
+        if (cmp(arr[b], arr[c]) > 0) swap(arr, b, c);
+        return b; // middle value after swaps
+    }
+
+    const partition = <T>(arr: T[], low: number, high: number, cmp: (a: T, b: T) => number) => {
+        const mid = (low + high) >> 1, lpIdx = median3(arr, low, mid, high, cmp);
+        swap(arr, low, lpIdx);
+        let p = arr[low], q = arr[high];
+        if (cmp(p, q) > 0) swap(arr, low, high), p = arr[low], q = arr[high];
+        let j = low + 1, g = high - 1, k = low + 1;
+        while (k <= g) {
+            if (cmp(arr[k], p) < 0) {
+                swap(arr, k, j++);
+            } else if (cmp(arr[k], q) >= 0) {
+                while (cmp(arr[g], q) > 0 && k < g) g--;
+                swap(arr, k, g--);
+                if (cmp(arr[k], p) < 0) swap(arr, k, j++);
+            }
+            k++;
+        }
+        swap(arr, low, --j), swap(arr, high, ++g);
+        return [j, g];
+    }
+
+    // --- jojoSort Hybrid (IntroSort-like) ---
+    export function jojoSort<T>(arr: T[], cmp: (a: T, b: T) => number, quick?: boolean) {
+        if (isSorted(arr, cmp)) return;
         const stack: number[][] = [[0, arr.length - 1, logb(arr.length) << 1]];
+
         while (stack.length > 0) {
-            const prop = stack.pop(); if (!prop) continue;
-            let lo = prop[0], hi = prop[1], depth = prop[2], size = hi - lo + 1;
-            while (lo < hi) {
-                if (!quick) { if (size <= 16) { insertionSort(arr, cmp, lo, hi); break; }; if (depth <= 0) { heapSort(arr, cmp, lo, hi); break; }; };
-                // Partition for iterative
-                const p = partition(arr, cmp, lo, hi); depth--;
-                // Push subarrays
-                if (p - lo < hi - p) stack.push([lo, p - 1, depth]), lo = p + 1;
-                else                 stack.push([p + 1, hi, depth]), hi = p - 1;
+            const [low, high, depth] = stack.pop();
+            const size = high - low + 1;
+
+            if (size <= 16 && !quick)  { shellSort(arr, cmp, low, high);  continue; } // small array fallback
+            if (depth <= 0 && !quick)  { smoothSort(arr, cmp, low, high); continue; } // depth limit fallback
+ 
+            if (low < high) {
+                const [lp, rp] = partition(arr, low, high, cmp);
+                // Push larger segment first to optimize tail recursion
+                if (lp - low < high - rp) {
+                    if (lp <= rp) stack.push([lp + 1, rp - 1, depth - 1]);
+                    stack.push([low, lp - 1, depth - 1]);
+                    stack.push([rp + 1, high, depth - 1]);
+                } else {
+                    stack.push([rp + 1, high, depth - 1]);
+                    if (lp <= rp) stack.push([lp + 1, rp - 1, depth - 1]);
+                    stack.push([low, lp - 1, depth - 1]);
+                }
             }
         }
     }
 
 }
-
