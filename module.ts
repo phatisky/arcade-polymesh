@@ -123,7 +123,7 @@ namespace Polymesh {
                 im = t.img.clone();
                 if (plm.flag.lod) {
                     let scaleD = Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, inds))
-                        scaleD = ((scaleD * PHI * zoom) / PHI)
+                        scaleD = ((scaleD * zoom) / SDIST)
                     im = image.create(Math.clamp(1, t.img.width, scaleD * t.img.width), Math.clamp(1, t.img.height, scaleD * t.img.height))
                     resizeImage(t.img.clone(), im, true, true)
                 }
