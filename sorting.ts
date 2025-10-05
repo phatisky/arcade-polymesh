@@ -71,7 +71,7 @@ namespace Polymesh {
     }
 
     // --- jojoSort Hybrid (IntroSort-like) ---
-    const jojoSort = <T>(arr: T[], cmp: (a: T, b: T) => number) => {
+    function jojoSort<T>(arr: T[], cmp: (a: T, b: T) => number) {
         const stack: number[][] = [[0, arr.length - 1, logb(arr.length) << 1]];
         while (stack.length > 0) {
             const [low, high, depth] = stack.pop(), size = high - low + 1;
