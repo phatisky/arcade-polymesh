@@ -2,7 +2,7 @@
 namespace Polymesh {
 
     // --- Shell Sort ---
-    const shellSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
+    export const shellSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
         if (!lo) lo = 0; if (!hi) hi = arr.length - 1;
         const n = hi - lo + 1; let gap = n >> 1;
         while (gap > 0) {
@@ -16,7 +16,7 @@ namespace Polymesh {
     }
 
     // --- Smooth Sort (simplified, iterative) ---
-    const smoothSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
+    export const smoothSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
         if (!lo) lo = 0; if (!hi) hi = arr.length - 1;
         const n = hi - lo + 1, L: number[] = [1, 1];
         for (let i = 2; i <= n; i++) L[i] = L[i - 1] + L[i - 2] + 1;
@@ -71,12 +71,12 @@ namespace Polymesh {
     }
 
     // --- jojoSort Hybrid (IntroSort-like) ---
-    function jojoSort<T>(arr: T[], cmp: (a: T, b: T) => number) {
+    export function jojoSort <T>(arr: T[], cmp: (a: T, b: T) => number) {
         const stack: number[][] = [[0, arr.length - 1, logb(arr.length) << 1]];
         while (stack.length > 0) {
             const [low, high, depth] = stack.pop(), size = high - low + 1;
 
-            if (size <= 16) { shellSort(arr, cmp, low, high);  continue; } // small array fallback
+            if (size <= 16) { shellSort( arr, cmp, low, high); continue; } // small array fallback
             if (depth <= 0) { smoothSort(arr, cmp, low, high); continue; } // depth limit fallback
  
             if (low < high) {
@@ -92,15 +92,6 @@ namespace Polymesh {
                     stack.push([low, lp - 1, depth - 1]);
                 }
             }
-        }
-    }
-
-    export function sortEnum<T>(arr: T[], cmp: (a: T, b: T) => number) {
-        switch (sort) {
-            case 0x0:          arr.sort(cmp);        break;
-            case 0x1:          jojoSort(  arr, cmp); break;
-            case 0x2: default: smoothSort(arr, cmp);
-                               shellSort( arr, cmp); break;
         }
     }
 
