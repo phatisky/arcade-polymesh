@@ -5,7 +5,7 @@ namespace Polymesh {
 
     export const sortedChance = <T>( arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number ): number => {
         if (!lo) lo = 0; if (!hi) hi = arr.length;
-        if (hi - lo < 2) return 15; // ช่วงสั้นถือว่าเรียงแล้ว
+        if (hi - lo < 2) return 15; // single item is sorted
         const count = arr.reduce((cur, _, idx) => cur + ((idx > lo && idx < hi && cmp(arr[idx - 1], arr[idx]) <= 0) ? 1 : 0), 0);
         const fraction = count / (hi - lo);
         return Math.floor(fraction * 15); // 0-15
