@@ -3,6 +3,14 @@ namespace Polymesh {
 
     export const swap = <T>(arr: T[], i: number, j: number) => { const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp; };
 
+    export const sortedChance = <T>( arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number ): number => {
+        if (!lo) lo = 0; if (!hi) hi = arr.length;
+        if (hi - lo < 2) return 15; // ช่วงสั้นถือว่าเรียงแล้ว
+        const count = arr.reduce((cur, _, idx) => cur + ((idx > lo && idx < hi && cmp(arr[idx - 1], arr[idx]) <= 0) ? 1 : 0), 0);
+        const fraction = count / (hi - lo);
+        return Math.floor(fraction * 15); // 0-15
+    }
+
     export function isOutOfRange(x: number, range: number, scale?: number) { return (scale ? x < -(range * scale) || x >= range + (range * scale) : x < 0 || x >= range); }
 
     export function isOutOfArea(x: number, y: number, width: number, height: number, scale?: number) { return (isOutOfRange(x, width, scale) || isOutOfRange(y, height, scale)); }
@@ -196,11 +204,6 @@ namespace Polymesh {
         while (x > 1) x >>= 1, r++;
         return r;
     };
-
-    export const isSorted = <T>(arr: T[], cmp: (a: T, b: T) => number) => {
-        for (let i = 1; i < arr.length; i++) if (cmp(arr[i - 1], arr[i]) > 0) return false;
-        return true;
-    }
 
     /** Fast inverse square root **/
     export const q_rsqrt = (x: number) => {

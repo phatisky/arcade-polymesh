@@ -2,8 +2,7 @@
 namespace Polymesh {
 
     // --- Shell Sort ---
-    const shellSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
-        if (isSorted(arr, cmp)) return;
+    export const shellSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
         if (!lo) lo = 0; if (!hi) hi = arr.length - 1;
         const n = hi - lo + 1; let gap = n >> 1;
         while (gap > 0) {
@@ -17,8 +16,7 @@ namespace Polymesh {
     }
 
     // --- Smooth Sort (simplified, iterative) ---
-    const smoothSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
-        if (isSorted(arr, cmp)) return;
+    export const smoothSort = <T>(arr: T[], cmp: (a: T, b: T) => number, lo?: number, hi?: number) => {
         if (!lo) lo = 0; if (!hi) hi = arr.length - 1;
         const n = hi - lo + 1, L: number[] = [1, 1];
         for (let i = 2; i <= n; i++) L[i] = L[i - 1] + L[i - 2] + 1;
@@ -73,16 +71,13 @@ namespace Polymesh {
     }
 
     // --- jojoSort Hybrid (IntroSort-like) ---
-    export function jojoSort<T>(arr: T[], cmp: (a: T, b: T) => number, quick?: boolean) {
-        if (isSorted(arr, cmp)) return;
+    export function jojoSort<T>(arr: T[], cmp: (a: T, b: T) => number) {
         const stack: number[][] = [[0, arr.length - 1, logb(arr.length) << 1]];
-
         while (stack.length > 0) {
-            const [low, high, depth] = stack.pop();
-            const size = high - low + 1;
+            const [low, high, depth] = stack.pop(), size = high - low + 1;
 
-            if (size <= 16 && !quick)  { shellSort(arr, cmp, low, high);  continue; } // small array fallback
-            if (depth <= 0 && !quick)  { smoothSort(arr, cmp, low, high); continue; } // depth limit fallback
+            if (size <= 16) { shellSort(arr, cmp, low, high);  continue; } // small array fallback
+            if (depth <= 0) { smoothSort(arr, cmp, low, high); continue; } // depth limit fallback
  
             if (low < high) {
                 const [lp, rp] = partition(arr, low, high, cmp);
