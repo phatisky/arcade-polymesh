@@ -32,14 +32,14 @@ namespace Polymesh {
     interface Pt { x: number; y: number; }
 
     // Bilinear interpolation on quad
-    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: Fx8, v: Fx8): Pt {
-        const x0 = p0.x + (p1.x - p0.x) * Fx.toFloat(u);
-        const y0 = p0.y + (p1.y - p0.y) * Fx.toFloat(u);
-        const x1 = p3.x + (p2.x - p3.x) * Fx.toFloat(u);
-        const y1 = p3.y + (p2.y - p3.y) * Fx.toFloat(u);
+    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
+        const x0 = p0.x + (p1.x - p0.x) * u;
+        const y0 = p0.y + (p1.y - p0.y) * u;
+        const x1 = p3.x + (p2.x - p3.x) * u;
+        const y1 = p3.y + (p2.y - p3.y) * u;
         return {
-            x: x0 + (x1 - x0) * Fx.toFloat(v),
-            y: y0 + (y1 - y0) * Fx.toFloat(v)
+            x: x0 + (x1 - x0) * v,
+            y: y0 + (y1 - y0) * v
         };
     }
 
@@ -58,32 +58,30 @@ namespace Polymesh {
         for (let sx = 0; sx < w; sx++) {
             from.getRows(sx, fromBuf)
             if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
-            const u0 = Fx8(sx / w), u1 = Fx8((sx + 1) / w);
+            const u0 = (sx / w), u1 = ((sx + 1) / w);
 
             for (let sy = 0; sy < h; sy++) {
                 const color = from.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
                 if (color === 0) continue; // transparent
 
-                const v0 = Fx8(sy / h), v1 = Fx8((sy + 1) / h);
+                const v0 = (sy / h), v1 = ((sy + 1) / h);
 
                 // fix quad of intersect
                 const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
 
                 // Map quad on 1 pixel
-                const q = [
+                const qd = [
                     lerpQuad(p0, p1, p2, p3, u0, v0),
                     lerpQuad(p0, p1, p2, p3, u1, v0),
                     lerpQuad(p0, p1, p2, p3, u0, v1),
                     lerpQuad(p0, p1, p2, p3, u1, v1),
                 ]
 
-                const qt = q.map(v => ({ x: Math.trunc(v.x), y: Math.trunc(v.y) }))
-
-                if (isOutOfAreaOnAvg(qt, to.width, to.height)) if (qt.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
+                if (isOutOfAreaOnAvg(qd, to.width, to.height)) if (qd.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
-                helpers.imageFillTriangle(to, qt[0].x, qt[0].y, qt[1].x, qt[1].y, qt[2].x, qt[2].y, color);
-                helpers.imageFillTriangle(to, qt[3].x, qt[3].y, qt[1].x, qt[1].y, qt[2].x, qt[2].y, color);
-                //helpers.imageFillPolygon4(to, qt[3].x, qt[3].y, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[1].x, qt[1].y, colorIdx);
+                helpers.imageFillTriangle(to, qd[0].x, qd[0].y, qd[1].x, qd[1].y, qd[2].x, qd[2].y, color);
+                helpers.imageFillTriangle(to, qd[3].x, qd[3].y, qd[1].x, qd[1].y, qd[2].x, qd[2].y, color);
+                //helpers.imageFillPolygon4(to, qd[3].x, qd[3].y, qd[2].x, qd[2].y, qd[0].x, qd[0].y, qd[1].x, qd[1].y, colorIdx);
             }
         }
     }
@@ -129,8 +127,7 @@ namespace Polymesh {
     export function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number, w?: number, h?: number): boolean {
         // Simple normal calculation for culling
         if (indices.length > 0) {
-            // if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
-            if (oface > -1 && oface < 1) if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
+            if (oface === 0) if (w && h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
             const xyzs = indices.map(ind => rotated[ind])
 
             // Average depth comparison
