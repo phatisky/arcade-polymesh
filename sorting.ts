@@ -70,26 +70,23 @@ namespace Polymesh {
         return [j, g];
     }
 
-    // --- jojoSort Hybrid (IntroSort-like) ---
-    export function jojoSort <T>(arr: T[], cmp: (a: T, b: T) => number) {
-        const stack: number[][] = [[0, arr.length - 1, logb(arr.length) << 1]];
+    // --- duoQuickSort ---
+    export function duoQuickSort<T>(arr: T[], cmp: (a: T, b: T) => number) {
+        const stack: number[][] = [[0, arr.length - 1]];
         while (stack.length > 0) {
-            const [low, high, depth] = stack.pop(), size = high - low + 1;
-
-            if (size <= 16) { shellSort( arr, cmp, low, high); continue; } // small array fallback
-            if (depth <= 0) { smoothSort(arr, cmp, low, high); continue; } // depth limit fallback
+            const [low, high] = stack.pop();
  
             if (low < high) {
                 const [lp, rp] = partition(arr, low, high, cmp);
                 // Push larger segment first to optimize tail recursion
                 if (lp - low < high - rp) {
-                    if (lp <= rp) stack.push([lp + 1, rp - 1, depth - 1]);
-                    stack.push([low, lp - 1, depth - 1]);
-                    stack.push([rp + 1, high, depth - 1]);
+                    if (lp <= rp) stack.push([lp + 1, rp - 1]);
+                    stack.push([low, lp - 1]);
+                    stack.push([rp + 1, high]);
                 } else {
-                    stack.push([rp + 1, high, depth - 1]);
-                    if (lp <= rp) stack.push([lp + 1, rp - 1, depth - 1]);
-                    stack.push([low, lp - 1, depth - 1]);
+                    stack.push([rp + 1, high]);
+                    if (lp <= rp) stack.push([lp + 1, rp - 1]);
+                    stack.push([low, lp - 1]);
                 }
             }
         }
