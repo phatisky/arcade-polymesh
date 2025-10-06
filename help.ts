@@ -67,7 +67,7 @@ namespace Polymesh {
                 const v0 = (sy / h), v1 = ((sy + 1) / h);
 
                 // fix quad of intersect
-                const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
+                // const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
 
                 // Map quad on 1 pixel
                 const qd = [
@@ -80,7 +80,7 @@ namespace Polymesh {
                 if (isOutOfAreaOnAvg(qd, to.width, to.height)) if (qd.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
                 helpers.imageFillTriangle(to, qd[1].x, qd[1].y, qd[0].x, qd[0].y, qd[3].x, qd[3].y, color);
-                helpers.imageFillTriangle(to, qd[2].x, qd[2].y, qd[0].x, qd[0].y, qd[3 ].x, qd[3].y, color);
+                helpers.imageFillTriangle(to, qd[2].x, qd[2].y, qd[0].x, qd[0].y, qd[3].x, qd[3].y, color);
                 //helpers.imageFillPolygon4(to, qd[3].x, qd[3].y, qd[2].x, qd[2].y, qd[0].x, qd[0].y, qd[1].x, qd[1].y, colorIdx);
             }
         }
