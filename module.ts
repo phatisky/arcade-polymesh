@@ -45,10 +45,11 @@ namespace Polymesh {
         inProcess[1] = true
         const sorted = plms.filter( plm => !plm || !plm.isDel() ).map(plm => ({ mesh: plm, depth: meshDepthZ(plm) }));
         switch (sort) {
-            case 0x0:          sorted.sort(         (a, b) => b.depth - a.depth); break;
-            case 0x1:          duoQuickSort(sorted, (a, b) => b.depth - a.depth); break;
-            case 0x2: default: smoothSort(  sorted, (a, b) => b.depth - a.depth);
-                               shellSort(   sorted, (a, b) => b.depth - a.depth); break;
+            case 0x0: sorted.sort(         (a, b) => b.depth - a.depth); break;
+            case 0x1: smoothSort(  sorted, (a, b) => b.depth - a.depth);
+                      shellSort(   sorted, (a, b) => b.depth - a.depth); break;
+            case 0x2:
+            default:  duoQuickSort(sorted, (a, b) => b.depth - a.depth); break;
         }
         for (const m of sorted) if (!m.mesh.isDel() || !m.mesh.flag.invisible) render(m.mesh, output, linecolor);
         inProcess[1] = false
@@ -110,10 +111,11 @@ namespace Polymesh {
         // Sort triangles
         const tris = plm.faces.slice();
         switch (sort) {
-            case 0x0:          tris.sort(         (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
-            case 0x1:          duoQuickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
-            case 0x2: default: smoothSort(  tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices));
-                               shellSort(   tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
+            case 0x0: tris.sort(         (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
+            case 0x1: smoothSort(  tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices));
+                      shellSort(   tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
+            case 0x2:
+            default:  duoQuickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
         }
 
         // Render
