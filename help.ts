@@ -32,14 +32,14 @@ namespace Polymesh {
     interface Pt { x: number; y: number; }
 
     // Bilinear interpolation on quad
-    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
-        const x0 = p0.x + (p1.x - p0.x) * u;
-        const y0 = p0.y + (p1.y - p0.y) * u;
-        const x1 = p3.x + (p2.x - p3.x) * u;
-        const y1 = p3.y + (p2.y - p3.y) * u;
+    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: Fx8, v: Fx8): Pt {
+        const x0 = p0.x + (p1.x - p0.x) * Fx.toFloat(u);
+        const y0 = p0.y + (p1.y - p0.y) * Fx.toFloat(u);
+        const x1 = p3.x + (p2.x - p3.x) * Fx.toFloat(u);
+        const y1 = p3.y + (p2.y - p3.y) * Fx.toFloat(u);
         return {
-            x: Math.trunc(x0 + (x1 - x0) * v),
-            y: Math.trunc(y0 + (y1 - y0) * v)
+            x: Math.trunc(x0 + (x1 - x0) * Fx.toFloat(v)),
+            y: Math.trunc(y0 + (y1 - y0) * Fx.toFloat(v))
         };
     }
 
@@ -58,13 +58,13 @@ namespace Polymesh {
         for (let sx = 0; sx < w; sx++) {
             from.getRows(sx, fromBuf)
             if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
-            const u0 = (sx / w), u1 = ((sx + 1) / w);
+            const u0 = Fx8(sx / w), u1 = Fx8((sx + 1) / w);
 
             for (let sy = 0; sy < h; sy++) {
                 const color = from.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
                 if (color === 0) continue; // transparent
 
-                const v0 = (sy / h), v1 = ((sy + 1) / h);
+                const v0 = Fx8(sy / h), v1 = Fx8((sy + 1) / h);
 
                 // fix quad of intersect
                 // const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
