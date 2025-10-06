@@ -1,5 +1,5 @@
 
-class polymesh_home {
+class polymesh {
 
     protected __del: boolean;
 
@@ -153,6 +153,12 @@ class polymesh_home {
         this.__home__();
     }
 
+    //% blockId=poly_dist_del
+    //% blockNamespace=Polymesh
+    //% block="delete $this"
+    //% this.shadow=variables_get this.defl=myMesh
+    //% group="Mesh util"
+    //% weight=15
     public del() {
         if (this.isDel()) return;
         this.__del = true;
@@ -160,31 +166,15 @@ class polymesh_home {
         this.rot = null, this.pos = null, this.flag = null;
     }
 
-    public isDel() {
-        return this.__del
-    }
-
-}
-
-class polymesh extends polymesh_home {
-
-    constructor() { super(); }
-
-    //% blockId=poly_dist_del
-    //% blockNamespace=Polymesh
-    //% block="delete $this"
-    //% this.shadow=variables_get this.defl=myMesh
-    //% group="Mesh util"
-    //% weight=15
-    public del() { super.del(); }
-
     //% blockId=poly_dist_isdel
     //% blockNamespace=Polymesh
     //% block=" $this is deleted"
     //% this.shadow=variables_get this.defl=myMesh
     //% group="Mesh util"
     //% weight=13
-    public isDel() { return super.isDel(); }
+    public isDel() {
+        return this.__del
+    }
 
     //% blockId=poly_dist_zdist
     //% blockNamespace=Polymesh
