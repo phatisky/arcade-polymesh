@@ -43,14 +43,14 @@ namespace Polymesh {
         if (!plms || !output || plms.length <= 0) return;
         if (inProcess[1]) return;
         inProcess[1] = true
-        const sorted = plms.map(plm => ({ mesh: plm, depth: meshDepthZ(plm) }));
+        const sorted = plms.filter( plm => !plm.isDel() ).map(plm => ({ mesh: plm, depth: meshDepthZ(plm) }));
         switch (sort) {
             case 0x0:          sorted.sort(       (a, b) => b.depth - a.depth); break;
             case 0x1:          jojoSort(  sorted, (a, b) => b.depth - a.depth); break;
             case 0x2: default: smoothSort(sorted, (a, b) => b.depth - a.depth);
                                shellSort( sorted, (a, b) => b.depth - a.depth); break;
         }
-        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
+        for (const m of sorted) if (!m.mesh.isDel() || !m.mesh.flag.invisible) render(m.mesh, output, linecolor);
         inProcess[1] = false
     }
 
@@ -60,6 +60,7 @@ namespace Polymesh {
     //% group="render"
     //% weight=10
     export function render(plm: polymesh, output: Image, linecolor?: number) {
+        if (plm.isDel()) return;
         if (!plm || !output || plm.points.length <= 0 || plm.faces.length <= 0) return;
         if (plm.flag.invisible) return;
 

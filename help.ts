@@ -201,7 +201,7 @@ namespace Polymesh {
 
     export const logb = (x: number) => {
         let r = 0;
-        while (x > 1) x >>= 1, r++;
+        while (x >>= 1) r++;
         return r;
     };
 
@@ -220,6 +220,7 @@ namespace Polymesh {
     }
 
     export const meshDepthZ = (plm: polymesh) => {
+        if (plm.isDel()) return NaN;
         let x = plm.pos.x - camx;
         let y = plm.pos.y - camy;
         let z = plm.pos.z - camz;
