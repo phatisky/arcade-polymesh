@@ -96,7 +96,7 @@ namespace Polymesh {
     export function resizeImage(from: Image, to: Image, revX?: boolean, revY?: boolean) {
         if (isEmptyImage(from)) return;
         if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
-        distortImage(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, revX, revY)
+        distortImage(from, to, 0, 0, to.width, 0, 0, to.height, to.width, to.height, revX, revY)
     }
 
     export function minPosArr(xyarr: { x: number, y: number }[]) {
