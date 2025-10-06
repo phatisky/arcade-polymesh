@@ -66,6 +66,9 @@ namespace Polymesh {
 
                 const v0 = Fx8(sy / h), v1 = Fx8((sy + 1) / h);
 
+                // fix quad of intersect
+                const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
+
                 // Map quad on 1 pixel
                 const q = [
                     lerpQuad(p0, p1, p2, p3, u0, v0),
