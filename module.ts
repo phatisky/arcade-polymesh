@@ -216,8 +216,8 @@ namespace Polymesh {
                 // use distortImage or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
                 distortImage(im, output,
-                    cx - halfW, cy - halfH,
                     cx + halfW, cy - halfH,
+                    cx - halfW, cy - halfH,
                     cx - halfW, cy + halfH,
                     cx + halfW, cy + halfH,
                     true, true);
@@ -264,10 +264,10 @@ namespace Polymesh {
             // Draw texture over
             if (inds.length === 4 && t.img) {
                 distortImage(im, output,
+                    rotated[inds[3]].x, rotated[inds[3]].y,
+                    rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y,
-                    rotated[inds[2]].x, rotated[inds[2]].y,
-                    rotated[inds[3]].x, rotated[inds[3]].y,
                     false, false
                 );
             }
