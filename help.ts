@@ -67,7 +67,7 @@ namespace Polymesh {
                 const v0 = (sy / h), v1 = ((sy + 1) / h);
 
                 // fix quad of intersect
-                // const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
+                const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
 
                 // Map quad on 1 pixel
                 const qd = [
