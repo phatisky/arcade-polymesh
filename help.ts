@@ -67,7 +67,7 @@ namespace Polymesh {
                 const v0 = (sy / h), v1 = ((sy + 1) / h);
 
                 // fix quad of intersect
-                const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
+                // const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
 
                 // Map quad on 1 pixel
                 const qd = [
@@ -96,7 +96,7 @@ namespace Polymesh {
     export function resizeImage(from: Image, to: Image, revX?: boolean, revY?: boolean) {
         if (isEmptyImage(from)) return;
         if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
-        distortImage(from, to, 0, 0, to.width, 0, 0, to.height, to.width, to.height, revX, revY)
+        distortImage(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, revX, revY)
     }
 
     export function minPosArr(xyarr: { x: number, y: number }[]) {
