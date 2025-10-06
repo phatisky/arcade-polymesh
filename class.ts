@@ -160,7 +160,6 @@ class polymesh {
     //% group="Mesh util"
     //% weight=15
     public del() {
-        if (this.isDel()) return;
         this.__del = true;
         this.faces = null, this.points = null, this.pivot = null;
         this.rot = null, this.pos = null, this.flag = null;
@@ -183,7 +182,6 @@ class polymesh {
     //% group="Mesh util"
     //% weight=7
     public zDist() {
-        if (this.isDel()) return NaN
         return Polymesh.meshDistZ(this) * Polymesh.XDIST
     }
 
@@ -194,7 +192,6 @@ class polymesh {
     //% group="Mesh util"
     //% weight=6
     public zDepth() {
-        if (this.isDel()) return NaN
         return Polymesh.meshDepthZ(this)
     }
 
@@ -205,7 +202,6 @@ class polymesh {
     //% group="Mesh util"
     //% weight=8
     public distFromCamera() {
-        if (this.isDel()) return NaN
         const distPos = { x: Polymesh.camx - this.pos.x, y: Polymesh.camy - this.pos.y, z: Polymesh.camz - this.pos.z }
         const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
         return distSum * Polymesh.q_rsqrt(distSum)
@@ -219,7 +215,7 @@ class polymesh {
     //% group="Mesh util"
     //% weight=9
     public distBetween(otherMesh: polymesh) {
-        if (this.isDel() || otherMesh.isDel()) return NaN
+        if (otherMesh.isDel()) return NaN
         const distPos = { x: otherMesh.pos.x - this.pos.x, y: otherMesh.pos.y - this.pos.y, z: otherMesh.pos.z - this.pos.z }
         const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
         return distSum * Polymesh.q_rsqrt(distSum)
@@ -232,7 +228,6 @@ class polymesh {
     //% group="Mesh util"
     //% weight=10
     public normalSpeed() {
-        if (this.isDel()) return NaN
         const distPosV = { vx: this.pos.vx, vy: this.pos.vy, vz: this.pos.vz }
         const distSum = (distPosV.vx * distPosV.vx) + (distPosV.vy * distPosV.vy) + (distPosV.vz * distPosV.vz)
         return distSum * Polymesh.q_rsqrt(distSum)
@@ -245,7 +240,6 @@ class polymesh {
     //% group="Flag mesh"
     //% weight=10
     public setFlag(flag: MeshFlags, ok: boolean) {
-        if (this.isDel()) return;
         switch (flag) {
             case 0x0: default: this.flag.invisible = ok; break
             case 0x1:          this.flag.noncull   = ok; break
@@ -260,7 +254,6 @@ class polymesh {
     //% group="Flag mesh"
     //% weight=5
     public getFlag(flag: MeshFlags) {
-        if (this.isDel()) return false
         switch (flag) {
             case 0x0: default: return this.flag.invisible;
             case 0x1:          return this.flag.noncull;
@@ -277,7 +270,6 @@ class polymesh {
     //% group="Mesh property"
     //% weight=10
     public setVertice(idx: number, point3: Polymesh.shadowPoint3) {
-        // if (this.isDel()) return;
         if (Polymesh.isOutOfRange(idx, this.points.length + 1)) return;
         this.points_xs[idx] = Fx8(point3.x), this.points_ys[idx] = Fx8(point3.y), this.points_zs[idx] = Fx8(point3.z);// this.points[idx] = { x: point3.x, y: point3.y, z: point3.z }
     }
@@ -290,7 +282,6 @@ class polymesh {
     //% group="Mesh property"
     //% weight=9
     public addVertice(point3: Polymesh.shadowPoint3) {
-        // if (this.isDel()) return;
         this.points_xs.push(Fx8(point3.x)), this.points_ys.push(Fx8(point3.y)), this.points_zs.push(Fx8(point3.z));// this.points.push({ x: point3.x, y: point3.y, z: point3.z })
     }
 
@@ -301,7 +292,6 @@ class polymesh {
     //% group="Mesh remover"
     //% weight=10
     public delVertice(idx?: number) {
-        // if (this.isDel()) return;
         if (idx) this.points_xs.removeAt(idx), this.points_ys.removeAt(idx), this.points_zs.removeAt(idx);// this.points.removeAt(idx);
         else this.points_xs.pop(), this.points_ys.pop(), this.points_zs.pop();// this.points.pop();
     }
@@ -314,7 +304,6 @@ class polymesh {
     //% group="Mesh property"
     //% weight=8
     public setFace(idx: number, c: number, inds: Polymesh.shadowIndices, clface?: Polymesh.shadowOffsetFace, billscale?: Polymesh.shadowBillSize, img?: Image) {
-        // if (this.isDel()) return;
         if (Polymesh.isOutOfRange(idx, this.faces.length + 1)) return;
         if (!billscale) billscale = new Polymesh.shadowBillSize(1)
         if (!clface) clface = new Polymesh.shadowOffsetFace(0)
@@ -341,7 +330,6 @@ class polymesh {
     //% group="Mesh property"
     //% weight=7
     public addFace(c: number, inds: Polymesh.shadowIndices, clface?: Polymesh.shadowOffsetFace, billscale?: Polymesh.shadowBillSize, img?: Image) {
-        // if (this.isDel()) return;
         if (!billscale) billscale = new Polymesh.shadowBillSize(1)
         if (!clface) clface = new Polymesh.shadowOffsetFace(0)
         const indice = [Fx8(inds.i1)]
@@ -365,7 +353,6 @@ class polymesh {
     //% group="Mesh remover"
     //% weight=9
     public delFace(idx?: number) {
-        if (this.isDel()) return;
         if (idx) this.faces_indices.removeAt(idx), this.faces_color.removeAt(idx), this.faces_offset.removeAt(idx), this.faces_scale.removeAt(idx), this.faces_img.removeAt(idx);// this.faces.removeAt(idx);
         else this.faces_indices.pop(), this.faces_color.pop(), this.faces_offset.pop(), this.faces_scale.pop(), this.faces_img.pop();// this.faces.pop();
     }
@@ -377,7 +364,6 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=10
     public getFaceColor(idx: number) {
-        if (this.isDel()) return NaN
         if (!this.faces_color[idx]) return NaN
         return Fx.toInt(this.faces_color[idx])
     }
@@ -389,7 +375,6 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=9
     public setFaceColor(idx: number, c: number) {
-        if (this.isDel()) return;
         if (this.faces_color[idx] === Fx8(c)) return;
         this.faces_color[idx] = Fx8(c)
     }
@@ -401,7 +386,7 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=8
     public getFaceImage(idx: number) {
-        if (this.isDel()) return null
+        // if (this.isDel()) return null
         if (!this.faces_img[idx]) return null
         return this.faces_img[idx]
     }
@@ -413,7 +398,6 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=7
     public setFaceImage(idx: number, img: Image) {
-        if (this.isDel()) return;
         if (this.faces_img[idx] && this.faces_img[idx].equals(img)) return;
         this.faces_img[idx] = img
     }
@@ -425,7 +409,6 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=6
     public clearFaceImage(idx: number) {
-        if (this.isDel()) return;
         if (!this.faces_img[idx]) return;
         this.faces_img[idx] = null
     }
@@ -437,7 +420,6 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=5
     public getFaceOffset(idx: number) {
-        if (this.isDel()) return NaN
         if (!this.faces_offset[idx]) return NaN
         return Fx.toFloat(this.faces_offset[idx])
     }
@@ -450,7 +432,6 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=4
     public setFaceOffset(idx: number, oface: number) {
-        if (this.isDel()) return;
         if (this.faces_offset[idx] === Fx8(oface)) return;
         this.faces_offset[idx] = Fx8(oface)
     }
@@ -462,7 +443,6 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=5
     public getFaceScale(idx: number) {
-        if (this.isDel()) return NaN
         if (!this.faces_scale[idx]) return NaN
         return Fx.toFloat(this.faces_scale[idx])
     }
@@ -475,7 +455,6 @@ class polymesh {
     //% group="Mesh face property"
     //% weight=4
     public setFaceScale(idx: number, scale: number) {
-        if (this.isDel()) return;
         if (this.faces_scale[idx] === Fx8(scale)) return;
         this.faces_scale[idx] = Fx8(scale)
     }
@@ -487,7 +466,6 @@ class polymesh {
     //% group="Mesh pivot"
     //% weight=10
     public setPivot(choice: PolyPivot, x: number) {
-        if (this.isDel()) return;
         switch (choice) {
             case 0x0: if (this.pivot_x !== Fx8(x)) this.pivot_x = Fx8(x); break
             case 0x1: if (this.pivot_y !== Fx8(x)) this.pivot_y = Fx8(x); break
@@ -502,7 +480,6 @@ class polymesh {
     //% group="Mesh pivot"
     //% weight=5
     public changePivot(choice: PolyPivot, x: number) {
-        if (this.isDel()) return;
         switch (choice) {
             case 0x0: if (this.pivot_x !== Fx.add(this.pivot_x, Fx8(x))) this.pivot_x = Fx.add(this.pivot_x, Fx8(x)); break
             case 0x1: if (this.pivot_y !== Fx.add(this.pivot_y, Fx8(x))) this.pivot_y = Fx.add(this.pivot_y, Fx8(x)); break
@@ -517,7 +494,6 @@ class polymesh {
     //% group="Mesh pivot"
     //% weight=4
     public getPivot(choice: PolyPivot) {
-        if (this.isDel()) return NaN
         switch (choice) {
             case 0x0: return Fx.toFloat(this.pivot_x)
             case 0x1: return Fx.toFloat(this.pivot_y)
@@ -533,7 +509,6 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=100
     public setAngle(choice: PolyAngle, x: number) {
-        if (this.isDel()) return;
         switch (choice) {
             case 0x0: if (this.rot_x  !== Fx8(x)) this.rot_x  = Fx8(x); break
             case 0x1: if (this.rot_y  !== Fx8(x)) this.rot_y  = Fx8(x); break
@@ -557,7 +532,6 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=5
     public changeAngle(choice: PolyAngle, x: number) {
-        if (this.isDel()) return;
         switch (choice) {
             case 0x0: if (this.rot_x  !== Fx.add(this.rot_x , Fx8(x))) this.rot_x  = Fx.add(this.rot_x , Fx8(x)); break
             case 0x1: if (this.rot_y  !== Fx.add(this.rot_y , Fx8(x))) this.rot_y  = Fx.add(this.rot_y , Fx8(x)); break
@@ -581,7 +555,6 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=4
     public getAngle(choice: PolyAngle) {
-        if (this.isDel()) return NaN
         switch (choice) {
             case 0x0: return Fx.toFloat(this.rot_x)
             case 0x1: return Fx.toFloat(this.rot_y)
@@ -606,7 +579,6 @@ class polymesh {
     //% group="Mesh position property"
     //% weight=10
     public setPos(choice: PolyPos, x: number) {
-        if (this.isDel()) return;
         switch (choice) {
             case 0x0: if (this.pos_x  !== Fx8(x)) this.pos_x  = Fx8(x); break
             case 0x1: if (this.pos_y  !== Fx8(x)) this.pos_y  = Fx8(x); break
@@ -630,7 +602,6 @@ class polymesh {
     //% group="Mesh position property"
     //% weight=9
     public changePos(choice: PolyPos, x: number) {
-        if (this.isDel()) return;
         switch (choice) {
             case 0x0: if (this.pos_x  !== Fx.add(this.pos_x , Fx8(x))) this.pos_x  = Fx.add(this.pos_x , Fx8(x)); break
             case 0x1: if (this.pos_y  !== Fx.add(this.pos_y , Fx8(x))) this.pos_y  = Fx.add(this.pos_y , Fx8(x)); break
@@ -654,7 +625,6 @@ class polymesh {
     //% group="Mesh position property"
     //% weight=8
     public getPos(choice: PolyPos) {
-        if (this.isDel()) return NaN
         switch (choice) {
             case 0x0: return Fx.toFloat(this.pos_x)
             case 0x1: return Fx.toFloat(this.pos_y)

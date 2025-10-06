@@ -43,7 +43,7 @@ namespace Polymesh {
         if (!plms || !output || plms.length <= 0) return;
         if (inProcess[1]) return;
         inProcess[1] = true
-        const sorted = plms.filter( plm => !plm.isDel() ).map(plm => ({ mesh: plm, depth: meshDepthZ(plm) }));
+        const sorted = plms.filter( plm => !plm || !plm.isDel() ).map(plm => ({ mesh: plm, depth: meshDepthZ(plm) }));
         switch (sort) {
             case 0x0:          sorted.sort(       (a, b) => b.depth - a.depth); break;
             case 0x1:          jojoSort(  sorted, (a, b) => b.depth - a.depth); break;
