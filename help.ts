@@ -29,58 +29,17 @@ namespace Polymesh {
         return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
     }
 
-    function gapAround(n: number, r: number, g: number) {
-        n -= Math.round(r / 2), n /= g, n += Math.round(r / 2);
-        return Math.round(n)
-    }
-
-    export function pixelessImage(from: Image, srink: number) {
-        if (srink <= 1) return from
-        srink = Math.max(srink, 1)
-        const to = image.create(Math.max(1, Math.floor(from.width / srink)), Math.max(1, Math.floor(from.height / srink)))
-        if (to.width <= 1 || to.height <= 1) {
-            const col = from.getPixel(Math.floor(from.width / 2), Math.floor(from.width / 2))
-            to.fill(col)
-            return to
-        }
-        for (let xi = 0; xi < to.width; xi++) {
-            const xj = gapAround(xi, from.width, srink)
-            for (let yi = 0; yi < to.height; yi++) {
-                const yj = gapAround(yi, from.height, srink)
-                const col = from.getPixel(xj, yj)
-                if (col > 0) to.setPixel(xi, yi, col)
-            }
-        }
-        return to
-    }
-
     interface Pt { x: number; y: number; }
 
-    // check if two points is cross
-    export function segmentsIntersect(p1: Pt, p2: Pt, p3: Pt, p4: Pt): boolean {
-        const ccw = (a: Pt, b: Pt, c: Pt) => ((c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x))
-        return ccw(p1, p3, p4) != ccw(p2, p3, p4) &&
-            ccw(p1, p2, p3) != ccw(p1, p2, p4);
-    }
-
-    // fix quad if intersect
-    export function fixQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt): [Pt, Pt, Pt, Pt] {
-        if (segmentsIntersect(p0, p1, p2, p3) || segmentsIntersect(p1, p2, p3, p0)) {
-            // get swapped
-            return [p3, p2, p0, p1];
-        }
-        return [p2, p3, p1, p0];
-    }
-
     // Bilinear interpolation on quad
-    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
-        const x0 = p0.x + (p1.x - p0.x) * u;
-        const y0 = p0.y + (p1.y - p0.y) * u;
-        const x1 = p3.x + (p2.x - p3.x) * u;
-        const y1 = p3.y + (p2.y - p3.y) * u;
+    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: Fx8, v: Fx8): Pt {
+        const x0 = p0.x + (p1.x - p0.x) * Fx.toFloat(u);
+        const y0 = p0.y + (p1.y - p0.y) * Fx.toFloat(u);
+        const x1 = p3.x + (p2.x - p3.x) * Fx.toFloat(u);
+        const y1 = p3.y + (p2.y - p3.y) * Fx.toFloat(u);
         return {
-            x: x0 + (x1 - x0) * v,
-            y: y0 + (y1 - y0) * v
+            x: x0 + (x1 - x0) * Fx.toFloat(v),
+            y: y0 + (y1 - y0) * Fx.toFloat(v)
         };
     }
 
@@ -90,8 +49,6 @@ namespace Polymesh {
         p0: Pt, p1: Pt, p2: Pt, p3: Pt,
         revX?: boolean, revY?: boolean
     ) {
-        // fix quad of intersect
-        const tmp_pt = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp_pt; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
 
         const w = from.width;
         const h = from.height;
@@ -101,15 +58,13 @@ namespace Polymesh {
         for (let sx = 0; sx < w; sx++) {
             from.getRows(sx, fromBuf)
             if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
-            const u0 = (sx / w);
-            const u1 = ((sx + 1) / w);
+            const u0 = Fx8(sx / w), u1 = Fx8((sx + 1) / w);
 
             for (let sy = 0; sy < h; sy++) {
-                const colorIdx = from.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
-                if (colorIdx === 0) continue; // transparent
+                const color = from.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
+                if (color === 0) continue; // transparent
 
-                const v0 = (sy / h);
-                const v1 = ((sy + 1) / h);
+                const v0 = Fx8(sy / h), v1 = Fx8((sy + 1) / h);
 
                 // Map quad on 1 pixel
                 const q = [
@@ -123,9 +78,9 @@ namespace Polymesh {
 
                 if (isOutOfAreaOnAvg(qt, to.width, to.height)) if (qt.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
-                //helpers.imageFillTriangle(to, qt[1].x, qt[1].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
-                //helpers.imageFillTriangle(to, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[3].x, qt[3].y, colorIdx);
-                helpers.imageFillPolygon4(to, qt[3].x, qt[3].y, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[1].x, qt[1].y, colorIdx);
+                helpers.imageFillTriangle(to, qt[0].x, qt[0].y, qt[1].x, qt[1].y, qt[2].x, qt[2].y, color);
+                helpers.imageFillTriangle(to, qt[3].x, qt[3].y, qt[1].x, qt[1].y, qt[2].x, qt[2].y, color);
+                //helpers.imageFillPolygon4(to, qt[3].x, qt[3].y, qt[2].x, qt[2].y, qt[0].x, qt[0].y, qt[1].x, qt[1].y, colorIdx);
             }
         }
     }
