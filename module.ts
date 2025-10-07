@@ -11,20 +11,20 @@ namespace Polymesh {
         // --- rotate around x ---
         let dy1 = dy * Math.cos(angle.x) - dz * Math.sin(angle.x);
         let dz1 = dy * Math.sin(angle.x) + dz * Math.cos(angle.x);
-            dy  = dy1;
-            dz  = dz1;
+            dy = dy1;
+            dz = dz1;
 
         // --- rotate around y ---
         let dx1 = dx * Math.cos(angle.y) + dz * Math.sin(angle.y);
             dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
-            dx  = dx1;
-            dz  = dz1;
+            dx = dx1;
+            dz = dz1;
 
         // --- rotate around z ---
             dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
             dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
-            dx  = dx1;
-            dy  = dy1;
+            dx = dx1;
+            dy = dy1;
 
         // move back to real position
         return {
@@ -41,18 +41,16 @@ namespace Polymesh {
     //% weight=9
     export function renderAll(plms: polymesh[], output: Image, linecolor?: number) {
         if (!plms || !output || plms.length <= 0) return;
-        if (inProcess[1]) return;
-        inProcess[1] = true
         const sorted = plms.filter( plm => !plm || !plm.isDel() ).map(plm => ({ mesh: plm, depth: meshDepthZ(plm) }));
+        if (sorted.length <= 0) return;
         switch (sort) {
-            case 0x0: sorted.sort(         (a, b) => b.depth - a.depth); break;
-            case 0x1: smoothSort(  sorted, (a, b) => b.depth - a.depth);
-                      shellSort(   sorted, (a, b) => b.depth - a.depth); break;
+            case 0x0: sorted.sort((a, b) => b.depth - a.depth); break;
+            case 0x1: smoothSort(sorted, (a, b) => b.depth - a.depth);
+            shellSort(sorted, (a, b) => b.depth - a.depth); break;
             case 0x2:
             default:  duoQuickSort(sorted, (a, b) => b.depth - a.depth); break;
         }
-        for (const m of sorted) if (!m.mesh.isDel() || !m.mesh.flag.invisible) render(m.mesh, output, linecolor);
-        inProcess[1] = false
+        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
     }
 
     //% blockId=poly_rendermesh
@@ -65,11 +63,7 @@ namespace Polymesh {
         if (!plm || !output || plm.points.length <= 0 || plm.faces.length <= 0) return;
         if (plm.flag.invisible) return;
 
-        if (inProcess[0]) return;
-        inProcess[0] = true
-
-        const centerX = output.width  >> 1;
-        const centerY = output.height >> 1;
+        const centerX = output.width  >> 1, centerY = output.height >> 1;
 
         const cosX = Math.cos(ax), sinX = Math.sin(ax);
         const cosY = Math.cos(ay), sinY = Math.sin(ay);
@@ -79,24 +73,24 @@ namespace Polymesh {
         const rotated = plm.points.map(v => {
             const vpoint = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z }
             const vpivot = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
-            const vpos   = rotatePoint3D(vpoint, vpivot, plm.rot)
+            const vpos = rotatePoint3D(vpoint, vpivot, plm.rot)
             // camera offset
-            let x  = vpos.x - camx;
-            let y  = vpos.y - camy;
-            let z  = vpos.z - camz;
+            let x = vpos.x - camx;
+            let y = vpos.y - camy;
+            let z = vpos.z - camz;
 
             // rotate camera
             let tx = x * cosY + z * sinY;
-                z  = -x * sinY + z * cosY;
-                x  = tx;
+                z = -x * sinY + z * cosY;
+                x = tx;
 
             let ty = y * cosX - z * sinX;
-                z  = y * sinX + z * cosX;
-                y  = ty;
+                z = y * sinX + z * cosX;
+                y = ty;
 
                 tx = x * cosZ - y * sinZ;
-                y  = x * sinZ + y * cosZ;
-                x  = tx;
+                y = x * sinZ + y * cosZ;
+                x = tx;
 
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
@@ -111,9 +105,9 @@ namespace Polymesh {
         // Sort triangles
         const tris = plm.faces.slice();
         switch (sort) {
-            case 0x0: tris.sort(         (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
-            case 0x1: smoothSort(  tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices));
-                      shellSort(   tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
+            case 0x0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
+            case 0x1: smoothSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices));
+            shellSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
             case 0x2:
             default:  duoQuickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
         }
@@ -127,19 +121,18 @@ namespace Polymesh {
             if (t.img) {
                 im = t.img.clone();
                 if (plm.flag.lod) {
-                    let scaleD = Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, inds))
-                        scaleD = ((scaleD * zoom) / SDIST)
+                    const scaleD = ((Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, inds))) * zoom) / LOD_DIST
                     im = image.create(Math.clamp(1, t.img.width, scaleD * t.img.width), Math.clamp(1, t.img.height, scaleD * t.img.height))
                     resizeImage(t.img.clone(), im, true, true)
                 }
             }
             if (t.indices.length === 1) {
                 idx = t.indices[0];
-                pt  = rotated[idx];
+                pt = rotated[idx];
 
                 // center image
-                cx  = pt.x;
-                cy  = pt.y;
+                cx = pt.x;
+                cy = pt.y;
 
                 const bq = [
                     { x: cx, y: cy },
@@ -152,11 +145,11 @@ namespace Polymesh {
                 square = 1.5 * scale * t.scale * zoom
                 if (im) {
                     // set scale image from camera distance
-                    baseW    = im.width;
-                    baseH    = im.height;
+                    baseW = im.width;
+                    baseH = im.height;
+                    halfW = (baseW / 3) * scale * t.scale * zoom;
+                    halfH = (baseH / 3) * scale * t.scale * zoom;
 
-                    halfW    = (baseW / 3) * scale * t.scale * zoom;
-                    halfH    = (baseH / 3) * scale * t.scale * zoom;
                     bq[0].x += halfW, bq[0].y += halfH
                     bq[1].x -= halfW, bq[1].y += halfH
                     bq[2].x += halfW, bq[2].y -= halfH
@@ -174,22 +167,22 @@ namespace Polymesh {
             // Backface culling
             if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
 
-            idx   = t.indices[0];
-            pt    = rotated[idx];
+            idx = t.indices[0];
+            pt = rotated[idx];
             scale = pt.scale;
             // center image
-            cx    = pt.x;
-            cy    = pt.y;
+            cx = pt.x;
+            cy = pt.y;
 
             square = 1.5 * scale * t.scale * zoom
 
             if (t.img) {
                 // set scale image from camera distance
-                baseW  = im.width;
-                baseH  = im.height;
+                baseW = im.width;
+                baseH = im.height;
 
-                halfW  = (baseW / 3) * scale * t.scale * zoom;
-                halfH  = (baseH / 3) * scale * t.scale * zoom;
+                halfW = (baseW / 3) * scale * t.scale * zoom;
+                halfH = (baseH / 3) * scale * t.scale * zoom;
 
                 square = Math.min(halfW, halfH)
             }
@@ -198,16 +191,10 @@ namespace Polymesh {
                 if (pt.z < -Math.abs(dist)) continue;
 
                 // when no image
-                if (!t.img) {
-                    fillCircleImage(output, cx, cy, scale * zoom / 2.2, t.color)
-                    continue;
-                }
+                if (!t.img) { fillCircleImage(output, cx, cy, scale * zoom / 2.2, t.color); continue; }
 
                 // fill circle if image is empty
-                if (isEmptyImage(t.img)) {
-                    fillCircleImage(output, cx, cy, Math.floor(square), t.color)
-                    continue;
-                }
+                if (isEmptyImage(t.img)) { fillCircleImage(output, cx, cy, Math.floor(square), t.color); continue; }
 
                 halfW /= 1.1
                 halfH /= 1.1
@@ -235,6 +222,12 @@ namespace Polymesh {
                 continue;
             }
             if (t.color > 0) {
+                // Draw line when no shape
+                helpers.imageDrawLine(output,
+                    rotated[inds[0]].x, rotated[inds[0]].y,
+                    rotated[inds[1]].x, rotated[inds[1]].y,
+                    t.color
+                );
                 if (inds.length > 2) {
                     // Draw solid when is vertice shape
                     helpers.imageFillTriangle(output,
@@ -251,13 +244,6 @@ namespace Polymesh {
                             t.color
                         );
                     }
-                } else {
-                    // Draw line when no shape
-                    helpers.imageDrawLine(output,
-                        rotated[inds[0]].x, rotated[inds[0]].y,
-                        rotated[inds[1]].x, rotated[inds[1]].y,
-                        t.color
-                    ); 
                 }
             }
 
@@ -274,7 +260,6 @@ namespace Polymesh {
 
         }
 
-        inProcess[0] = false
     }
     
 }

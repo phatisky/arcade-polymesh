@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    forever(() => {
+    control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const deltaG = control.eventContext().deltaTime
 
         // Acceleration angle of camera

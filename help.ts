@@ -32,14 +32,14 @@ namespace Polymesh {
     interface Pt { x: number; y: number; }
 
     // Bilinear interpolation on quad
-    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: Fx8, v: Fx8): Pt {
-        const x0 = p0.x + (p1.x - p0.x) * Fx.toFloat(u);
-        const y0 = p0.y + (p1.y - p0.y) * Fx.toFloat(u);
-        const x1 = p3.x + (p2.x - p3.x) * Fx.toFloat(u);
-        const y1 = p3.y + (p2.y - p3.y) * Fx.toFloat(u);
+    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
+        const x0 = p0.x + (p1.x - p0.x) * u;
+        const y0 = p0.y + (p1.y - p0.y) * u;
+        const x1 = p3.x + (p2.x - p3.x) * u;
+        const y1 = p3.y + (p2.y - p3.y) * u;
         return {
-            x: Math.trunc(x0 + (x1 - x0) * Fx.toFloat(v)),
-            y: Math.trunc(y0 + (y1 - y0) * Fx.toFloat(v))
+            x: Math.trunc(x0 + (x1 - x0) * v),
+            y: Math.trunc(y0 + (y1 - y0) * v)
         };
     }
 
@@ -50,21 +50,20 @@ namespace Polymesh {
         revX?: boolean, revY?: boolean
     ) {
 
-        const w = from.width;
-        const h = from.height;
+        const w = from.width, h = from.height;
 
         const fromBuf = pins.createBuffer(from.height)
 
         for (let sx = 0; sx < w; sx++) {
             from.getRows(sx, fromBuf)
             if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
-            const u0 = Fx8(sx / w), u1 = Fx8((sx + 1) / w);
+            const u0 = (sx / w), u1 = ((sx + 1) / w);
 
             for (let sy = 0; sy < h; sy++) {
                 const color = from.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
                 if (color === 0) continue; // transparent
 
-                const v0 = Fx8(sy / h), v1 = Fx8((sy + 1) / h);
+                const v0 = (sy / h), v1 = ((sy + 1) / h);
 
                 // fix quad of intersect
                 // const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
@@ -89,22 +88,13 @@ namespace Polymesh {
     export function distortImage(from: Image, to: Image,
         x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
         revX?: boolean, revY?: boolean) {
-        let p0 = { x: x0, y: y0 }, p1 = { x: x1, y: y1 }, p2 = { x: x2, y: y2 }, p3 = { x: x3, y: y3 }
-        distortImageUtil(from, to, p0, p1, p2, p3, revX, revY)
+        distortImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 }, revX, revY)
     }
 
     export function resizeImage(from: Image, to: Image, revX?: boolean, revY?: boolean) {
         if (isEmptyImage(from)) return;
         if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
         distortImage(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, revX, revY)
-    }
-
-    export function minPosArr(xyarr: { x: number, y: number }[]) {
-        return { x: xyarr.reduce((cur, val) => Math.min(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.min(cur, val.y), xyarr[0].y) }
-    }
-
-    export function maxPosArr(xyarr: { x: number, y: number }[]) {
-        return { x: xyarr.reduce((cur, val) => Math.max(cur, val.x), xyarr[0].x), y: xyarr.reduce((cur, val) => Math.max(cur, val.y), xyarr[0].y) }
     }
 
     export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
@@ -127,7 +117,7 @@ namespace Polymesh {
     export function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number, w?: number, h?: number): boolean {
         // Simple normal calculation for culling
         if (indices.length > 0) {
-            if (oface === 0) if (w && h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
+            if (oface < 1 && oface > -1) if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
             const xyzs = indices.map(ind => rotated[ind])
 
             // Average depth comparison
