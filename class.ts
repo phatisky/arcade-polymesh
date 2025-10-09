@@ -8,9 +8,12 @@ class polymesh {
     }
 
     //% blockId=poly_kind_set
-    //% block=" set kind to"
+    //% blockNamespace=Polymesh
+    //% block=" $this set kind to $id"
+    //% this.shadow=variables_get this.defl=myMesh
     //% id.shadow=poly_kind_get
-    //% group=11
+    //% group="mesh kind"
+    //% weight=11
     set kind(id: number) {
         if (Fx.toInt(this._kind) === Math.round(id)) return;
         Polymesh.__mesh[Fx.toInt(this._kind)][this.kind_idx] = null;
@@ -24,8 +27,11 @@ class polymesh {
     }
 
     //% blockId=poly_kind_get
-    //% block=" get kind"
-    //% group=11
+    //% blockNamespace=Polymesh
+    //% block=" $this get kind"
+    //% this.shadow=variables_get this.defl=myMesh
+    //% group="mesh kind"
+    //% weight=9
     get kind() {
         return Fx.toInt(this._kind);
     }
