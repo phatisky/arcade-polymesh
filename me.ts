@@ -2,6 +2,7 @@
 //% block="Poly mesh" color="#279139" icon="\uf1b2" groups='["Create","Controls","Styling"]'
 namespace Polymesh {
 
+    export const __mesh: polymesh[][] = []
     export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.06
 
     export let ax   = 0, az   = 0,   ay   = 0,   avx     = 0, avy   = 0, avz   = 0, aax   = 0, aay   = 0, aaz   = 0, afx   = 0, afy   = 0, afz   = 0
@@ -16,12 +17,23 @@ namespace Polymesh {
         if (sort !== method) sort = method;
     }
 
-    //% blockId=poly_newmesh
-    //% block="create new mesh"
+    //% blockId=poly_create
+    //% block="create mesh with kind $kind=poly_kind_get"
     //% blockSetVariable=myMesh
     //% group="create"
     //% weight=10
-    export function newmesh() { return new polymesh() }
+    export function create(kind: number) {
+        return new polymesh(Fx8(kind));
+    }
+
+    //% blockId=poly_kind_all
+    //% block="all mesh of kind $kind=poly_kind_get"
+    //% blockSetVariable=myMesh
+    //% group="mesh kind"
+    //% weight=13
+    export function meshAll(kind?: number) {
+        return Polymesh.__mesh[kind]
+    }
 
 }
 

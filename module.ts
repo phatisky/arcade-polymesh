@@ -35,18 +35,16 @@ namespace Polymesh {
     };
 
     //% blockId=poly_rendermesh_all
-    //% block=" $plms render all meshes to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
-    //% plms.shadow=variables_get plms.defl=myMeshes
+    //% block=" render all mesh of kind $id=poly_kind_get to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% group="render"
     //% weight=9
-    export function renderAll(plms: polymesh[], output: Image, linecolor?: number) {
-        if (!plms || !output || plms.length <= 0) return;
-        const sorted = plms.filter( plm => !plm || !plm.isDel() ).map(plm => ({ mesh: plm, depth: meshDepthZ(plm) }));
+    export function renderAll(id: number, output: Image, linecolor?: number) {
+        if ((id == null || isNaN(id)) || !output) return;
+        const sorted = Polymesh.__mesh[id].filter( msh => !msh || !msh.isDel() ).map(msh => ({ mesh: msh, depth: meshDepthZ(msh) }));
         if (sorted.length <= 0) return;
         switch (sort) {
             case 0x0: sorted.sort((a, b) => b.depth - a.depth); break;
-            case 0x1: smoothSort(sorted, (a, b) => b.depth - a.depth);
-            shellSort(sorted, (a, b) => b.depth - a.depth); break;
+            case 0x1: quickSort(sorted, (a, b) => b.depth - a.depth); break;
             case 0x2:
             default:  duoQuickSort(sorted, (a, b) => b.depth - a.depth); break;
         }
@@ -54,14 +52,14 @@ namespace Polymesh {
     }
 
     //% blockId=poly_rendermesh
-    //% block=" $plm render to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
-    //% plm.shadow=variables_get plm.defl=myMesh
+    //% block=" $msh render to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
+    //% msh.shadow=variables_get msh.defl=myMesh
     //% group="render"
     //% weight=10
-    export function render(plm: polymesh, output: Image, linecolor?: number) {
-        if (plm.isDel()) return;
-        if (!plm || !output || plm.points.length <= 0 || plm.faces.length <= 0) return;
-        if (plm.flag.invisible) return;
+    export function render(msh: polymesh, output: Image, linecolor?: number) {
+        if (msh.isDel()) return;
+        if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
+        if (msh.flag.invisible) return;
 
         const centerX = output.width  >> 1, centerY = output.height >> 1;
 
@@ -70,10 +68,10 @@ namespace Polymesh {
         const cosZ = Math.cos(az), sinZ = Math.sin(az);
 
         // Transform vertices
-        const rotated = plm.points.map(v => {
-            const vpoint = { x: plm.pos.x + v.x, y: plm.pos.y + v.y, z: plm.pos.z + v.z }
-            const vpivot = { x: plm.pos.x + plm.pivot.x, y: plm.pos.y + plm.pivot.y, z: plm.pos.z + plm.pivot.z }
-            const vpos = rotatePoint3D(vpoint, vpivot, plm.rot)
+        const rotated = msh.points.map(v => {
+            const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
+            const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
+            const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
             // camera offset
             let x = vpos.x - camx;
             let y = vpos.y - camy;
@@ -103,11 +101,10 @@ namespace Polymesh {
         })
 
         // Sort triangles
-        const tris = plm.faces.slice();
+        const tris = msh.faces.slice();
         switch (sort) {
             case 0x0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
-            case 0x1: smoothSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices));
-            shellSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
+            case 0x1: quickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
             case 0x2:
             default:  duoQuickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
         }
@@ -120,7 +117,7 @@ namespace Polymesh {
             // LOD calculating?
             if (t.img) {
                 im = t.img.clone();
-                if (plm.flag.lod) {
+                if (msh.flag.lod) {
                     const scaleD = ((Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, inds))) * zoom) / LOD_DIST
                     im = image.create(Math.clamp(1, t.img.width, scaleD * t.img.width), Math.clamp(1, t.img.height, scaleD * t.img.height))
                     resizeImage(t.img.clone(), im, true, true)
@@ -165,7 +162,7 @@ namespace Polymesh {
             } else if (isOutOfAreaOnFace(rotated, inds, output.width, output.height)) if (inds.every(i => isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height))) continue;
 
             // Backface culling
-            if (!plm.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
+            if (!msh.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
 
             idx = t.indices[0];
             pt = rotated[idx];

@@ -17,7 +17,8 @@
         "module.ts",
         "class.ts",
         "enum.ts",
-        "shadow.ts"
+        "shadow.ts",
+        "kind.ts"
     ],
     "testFiles": [
         "test.ts"

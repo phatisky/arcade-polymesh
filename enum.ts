@@ -94,8 +94,8 @@ enum PolyPivot {
 enum PolySort {
     //% block="accurate"
     accurate = 0x0,
-    //% block="normal"
-    normal   = 0x1,
+    //% block="absolute"
+    absolute   = 0x1,
     //% block="quick"
     quick    = 0x2,
 }
