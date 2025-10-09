@@ -28,7 +28,7 @@ namespace Polymesh {
 
     //% blockId=poly_kind_all
     //% block="all mesh of kind $kind=poly_kind_shadow"
-    //% blockSetVariable=myMesh
+    //% blockSetVariable=myMeshes
     //% group="mesh kind"
     //% weight=13
     export function meshAll(kind?: number) {
