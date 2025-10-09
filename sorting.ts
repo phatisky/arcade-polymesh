@@ -13,13 +13,13 @@ namespace Polymesh {
         //const mi = median3(arr, cmp, lo, hi); swap(arr, lo, mi)
         if (cmp(arr[lo], arr[hi]) > 0) swap(arr, lo, hi);
         const p = arr[lo], q = arr[hi]; 
-        let j = lo + 1, g = hi - 1;
-        for (let k = j; k <= g; k++) {
-            if (cmp(arr[k], p) < 0) swap(arr, k, j++);
+        let l = lo + 1, r = hi - 1;
+        for (let k = l; k <= r; k++) {
+            if (cmp(arr[k], p) < 0) swap(arr, k, l++);
             else if (cmp(arr[k], q) > 0) {
-                while (cmp(arr[g], q) > 0 && k < g) g--;
-                swap(arr, k, g--);
-                if (cmp(arr[k], p) < 0) swap(arr, k, j++);
+                while (cmp(arr[r], q) > 0 && k < r) r--;
+                swap(arr, k, r--);
+                if (cmp(arr[k], p) < 0) swap(arr, k, l++);
             }
         }
         swap(arr, lo, --j), swap(arr, hi, ++g);
@@ -34,11 +34,11 @@ namespace Polymesh {
  
             while (lo < hi) {
                 const [lp, rp] = duoPartition(arr, cmp, lo, hi);
-                // Tail recursion optimization: push subarray small first
-                if (lp - lo < hi - rp) stack.push([lo, rp - 1]), lo = lp + 1;
-                else stack.push([lp + 1, hi]), hi = rp - 1;
                 // Middle Subarray (lp+1 to rp-1)
-                if (lp <= rp) stack.push([lp + 1, rp - 1]);
+                if (lp <= rp) stack.push([lp + 1, rp - 1]); 
+                // Tail recursion optimization: push subarray small first
+                if (lp - lo < hi - rp) stack.push([lp + 1, hi]), hi = rp - 1;
+                else stack.push([lo, rp - 1]), lo = lp + 1;
             }
         }
     }
