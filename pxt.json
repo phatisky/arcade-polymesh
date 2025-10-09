@@ -15,10 +15,10 @@
         "me.ts",
         "myself.ts",
         "module.ts",
+        "kind.ts",
         "class.ts",
         "enum.ts",
-        "shadow.ts",
-        "kind.ts"
+        "shadow.ts"
     ],
     "testFiles": [
         "test.ts"

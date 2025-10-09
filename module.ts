@@ -35,7 +35,7 @@ namespace Polymesh {
     };
 
     //% blockId=poly_rendermesh_all
-    //% block=" render all mesh of kind $id=poly_kind_get to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
+    //% block=" render all mesh of kind $id=poly_kind_shadow to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% group="render"
     //% weight=9
     export function renderAll(id: number, output: Image, linecolor?: number) {

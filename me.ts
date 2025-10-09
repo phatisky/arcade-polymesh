@@ -18,7 +18,7 @@ namespace Polymesh {
     }
 
     //% blockId=poly_create
-    //% block="create mesh with kind $kind=poly_kind_get"
+    //% block="create mesh with kind $kind=poly_kind_shadow"
     //% blockSetVariable=myMesh
     //% group="create"
     //% weight=10
@@ -27,7 +27,7 @@ namespace Polymesh {
     }
 
     //% blockId=poly_kind_all
-    //% block="all mesh of kind $kind=poly_kind_get"
+    //% block="all mesh of kind $kind=poly_kind_shadow"
     //% blockSetVariable=myMesh
     //% group="mesh kind"
     //% weight=13

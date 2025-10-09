@@ -11,7 +11,7 @@ class polymesh {
     //% blockNamespace=Polymesh
     //% block=" $this set kind to $id"
     //% this.shadow=variables_get this.defl=myMesh
-    //% id.shadow=poly_kind_get
+    //% id.shadow=poly_kind_shadow
     //% group="mesh kind"
     //% weight=11
     set kind(id: number) {

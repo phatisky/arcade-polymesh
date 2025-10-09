@@ -16,7 +16,7 @@ namespace Polymesh {
 
     //% shim=KIND_GET
     //% kindMemberName=mesh
-    //% blockId=poly_kind_get
+    //% blockId=poly_kind_shadow
     //% block="$arg"
     //% kindNamespace=PolyKind 
     //% kindPromptHint="enter your mesh group"
