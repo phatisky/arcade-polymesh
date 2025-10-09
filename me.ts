@@ -32,7 +32,7 @@ namespace Polymesh {
     //% group="mesh kind"
     //% weight=13
     export function meshAll(kind?: number) {
-        return Polymesh.__mesh[kind]
+        return Polymesh.__mesh[kind].filter( msh => !msh || !msh.isDel())
     }
 
 }
