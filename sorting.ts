@@ -15,9 +15,8 @@ namespace Polymesh {
         if (cmp(p, q) > 0) swap(arr, lo, hi), p = arr[lo], q = arr[hi];
         let j = lo + 1, g = hi - 1;
         for (let k = lo + 1; k <= g; k++) {
-            if (cmp(arr[k], p) < 0) {
-                swap(arr, k, j++);
-            } else if (cmp(arr[k], q) >= 0) {
+            if (cmp(arr[k], p) < 0) swap(arr, k, j++);
+            else if (cmp(arr[k], q) >= 0) {
                 while (cmp(arr[g], q) > 0 && k < g) g--;
                 swap(arr, k, g--);
                 if (cmp(arr[k], p) < 0) swap(arr, k, j++);
