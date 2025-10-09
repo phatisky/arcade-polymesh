@@ -23,7 +23,7 @@ namespace Polymesh {
     //% group="create"
     //% weight=10
     export function create(kind: number) {
-        return new polymesh(Fx8(kind));
+        return new polymesh(Math.round(kind));
     }
 
     //% blockId=poly_kind_all

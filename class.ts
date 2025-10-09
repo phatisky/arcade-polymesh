@@ -1,10 +1,10 @@
 
 class polymesh {
 
-    protected __del: boolean; protected __prop_upd: control.FrameCallback; protected _kind: Fx8; kind_idx: number;
+    protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; kind_idx: number;
 
     __upd() {
-        Polymesh.__mesh[Fx.toInt(this._kind)][this.kind_idx] = this;
+        Polymesh.__mesh[this.kind][this.kind_idx] = this;
     }
 
     //% blockId=poly_kind_set
@@ -14,11 +14,11 @@ class polymesh {
     //% id.shadow=poly_kind_shadow
     //% group="mesh kind"
     //% weight=11
-    set kind(id: number) {
-        if (Fx.toInt(this._kind) === Math.round(id)) return;
-        Polymesh.__mesh[Fx.toInt(this._kind)][this.kind_idx] = null;
-        this._kind = Fx8(id);
-        const kind = Fx.toInt(this._kind);
+    setKind(id: number) {
+        if (Math.round(this.kind) === Math.round(id)) return;
+        Polymesh.__mesh[Math.round(this.kind)][this.kind_idx] = null;
+        this.kind = Math.round(id);
+        const kind = Math.round(this.kind);
         if (!Polymesh.__mesh[kind]) Polymesh.__mesh[kind] = [];
         const kind_idx = Polymesh.__mesh[kind].indexOf(null)
         if (kind_idx < 0) Polymesh.__mesh[kind].push(null)
@@ -32,8 +32,8 @@ class polymesh {
     //% this.shadow=variables_get this.defl=myMesh
     //% group="mesh kind"
     //% weight=9
-    get kind() {
-        return Fx.toInt(this._kind);
+    getKind() {
+        return Math.round(this.kind);
     }
 
     protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[];
@@ -161,7 +161,7 @@ class polymesh {
         });
     }
 
-    init(id: Fx8) {
+    init() {
         this.faces = [];
         this.points = [];
         this.pivot = { x: 0, y: 0, z: 0 };
@@ -172,15 +172,15 @@ class polymesh {
         this.loop();
     }
 
-    constructor(id: Fx8) {
-        this._kind = id;
-        const kind = Fx.toInt(id)
+    constructor(id: number) {
+        this.kind = Math.round(id);
+        const kind = this.kind;
         if (!Polymesh.__mesh[kind]) Polymesh.__mesh[kind] = [];
         const kind_idx = Polymesh.__mesh[kind].indexOf(null)
         if (kind_idx < 0) Polymesh.__mesh[kind].push(null)
         this.kind_idx = (kind_idx >= 0) ? kind_idx : Polymesh.__mesh[kind].length - 1
         Polymesh.__mesh[kind][kind_idx] = this;
-        this.init(id);
+        this.init();
     }
 
     //% blockId=poly_dist_del
