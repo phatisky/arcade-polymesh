@@ -22,8 +22,8 @@ namespace Polymesh {
                 if (cmp(arr[k], p) < 0) swap(arr, k, l++);
             }
         }
-        swap(arr, lo, --j), swap(arr, hi, ++g);
-        return [j, g];
+        swap(arr, lo, --l), swap(arr, hi, ++r);
+        return [l, r];// j->l g->r
     }
 
     // --- duoQuickSort ---
