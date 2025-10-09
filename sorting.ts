@@ -38,7 +38,7 @@ namespace Polymesh {
                 if (lp <= rp) stack.push([lp + 1, rp - 1]); 
                 // Tail recursion optimization: push subarray small first
                 if (lp - lo < hi - rp) stack.push([lo, lp - 1]), lo = rp + 1;
-                else stack.push([rp + 1, hi]), hi = rp - 1;
+                else stack.push([lp + 1, hi]), hi = rp - 1;
             }
         }
     }
