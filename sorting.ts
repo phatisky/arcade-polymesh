@@ -35,7 +35,7 @@ namespace Polymesh {
             while (lo < hi) {
                 const [lp, rp] = duoPartition(arr, cmp, lo, hi);
                 // Tail recursion optimization: push subarray small first
-                if (lp - lo < hi - rp) stack.push([lo, rp - 1]), lo = lp - 1;
+                if (lp - lo < hi - rp) stack.push([lo, rp - 1]), lo = lp + 1;
                 else stack.push([lp + 1, hi]), hi = rp - 1;
                 // Middle Subarray (lp+1 to rp-1)
                 if (lp <= rp) stack.push([lp + 1, rp - 1]);
