@@ -10,9 +10,9 @@ namespace Polymesh {
     };
 
     const duoPartition = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
-        const mi = median3(arr, cmp, lo, hi); swap(arr, lo, mi)
-        let p = arr[lo], q = arr[hi];
-        if (cmp(p, q) > 0) swap(arr, lo, hi), p = arr[lo], q = arr[hi];
+        //const mi = median3(arr, cmp, lo, hi); swap(arr, lo, mi)
+        if (cmp(arr[lo], arr[hi]) > 0) swap(arr, lo, hi);
+        const p = arr[lo], q = arr[hi]; 
         let j = lo + 1, g = hi - 1;
         for (let k = lo + 1; k <= g; k++) {
             if (cmp(arr[k], p) < 0) swap(arr, k, j++);
