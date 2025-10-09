@@ -23,7 +23,7 @@ namespace Polymesh {
             }
         }
         swap(arr, lo, --l), swap(arr, hi, ++r);
-        return [l, r];// j->l g->r
+        return [l, r];
     }
 
     // --- duoQuickSort ---
@@ -37,8 +37,8 @@ namespace Polymesh {
                 // Middle Subarray (lp+1 to rp-1)
                 if (lp <= rp) stack.push([lp + 1, rp - 1]); 
                 // Tail recursion optimization: push subarray small first
-                if (lp - lo < hi - rp) stack.push([lp + 1, hi]), hi = rp - 1;
-                else stack.push([lo, rp - 1]), lo = lp + 1;
+                if (lp - lo < hi - rp) stack.push([low, lp - 1]), lo = rp + 1;
+                else stack.push([rp + 1, high]), hi = rp - 1;
             }
         }
     }
