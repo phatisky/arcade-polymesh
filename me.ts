@@ -26,12 +26,12 @@ namespace Polymesh {
         return new polymesh(Math.round(kind));
     }
 
-    //% blockId=poly_kind_all
-    //% block="all mesh of kind $kind=poly_kind_shadow"
+    //% blockId=poly_kind_allmesh
+    //% block="array mesh of kind $kind=poly_kind_shadow"
     //% blockSetVariable=myMeshes
     //% group="mesh kind"
     //% weight=13
-    export function meshAll(kind?: number) {
+    export function arrMesh(kind?: number) {
         return Polymesh.__mesh[kind].filter( msh => !msh || !msh.isDel())
     }
 

@@ -61,7 +61,7 @@ namespace Polymesh {
         if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
         if (msh.flag.invisible) return;
 
-        const centerX = output.width  >> 1, centerY = output.height >> 1;
+        const centerX = output.width >> 1, centerY = output.height >> 1;
 
         const cosX = Math.cos(ax), sinX = Math.sin(ax);
         const cosY = Math.cos(ay), sinY = Math.sin(ay);
@@ -93,7 +93,6 @@ namespace Polymesh {
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
-                scale: scale,
                 x: centerX + x * scale * zoom,
                 y: centerY + y * scale * zoom,
                 z: z,
@@ -113,7 +112,7 @@ namespace Polymesh {
         for (const t of tris) {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist) || (fardist > 0 && rotated[i].z > Math.abs(fardist)))) continue;
-            let idx: number, pt: { scale: number, x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
+            let idx: number, pt: { x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
             // LOD calculating?
             if (t.img) {
                 im = t.img.clone();
@@ -138,7 +137,7 @@ namespace Polymesh {
                     { x: cx, y: cy },
                 ]
 
-                scale = pt.scale;
+                scale = (Math.abs(dist) / (Math.abs(dist) + pt.z));
                 square = 1.5 * scale * t.scale * zoom
                 if (im) {
                     // set scale image from camera distance
@@ -166,7 +165,7 @@ namespace Polymesh {
 
             idx = t.indices[0];
             pt = rotated[idx];
-            scale = pt.scale;
+            scale = (Math.abs(dist) / (Math.abs(dist) + pt.z));
             // center image
             cx = pt.x;
             cy = pt.y;
@@ -203,8 +202,8 @@ namespace Polymesh {
                     cx + halfW, cy - halfH,
                     cx - halfW, cy - halfH,
                     cx - halfW, cy + halfH,
-                    cx + halfW, cy + halfH,
-                    true, true);
+                    cx + halfW, cy + halfH
+                );
                 continue;
             }
 
@@ -250,8 +249,7 @@ namespace Polymesh {
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[0]].x, rotated[inds[0]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    false, false
+                    rotated[inds[1]].x, rotated[inds[1]].y
                 );
             }
 

@@ -35,27 +35,29 @@ namespace Polymesh {
         };
     }
 
+    const cocktailSum = (n: number, r: number) => ((n & 1) === 0) ? (n >> 1) + 0.5 : r - (n >> 1) - 1.5
+
     // main distortImage function
     export function distortImageUtil(
         from: Image, to: Image,
-        p0: Pt, p1: Pt, p2: Pt, p3: Pt,
-        revX?: boolean, revY?: boolean
+        p0: Pt, p1: Pt, p2: Pt, p3: Pt
     ) {
 
         const w = from.width, h = from.height;
 
         const fromBuf = pins.createBuffer(from.height)
-
         for (let sx = 0; sx < w; sx++) {
-            from.getRows(sx, fromBuf)
+            const ix = cocktailSum(sx, w)
+            from.getRows(ix, fromBuf)
             if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
-            const u0 = (sx / w), u1 = ((sx + 1) / w);
+            const u0 = (ix / w), u1 = ((ix + 1) / w);
 
             for (let sy = 0; sy < h; sy++) {
-                const color = from.getPixel(revX ? w - sx - 1 : sx, revY ? h - sy - 1 : sy);
+                const iy = cocktailSum(sy, h)
+                const color = from.getPixel(w - ix - 1, iy);
                 if (color === 0) continue; // transparent
 
-                const v0 = (sy / h), v1 = ((sy + 1) / h);
+                const v0 = (iy / h), v1 = ((iy + 1) / h);
 
                 // fix quad of intersect
                 // const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
@@ -80,7 +82,7 @@ namespace Polymesh {
     export function distortImage(from: Image, to: Image,
         x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
         revX?: boolean, revY?: boolean) {
-        distortImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 }, revX, revY)
+        distortImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 })
     }
 
     export function resizeImage(from: Image, to: Image, revX?: boolean, revY?: boolean) {
