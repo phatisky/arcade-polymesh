@@ -23,7 +23,7 @@ class polymesh {
         const kind_idx = Polymesh.__mesh[kind].indexOf(null)
         if (kind_idx < 0) Polymesh.__mesh[kind].push(null)
         this.kind_idx = (kind_idx >= 0) ? kind_idx : Polymesh.__mesh[kind].length - 1
-        Polymesh.__mesh[kind][kind_idx] = this;
+        Polymesh.__mesh[kind][this.kind_idx] = this;
     }
 
     //% blockId=poly_kind_get
@@ -179,7 +179,7 @@ class polymesh {
         const kind_idx = Polymesh.__mesh[kind].indexOf(null)
         if (kind_idx < 0) Polymesh.__mesh[kind].push(null)
         this.kind_idx = (kind_idx >= 0) ? kind_idx : Polymesh.__mesh[kind].length - 1
-        Polymesh.__mesh[kind][kind_idx] = this;
+        Polymesh.__mesh[kind][this.kind_idx] = this;
         this.init();
     }
 
@@ -192,7 +192,7 @@ class polymesh {
     del() {
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
         this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null;
-        Polymesh.__mesh[this.kind][Polymesh.__mesh[this.kind].indexOf(this)] = null;
+        Polymesh.__mesh_del(this);
     }
 
     //% blockId=poly_dist_isdel
