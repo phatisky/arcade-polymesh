@@ -119,7 +119,7 @@ namespace Polymesh {
                 if (msh.flag.lod) {
                     const scaleD = ((Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, inds))) * zoom) / LOD_DIST
                     im = image.create(Math.clamp(1, t.img.width, scaleD * t.img.width), Math.clamp(1, t.img.height, scaleD * t.img.height))
-                    resizeImage(t.img.clone(), im, true, true)
+                    resizeImage(t.img.clone(), im, true)
                 }
             }
             if (t.indices.length === 1) {

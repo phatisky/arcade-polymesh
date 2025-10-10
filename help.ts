@@ -35,22 +35,22 @@ namespace Polymesh {
         };
     }
 
-    const cocktailSum = (n: number, r: number) => ((n & 1) === 0) ? (n >> 1) + 0.5 : r - (n >> 1) - 1.5
+    const cocktailSum = (n: number, r: number, c?: boolean) => ((n & 1) === 0) ? (n >> 1) + (c ? 0.5 : 0) : r - (n >> 1) - (c ? 1.5 : 1)
 
     // main distortImage function
     export function distortImageUtil(
         from: Image, to: Image,
-        p0: Pt, p1: Pt, p2: Pt, p3: Pt
-    ) {
+        p0: Pt, p1: Pt, p2: Pt, p3: Pt,
+        center?: boolean) {
         const w = from.width, h = from.height;
         const fromBuf = pins.createBuffer(from.height)
         for (let sx = 0; sx < w; sx++) {
-            const ix = cocktailSum(sx, w)
+            const ix = cocktailSum(sx, w, center)
             from.getRows(ix, fromBuf)
             if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
             const u0 = (ix / w), u1 = ((ix + 1) / w);
             for (let sy = 0; sy < h; sy++) {
-                const iy = cocktailSum(sy, h)
+                const iy = cocktailSum(sy, h, center)
                 const color = from.getPixel(w - ix - 1, iy);
                 if (color === 0) continue; // transparent
                 const v0 = (iy / h), v1 = ((iy + 1) / h);
@@ -72,14 +72,14 @@ namespace Polymesh {
 
     export function distortImage(from: Image, to: Image,
         x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
-        revX?: boolean, revY?: boolean) {
-        distortImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 })
+        center?: boolean) {
+        distortImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 }, center)
     }
 
-    export function resizeImage(from: Image, to: Image, revX?: boolean, revY?: boolean) {
+    export function resizeImage(from: Image, to: Image, center?: boolean) {
         if (isEmptyImage(from)) return;
         if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
-        distortImage(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, revX, revY)
+        distortImage(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, center)
     }
 
     export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
