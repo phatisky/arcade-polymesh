@@ -40,7 +40,7 @@ namespace Polymesh {
     //% weight=9
     export function renderAll(id: number, output: Image, linecolor?: number) {
         if ((id == null || isNaN(id)) || !output) return;
-        const sorted = Polymesh.__mesh[id].filter( msh => msh != null || !msh.isDel()).map(msh => ({ mesh: msh, depth: meshDepthZ(msh) }));
+        const sorted = Polymesh.__mesh[id].filter( msh => msh != null || (msh && !msh.isDel())).map(msh => ({ mesh: msh, depth: meshDepthZ(msh) }));
         if (sorted.length <= 0) return;
         switch (sort) {
             case 0x0: sorted.sort((a, b) => b.depth - a.depth);          break;
