@@ -34,8 +34,8 @@ namespace Polymesh {
     //% blockSetVariable=myMeshes
     //% group="mesh kind"
     //% weight=13
-    export function arrMesh(kind?: number) {
-        return Polymesh.__mesh[kind].filter( msh => !msh || !msh.isDel())
+    export function meshAll(kind?: number) {
+        return Polymesh.__mesh[kind].filter( msh => msh || !msh.isDel())
     }
 
 }
