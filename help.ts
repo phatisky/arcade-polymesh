@@ -42,26 +42,18 @@ namespace Polymesh {
         from: Image, to: Image,
         p0: Pt, p1: Pt, p2: Pt, p3: Pt
     ) {
-
         const w = from.width, h = from.height;
-
         const fromBuf = pins.createBuffer(from.height)
         for (let sx = 0; sx < w; sx++) {
             const ix = cocktailSum(sx, w)
             from.getRows(ix, fromBuf)
             if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
             const u0 = (ix / w), u1 = ((ix + 1) / w);
-
             for (let sy = 0; sy < h; sy++) {
                 const iy = cocktailSum(sy, h)
                 const color = from.getPixel(w - ix - 1, iy);
                 if (color === 0) continue; // transparent
-
                 const v0 = (iy / h), v1 = ((iy + 1) / h);
-
-                // fix quad of intersect
-                // const tmp = p3; p3 = p1, p1 = p2, p2 = p0, p0 = tmp; // [p0, p1, p2, p3] = [p3, p2, p0, p1];
-
                 // Map quad on 1 pixel
                 const qd = [
                     lerpQuad(p0, p1, p2, p3, u0, v0),
@@ -69,7 +61,6 @@ namespace Polymesh {
                     lerpQuad(p0, p1, p2, p3, u0, v1),
                     lerpQuad(p0, p1, p2, p3, u1, v1),
                 ]
-
                 if (isOutOfAreaOnAvg(qd, to.width, to.height)) if (qd.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
                 helpers.imageFillTriangle(to, qd[1].x, qd[1].y, qd[0].x, qd[0].y, qd[3].x, qd[3].y, color);
@@ -92,14 +83,10 @@ namespace Polymesh {
     }
 
     export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
-        let src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
+        const src = image.create(Math.max(r * 2, 1), Math.max(r * 2, 1))
         if (r > 1) helpers.imageFillCircle(src, r, r, r, c)
-        else {
-            src.fill(c)
-            dest.drawTransparentImage(src, x, y)
-            return
-        }
-        let src0 = src.clone()
+        else { src.fill(c), dest.drawTransparentImage(src, x, y); return; }
+        const src0 = src.clone()
         src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
         src0.flipY(), src.drawTransparentImage(src0.clone(), 0, 0)
         src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
