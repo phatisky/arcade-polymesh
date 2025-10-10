@@ -35,7 +35,7 @@ namespace Polymesh {
     //% group="mesh kind"
     //% weight=13
     export function meshAll(kind?: number) {
-        return Polymesh.__mesh[kind].filter( msh => msh != null || !msh.isDel())
+        return Polymesh.__mesh[kind].filter( msh => msh != null || (msh && !msh.isDel()))
     }
 
 }
