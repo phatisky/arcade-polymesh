@@ -192,7 +192,7 @@ class polymesh {
     del() {
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
         this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null;
-        Polymesh.__mesh_del(this);
+        Polymesh.__mesh[this.kind][this.kind_idx] = null;
     }
 
     //% blockId=poly_dist_isdel
