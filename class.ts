@@ -1,6 +1,7 @@
 
 class polymesh {
 
+    data: {[string]: any};
     protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; kind_idx: number;
 
     __upd() {
@@ -38,6 +39,10 @@ class polymesh {
 
     protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[];
     set faces(vals: { indices: number[], color: number, offset?: number, scale?: number, img?: Image }[]) {
+        if (vals == null || vals.length <= 0) {
+            this.faces_indices = [], this.faces_color = [], this.faces_offset = [], this.faces_scale = [], this.faces_img = [];
+            return;
+        }​
         if (this.isDel()) return;
         this.faces_indices = vals.map(vs => vs.indices.map(v => Fx8(v))), this.faces_color = vals.map(v => Fx8(v.color))
         this.faces_offset = vals.map(v => v.offset ? Fx8(v.offset) : Fx8(0)), this.faces_scale = vals.map(v => v.scale ? Fx8(v.scale) : Fx8(1))
@@ -54,6 +59,10 @@ class polymesh {
 
     protected points_xs: Fx8[]; protected points_ys: Fx8[]; protected points_zs: Fx8[];
     set points(vals: { x: number, y: number, z: number }[]) {
+        if (vals == null || vals.length <= 0) {
+            this.points_xs = [], this.points_ys = [], this.point_zs = [];
+            return;
+        }
         if (this.isDel()) return;
         this.points_xs = vals.map(v => Fx8(v.x)), this.points_ys = vals.map(v => Fx8(v.y)), this.points_zs = vals.map(v => Fx8(v.z));
         this.__upd();
@@ -81,8 +90,15 @@ class polymesh {
         ax: number, ay: number, az: number,
         fx: number, fy: number, fz: number
     }) {
+        if (v == null) {
+            this.rot_x = null,  this.rot_y = null,  this.rot_z = null;
+            this.rot_vx = null, this.rot_vy = null, this.rot_vz = null;
+            this.rot_ax = null, this.rot_ay = null, this.rot_az = null;
+            this.rot_fx = null, this.rot_fy = null, this.rot_fz = null;
+            return;
+        }
         if (this.isDel()) return;
-        if (this.rot_x !== Fx8(v.x)) this.rot_x = Fx8(v.x); if (this.rot_y !== Fx8(v.y)) this.rot_y = Fx8(v.y); if (this.rot_z !== Fx8(v.z)) this.rot_z = Fx8(v.z);
+        if (this.rot_x !== Fx8(v.x))   this.rot_x = Fx8(v.x);   if (this.rot_y !== Fx8(v.y))   this.rot_y = Fx8(v.y);   if (this.rot_z !== Fx8(v.z))   this.rot_z = Fx8(v.z);
         if (this.rot_vx !== Fx8(v.vx)) this.rot_vx = Fx8(v.vx); if (this.rot_vy !== Fx8(v.vy)) this.rot_vy = Fx8(v.vy); if (this.rot_vz !== Fx8(v.vz)) this.rot_vz = Fx8(v.vz);
         if (this.rot_ax !== Fx8(v.ax)) this.rot_ax = Fx8(v.ax); if (this.rot_ay !== Fx8(v.ay)) this.rot_ay = Fx8(v.ay); if (this.rot_az !== Fx8(v.az)) this.rot_az = Fx8(v.az);
         if (this.rot_fx !== Fx8(v.fx)) this.rot_fx = Fx8(v.fx); if (this.rot_fy !== Fx8(v.fy)) this.rot_fy = Fx8(v.fy); if (this.rot_fz !== Fx8(v.fz)) this.rot_fz = Fx8(v.fz);
@@ -107,6 +123,13 @@ class polymesh {
         ax: number, ay: number, az: number,
         fx: number, fy: number, fz: number
     }) {
+        if (v == null) {
+            this.pos_x = null, this.pos_y = null, this.pos_z = null;
+            this.pos_vx = null, this.pos_vy = null, this.pos_vz = null;
+            this.pos_ax = null, this.pos_ay = null, this.pos_az = null;
+            this.pos_fx = null, this.pos_fy = null, this.pos_fz = null;
+            return;
+        }
         if (this.isDel()) return;
         if (this.pos_x !== Fx8(v.x)) this.pos_x = Fx8(v.x); if (this.pos_y !== Fx8(v.y)) this.pos_y = Fx8(v.y); if (this.pos_z !== Fx8(v.z)) this.pos_z = Fx8(v.z);
         if (this.pos_vx !== Fx8(v.vx)) this.pos_vx = Fx8(v.vx); if (this.pos_vy !== Fx8(v.vy)) this.pos_vy = Fx8(v.vy); if (this.pos_vz !== Fx8(v.vz)) this.pos_vz = Fx8(v.vz);
@@ -162,6 +185,7 @@ class polymesh {
     }
 
     init() {
+        this.data = {};
         this.faces = [];
         this.points = [];
         this.pivot = { x: 0, y: 0, z: 0 };
@@ -191,7 +215,7 @@ class polymesh {
     //% weight=15
     del() {
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
-        this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null;
+        this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
         Polymesh.__mesh[this.kind][this.kind_idx] = null;
     }
 
