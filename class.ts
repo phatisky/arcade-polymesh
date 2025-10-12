@@ -1,7 +1,7 @@
 
 class polymesh {
 
-    data: {[string]: any};
+    data: {[id: string]: any};
     protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; kind_idx: number;
 
     __upd() {
@@ -60,7 +60,7 @@ class polymesh {
     protected points_xs: Fx8[]; protected points_ys: Fx8[]; protected points_zs: Fx8[];
     set points(vals: { x: number, y: number, z: number }[]) {
         if (vals == null || vals.length <= 0) {
-            this.points_xs = [], this.points_ys = [], this.point_zs = [];
+            this.points_xs = [], this.points_ys = [], this.points_zs = [];
             return;
         }
         if (this.isDel()) return;
