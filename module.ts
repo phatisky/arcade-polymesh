@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    const rotatePoint3D = (point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) => {
+    const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3) => {
         let tmp = 0
         const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
         const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
@@ -112,7 +112,7 @@ namespace Polymesh {
         }
 
         // Render
-        let idx: number, pt: { x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
+        let idx: number, pt: Vector3, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
         for (const t of tris) {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist) || (fardist > 0 && rotated[i].z > Math.abs(fardist)))) continue;
