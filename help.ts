@@ -43,17 +43,15 @@ namespace Polymesh {
         p0: Pt, p1: Pt, p2: Pt, p3: Pt,
         center?: boolean) {
         const w = from.width, h = from.height;
-        const fromBuf = pins.createBuffer(from.height)
+        const w_ = 1 / w, h_ = 1 / h;
         for (let sx = 0; sx < w; sx++) {
             const ix = cocktailSum(sx, w, center)
-            from.getRows(ix, fromBuf)
-            if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
-            const u0 = (ix / w), u1 = ((ix + 1) / w);
+            const u0 = (ix * w_), u1 = ((ix + 1) * w_);
             for (let sy = 0; sy < h; sy++) {
                 const iy = cocktailSum(sy, h, center)
                 const color = from.getPixel(w - ix - 1, iy);
                 if (color === 0) continue; // transparent
-                const v0 = (iy / h), v1 = ((iy + 1) / h);
+                const v0 = (iy * h_), v1 = ((iy + 1) * h_);
                 // Map quad on 1 pixel
                 const qd = [
                     lerpQuad(p0, p1, p2, p3, u0, v0),
@@ -147,22 +145,30 @@ namespace Polymesh {
 
     export const meshDepthZ = (plm: polymesh) => {
         if (plm.isDel()) return NaN;
-        let x = plm.pos.x - camx;
-        let y = plm.pos.y - camy;
-        let z = plm.pos.z - camz;
+        let tmp = 0
 
-        // rotate camera
-        let tx = x * Math.cos(ay) + z * Math.sin(ay);
-        z = -x * Math.sin(ay) + z * Math.cos(ay);
-        x = tx;
+        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
+        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
+        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
 
-        let ty = y * Math.cos(ax) - z * Math.sin(ax);
-        z = y * Math.sin(ax) + z * Math.cos(ax);
-        y = ty;
+        let x = plm.pos.x - cam.x;
+        let y = plm.pos.y - cam.y;
+        let z = plm.pos.z - cam.z;
 
-        tx = x * Math.cos(az) - y * Math.sin(az);
-        y = x * Math.sin(az) + y * Math.cos(az);
-        x = tx;
+        // --- rotate around x ---
+        tmp = y * cosX - z * sinX;
+        z = y * sinX + z * cosX;
+        y = tmp;
+
+        // --- rotate around y ---
+        tmp = x * cosY + z * sinY;
+        z = -x * sinY + z * cosY;
+        x = tmp;
+
+        // --- rotate around z ---
+        tmp = x * cosZ - y * sinZ;
+        y = x * sinZ + y * cosZ;
+        x = tmp;
 
         return z;
     }
