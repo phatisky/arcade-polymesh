@@ -1,30 +1,29 @@
 
 namespace Polymesh {
 
-    const rotatePoint3D = (point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) => {
-
+    export function rotatePoint3D(point: { x: number, y: number, z: number }, pivot: { x: number, y: number, z: number }, angle: { x: number, y: number, z: number }) {
+        let tmp = 0
         // move point with pivot to 1st place
         let dx  = point.x - pivot.x;
         let dy  = point.y - pivot.y;
         let dz  = point.z - pivot.z;
 
-        // --- rotate around x ---
-        let dy1 = dy * Math.cos(angle.x) - dz * Math.sin(angle.x);
-        let dz1 = dy * Math.sin(angle.x) + dz * Math.cos(angle.x);
-            dy = dy1;
-            dz = dz1;
+        const sinX = Math.sin(angle.x), cosX = Math.cos(angle.x)
+        const sinY = Math.sin(angle.y), cosY = Math.cos(angle.y)
+        const sinZ = Math.sin(angle.z), cosZ = Math.cos(angle.z)
 
-        // --- rotate around y ---
-        let dx1 = dx * Math.cos(angle.y) + dz * Math.sin(angle.y);
-            dz1 = -dx * Math.sin(angle.y) + dz * Math.cos(angle.y);
-            dx = dx1;
-            dz = dz1;
-
-        // --- rotate around z ---
-            dx1 = dx * Math.cos(angle.z) - dy * Math.sin(angle.z);
-            dy1 = dx * Math.sin(angle.z) + dy * Math.cos(angle.z);
-            dx = dx1;
-            dy = dy1;
+        // rotate around x
+        tmp = (dy * cosX) - (dz * sinX);
+        dz = (dy * sinX) + (dz * cosX);
+        dy = tmp;
+        // rotate around y
+        tmp = (dx * cosY) + (dz * sinY);
+        dz = (-dx * sinY) + (dz * cosY);
+        dx = tmp;
+        // rotate around z
+        tmp = (dx * cosZ) - (dy * sinZ);
+        dy = (dx * sinZ) + (dy * cosZ);
+        dx = tmp;
 
         // move back to real position
         return {
@@ -60,12 +59,12 @@ namespace Polymesh {
         if (msh.isDel()) return;
         if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
         if (msh.flag.invisible) return;
-
+        let tmp = 0;
         const centerX = output.width >> 1, centerY = output.height >> 1;
 
-        const cosX = Math.cos(ax), sinX = Math.sin(ax);
-        const cosY = Math.cos(ay), sinY = Math.sin(ay);
-        const cosZ = Math.cos(az), sinZ = Math.sin(az);
+        const sinX = Math.sin(angle.x), cosX = Math.cos(angle.x)
+        const sinY = Math.sin(angle.y), cosY = Math.cos(angle.y)
+        const sinZ = Math.sin(angle.z), cosZ = Math.cos(angle.z)
 
         // Transform vertices
         const rotated = msh.points.map(v => {
@@ -73,22 +72,22 @@ namespace Polymesh {
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
             const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
             // camera offset
-            let x = vpos.x - camx;
-            let y = vpos.y - camy;
-            let z = vpos.z - camz;
+            let x = vpos.x - cam.x;
+            let y = vpos.y - cam.y;
+            let z = vpos.z - cam.z;
 
-            // rotate camera
-            let tx = x * cosY + z * sinY;
-                z = -x * sinY + z * cosY;
-                x = tx;
-
-            let ty = y * cosX - z * sinX;
-                z = y * sinX + z * cosX;
-                y = ty;
-
-                tx = x * cosZ - y * sinZ;
-                y = x * sinZ + y * cosZ;
-                x = tx;
+            // rotate around x
+            tmp = (y * cosX) - (z * sinX);
+            z = (y * sinX) + (z * cosX);
+            y = tmp;
+            // rotate around y
+            tmp = (x * cosY) + (z * sinY);
+            z = (-x * sinY) + (z * cosY);
+            x = tmp;
+            // rotate around z
+            tmp = (x * cosZ) - (y * sinZ);
+            y = (x * sinZ) + (y * cosZ);
+            x = tmp;
 
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
@@ -109,10 +108,10 @@ namespace Polymesh {
         }
 
         // Render
+        let idx: number, pt: { x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
         for (const t of tris) {
             const inds = t.indices;
             if (inds.some(i => rotated[i].z < -Math.abs(dist) || (fardist > 0 && rotated[i].z > Math.abs(fardist)))) continue;
-            let idx: number, pt: { x: number, y: number, z: number }, cx: number, cy: number, scale: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
             // LOD calculating?
             if (t.img) {
                 im = t.img.clone();

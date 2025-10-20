@@ -4,9 +4,10 @@ namespace Polymesh {
 
     export const __mesh: polymesh[][] = []
     export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.06
+    export const D2R = Math.PI / 180, R2D = 180 / Math.PI
 
-    export let ax   = 0, az   = 0,   ay   = 0,   avx     = 0, avy   = 0, avz   = 0, aax   = 0, aay   = 0, aaz   = 0, afx   = 0, afy   = 0, afz   = 0
-    export let camx = 0, camy = 0,   camz = 0,   camvx   = 0, camvy = 0, camvz = 0, camax = 0, camay = 0, camaz = 0, camfx = 0, camfy = 0, camfz = 0
+    export const angle = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
+    export const cam = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
     export let zoom = 1, sort = 0x0, dist = 150, fardist = 0
 
     //% blockId=poly_sorttype
