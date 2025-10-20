@@ -1,16 +1,16 @@
 
 namespace Polymesh {
 
-    export function updatePhysic() {
+    export function updatePhysic(motion: Motion3, deltaG: number) {
         // Acceleration angle of camera
-        if (angle.ax !== 0) angle.vx += angle.ax * deltaG
-        if (angle.ay !== 0) angle.vy += angle.ay * deltaG
-        if (angle.az !== 0) angle.vz += angle.az * deltaG
+        if (motion.ax !== 0) angle.vx += angle.ax * deltaG
+        if (motion.ay !== 0) angle.vy += angle.ay * deltaG
+        if (motion.az !== 0) angle.vz += angle.az * deltaG
 
         // Friction angle of camera
-        if (angle.fx !== 0) angle.vx = angle.vx < 0 ? Math.min(angle.vx + Math.abs(angle.fx) * deltaG, 0) : Math.max(angle.vx - Math.abs(angle.fx) * deltaG, 0)
-        if (angle.fy !== 0) angle.vy = angle.vy < 0 ? Math.min(angle.vy + Math.abs(angle.fy) * deltaG, 0) : Math.max(angle.vy - Math.abs(angle.fy) * deltaG, 0)
-        if (angle.fz !== 0) angle.vz = angle.vz < 0 ? Math.min(angle.vz + Math.abs(angle.fz) * deltaG, 0) : Math.max(angle.vz - Math.abs(angle.fz) * deltaG, 0)
+        if (angle.fx !== 0) angle.vx *= (1 - angle.fx) * deltaG
+        if (angle.fy !== 0) angle.vy *= (1 - angle.fy) * deltaG
+        if (angle.fz !== 0) angle.vz *= (1 - angle.fz) * deltaG
 
         // Velocity angle of camera
         if (angle.vx !== 0) angle.x += angle.vx * deltaG
