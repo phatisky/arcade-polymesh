@@ -1,55 +1,28 @@
 
 namespace Polymesh {
 
-    export function updatePhysic(motion: Motion3, deltaG: number) {
+    export function updateMotion(motion: Motion3, delta: number) {
         // Acceleration angle of camera
-        if (motion.ax !== 0) angle.vx += angle.ax * deltaG
-        if (motion.ay !== 0) angle.vy += angle.ay * deltaG
-        if (motion.az !== 0) angle.vz += angle.az * deltaG
+        if (motion.ax !== 0) motion.vx += motion.ax * delta
+        if (motion.ay !== 0) motion.vy += motion.ay * delta
+        if (motion.az !== 0) motion.vz += motion.az * delta
 
         // Friction angle of camera
-        if (angle.fx !== 0) angle.vx *= (1 - angle.fx) * deltaG
-        if (angle.fy !== 0) angle.vy *= (1 - angle.fy) * deltaG
-        if (angle.fz !== 0) angle.vz *= (1 - angle.fz) * deltaG
+        if (motion.fx !== 0) motion.vx *= (1 - motion.fx) * delta
+        if (motion.fy !== 0) motion.vy *= (1 - motion.fy) * delta
+        if (motion.fz !== 0) motion.vz *= (1 - motion.fz) * delta
 
         // Velocity angle of camera
-        if (angle.vx !== 0) angle.x += angle.vx * deltaG
-        if (angle.vy !== 0) angle.y += angle.vy * deltaG
-        if (angle.vz !== 0) angle.z += angle.vz * deltaG
+        if (motion.vx !== 0) motion.x += motion.vx * delta
+        if (motion.vy !== 0) motion.y += motion.vy * delta
+        if (motion.vz !== 0) motion.z += motion.vz * delta
     }
 
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
-        const deltaG = control.eventContext().deltaTime
+        const delta = control.eventContext().deltaTime
 
-        // Acceleration angle of camera
-        if (angle.ax !== 0) angle.vx += angle.ax * deltaG
-        if (angle.ay !== 0) angle.vy += angle.ay * deltaG
-        if (angle.az !== 0) angle.vz += angle.az * deltaG
-
-        // Friction angle of camera
-        if (angle.fx !== 0) angle.vx = angle.vx < 0 ? Math.min(angle.vx + Math.abs(angle.fx) * deltaG, 0) : Math.max(angle.vx - Math.abs(angle.fx) * deltaG, 0)
-        if (angle.fy !== 0) angle.vy = angle.vy < 0 ? Math.min(angle.vy + Math.abs(angle.fy) * deltaG, 0) : Math.max(angle.vy - Math.abs(angle.fy) * deltaG, 0)
-        if (angle.fz !== 0) angle.vz = angle.vz < 0 ? Math.min(angle.vz + Math.abs(angle.fz) * deltaG, 0) : Math.max(angle.vz - Math.abs(angle.fz) * deltaG, 0)
-
-        // Velocity angle of camera
-        if (angle.vx !== 0) angle.x += angle.vx * deltaG
-        if (angle.vy !== 0) angle.y += angle.vy * deltaG
-        if (angle.vz !== 0) angle.z += angle.vz * deltaG
-
-        // Acceleration​ position of camera
-        if (cam.ax !== 0) cam.vx += cam.ax * deltaG
-        if (cam.ay !== 0) cam.vy += cam.ay * deltaG
-        if (cam.az !== 0) cam.vz += cam.az * deltaG
-
-        // Friction position of camera
-        if (cam.fx !== 0) cam.vx = cam.vx < 0 ? Math.min(cam.vx + Math.abs(cam.fx) * deltaG, 0) : Math.max(cam.vx - Math.abs(cam.fx) * deltaG, 0)
-        if (cam.fy !== 0) cam.vy = cam.vy < 0 ? Math.min(cam.vy + Math.abs(cam.fy) * deltaG, 0) : Math.max(cam.vy - Math.abs(cam.fy) * deltaG, 0)
-        if (cam.fz !== 0) cam.vz = cam.vz < 0 ? Math.min(cam.vz + Math.abs(cam.fz) * deltaG, 0) : Math.max(cam.vz - Math.abs(cam.fz) * deltaG, 0)
-
-        // Velocity position of camera
-        if (cam.vx !== 0) cam.x += cam.vx * deltaG
-        if (cam.vy !== 0) cam.y += cam.vy * deltaG
-        if (cam.vz !== 0) cam.z += cam.vz * deltaG
+        updateMotion(angle, delta)
+        updateMotion(cam, delta)
     })
 
     //% blockId=poly_camera_setpos
