@@ -1,6 +1,23 @@
 
 namespace Polymesh {
 
+    export function updatePhysic() {
+        // Acceleration angle of camera
+        if (angle.ax !== 0) angle.vx += angle.ax * deltaG
+        if (angle.ay !== 0) angle.vy += angle.ay * deltaG
+        if (angle.az !== 0) angle.vz += angle.az * deltaG
+
+        // Friction angle of camera
+        if (angle.fx !== 0) angle.vx = angle.vx < 0 ? Math.min(angle.vx + Math.abs(angle.fx) * deltaG, 0) : Math.max(angle.vx - Math.abs(angle.fx) * deltaG, 0)
+        if (angle.fy !== 0) angle.vy = angle.vy < 0 ? Math.min(angle.vy + Math.abs(angle.fy) * deltaG, 0) : Math.max(angle.vy - Math.abs(angle.fy) * deltaG, 0)
+        if (angle.fz !== 0) angle.vz = angle.vz < 0 ? Math.min(angle.vz + Math.abs(angle.fz) * deltaG, 0) : Math.max(angle.vz - Math.abs(angle.fz) * deltaG, 0)
+
+        // Velocity angle of camera
+        if (angle.vx !== 0) angle.x += angle.vx * deltaG
+        if (angle.vy !== 0) angle.y += angle.vy * deltaG
+        if (angle.vz !== 0) angle.z += angle.vz * deltaG
+    }
+
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const deltaG = control.eventContext().deltaTime
 
