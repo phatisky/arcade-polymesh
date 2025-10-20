@@ -58,7 +58,7 @@ class polymesh {
     }
 
     protected points_xs: Fx8[]; protected points_ys: Fx8[]; protected points_zs: Fx8[];
-    set points(vals: { x: number, y: number, z: number }[]) {
+    set points(vals: Polymesh.Vector3[]) {
         if (vals == null || vals.length <= 0) {
             this.points_xs = [], this.points_ys = [], this.points_zs = [];
             return;
@@ -77,19 +77,14 @@ class polymesh {
     }
 
     protected pivot_x: Fx8; protected pivot_y: Fx8; protected pivot_z: Fx8;
-    set pivot(v: { x: number, y: number, z: number }) { if (this.isDel()) return; this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z) }
+    set pivot(v: Polymesh.Vector3) { if (this.isDel()) return; this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z) }
     get pivot() { if (this.isDel()) return null; return { x: Fx.toFloat(this.pivot_x), y: Fx.toFloat(this.pivot_y), z: Fx.toFloat(this.pivot_z) } }
 
     protected rot_x: Fx8; protected rot_y: Fx8; protected rot_z: Fx8;
     protected rot_vx: Fx8; protected rot_vy: Fx8; protected rot_vz: Fx8;
     protected rot_ax: Fx8; protected rot_ay: Fx8; protected rot_az: Fx8;
     protected rot_fx: Fx8; protected rot_fy: Fx8; protected rot_fz: Fx8;
-    set rot(v: {
-        x: number, y: number, z: number,
-        vx: number, vy: number, vz: number,
-        ax: number, ay: number, az: number,
-        fx: number, fy: number, fz: number
-    }) {
+    set rot(v: Polymesh.Motion3) {
         if (v == null) {
             this.rot_x = null,  this.rot_y = null,  this.rot_z = null;
             this.rot_vx = null, this.rot_vy = null, this.rot_vz = null;
@@ -117,12 +112,7 @@ class polymesh {
     protected pos_vx: Fx8; protected pos_vy: Fx8; protected pos_vz: Fx8;
     protected pos_ax: Fx8; protected pos_ay: Fx8; protected pos_az: Fx8;
     protected pos_fx: Fx8; protected pos_fy: Fx8; protected pos_fz: Fx8;
-    set pos(v: {
-        x: number, y: number, z: number,
-        vx: number, vy: number, vz: number,
-        ax: number, ay: number, az: number,
-        fx: number, fy: number, fz: number
-    }) {
+    set pos(v: Polymesh.Motion3) {
         if (v == null) {
             this.pos_x = null, this.pos_y = null, this.pos_z = null;
             this.pos_vx = null, this.pos_vy = null, this.pos_vz = null;
@@ -151,36 +141,37 @@ class polymesh {
     loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = Fx8(control.eventContext().deltaTime)
+            const fv0 = Fx8(0), fv1 = Fx8(1)
 
             // Acceleration angle of this mesh
-            if (this.rot_ax !== Fx8(0)) this.rot_vx = Fx.add(this.rot_vx, Fx.mul(this.rot_ax, delta))
-            if (this.rot_ay !== Fx8(0)) this.rot_vy = Fx.add(this.rot_vy, Fx.mul(this.rot_ay, delta))
-            if (this.rot_az !== Fx8(0)) this.rot_vz = Fx.add(this.rot_vz, Fx.mul(this.rot_az, delta))
+            if (this.rot_ax !== fv0) this.rot_vx = Fx.add(this.rot_vx, Fx.mul(this.rot_ax, delta))
+            if (this.rot_ay !== fv0) this.rot_vy = Fx.add(this.rot_vy, Fx.mul(this.rot_ay, delta))
+            if (this.rot_az !== fv0) this.rot_vz = Fx.add(this.rot_vz, Fx.mul(this.rot_az, delta))
 
             // Friction angle of this mesh
-            if (this.rot_fx !== Fx8(0)) this.rot_vx = this.rot_vx < Fx8(0) ? Fx.min(Fx.add(this.rot_vx, Fx.mul(Fx.abs(this.rot_fx), delta)), Fx8(0)) : Fx.max(Fx.sub(this.rot_vx, Fx.mul(Fx.abs(this.rot_fx), delta)), Fx8(0))
-            if (this.rot_fy !== Fx8(0)) this.rot_vy = this.rot_vy < Fx8(0) ? Fx.min(Fx.add(this.rot_vy, Fx.mul(Fx.abs(this.rot_fy), delta)), Fx8(0)) : Fx.max(Fx.sub(this.rot_vy, Fx.mul(Fx.abs(this.rot_fy), delta)), Fx8(0))
-            if (this.rot_fz !== Fx8(0)) this.rot_vz = this.rot_vz < Fx8(0) ? Fx.min(Fx.add(this.rot_vz, Fx.mul(Fx.abs(this.rot_fz), delta)), Fx8(0)) : Fx.max(Fx.sub(this.rot_vz, Fx.mul(Fx.abs(this.rot_fz), delta)), Fx8(0))
+            if (this.rot_fx !== fv0) this.rot_vx = Fx.mul(this.rot_vx, Fx.mul(Fx.sub(fv1, this.rot_fx), delta))
+            if (this.rot_fy !== fv0) this.rot_vy = Fx.mul(this.rot_vy, Fx.mul(Fx.sub(fv1, this.rot_fy), delta))
+            if (this.rot_fz !== fv0) this.rot_vz = Fx.mul(this.rot_vz, Fx.mul(Fx.sub(fv1, this.rot_fz), delta))
 
             // Velocity angle of this mesh
-            if (this.rot_vx !== Fx8(0)) this.rot_x = Fx.add(this.rot_x, Fx.mul(this.rot_vx, delta));
-            if (this.rot_vy !== Fx8(0)) this.rot_y = Fx.add(this.rot_y, Fx.mul(this.rot_vy, delta));
-            if (this.rot_vz !== Fx8(0)) this.rot_z = Fx.add(this.rot_z, Fx.mul(this.rot_vz, delta));
+            if (this.rot_vx !== fv0) this.rot_x = Fx.add(this.rot_x, Fx.mul(this.rot_vx, delta));
+            if (this.rot_vy !== fv0) this.rot_y = Fx.add(this.rot_y, Fx.mul(this.rot_vy, delta));
+            if (this.rot_vz !== fv0) this.rot_z = Fx.add(this.rot_z, Fx.mul(this.rot_vz, delta));
 
             // Acceleration position of this mesh
-            if (this.pos_ax !== Fx8(0)) this.pos_vx = Fx.add(this.pos_vx, Fx.mul(this.pos_ax, delta))
-            if (this.pos_ay !== Fx8(0)) this.pos_vy = Fx.add(this.pos_vy, Fx.mul(this.pos_ay, delta))
-            if (this.pos_az !== Fx8(0)) this.pos_vz = Fx.add(this.pos_vz, Fx.mul(this.pos_az, delta))
+            if (this.pos_ax !== fv0) this.pos_vx = Fx.add(this.pos_vx, Fx.mul(this.pos_ax, delta))
+            if (this.pos_ay !== fv0) this.pos_vy = Fx.add(this.pos_vy, Fx.mul(this.pos_ay, delta))
+            if (this.pos_az !== fv0) this.pos_vz = Fx.add(this.pos_vz, Fx.mul(this.pos_az, delta))
 
             // Friction position of this mesh
-            if (this.pos_fx !== Fx8(0)) this.pos_vx = this.pos_vx < Fx8(0) ? Fx.min(Fx.add(this.pos_vx, Fx.mul(Fx.abs(this.pos_fx), delta)), Fx8(0)) : Fx.max(Fx.sub(this.pos_vx, Fx.mul(Fx.abs(this.pos_fx), delta)), Fx8(0))
-            if (this.pos_fy !== Fx8(0)) this.pos_vy = this.pos_vy < Fx8(0) ? Fx.min(Fx.add(this.pos_vy, Fx.mul(Fx.abs(this.pos_fy), delta)), Fx8(0)) : Fx.max(Fx.sub(this.pos_vy, Fx.mul(Fx.abs(this.pos_fy), delta)), Fx8(0))
-            if (this.pos_fz !== Fx8(0)) this.pos_vz = this.pos_vz < Fx8(0) ? Fx.min(Fx.add(this.pos_vz, Fx.mul(Fx.abs(this.pos_fz), delta)), Fx8(0)) : Fx.max(Fx.sub(this.pos_vz, Fx.mul(Fx.abs(this.pos_fz), delta)), Fx8(0))
+            if (this.pos_fx !== fv0) this.pos_vx = Fx.mul(this.pos_vx, Fx.mul(Fx.sub(fv1, this.pos_fx), delta))
+            if (this.pos_fy !== fv0) this.pos_vy = Fx.mul(this.pos_vy, Fx.mul(Fx.sub(fv1, this.pos_fy), delta))
+            if (this.pos_fz !== fv0) this.pos_vz = Fx.mul(this.pos_vz, Fx.mul(Fx.sub(fv1, this.pos_fz), delta))
 
             // Velocity position of this mesh
-            if (this.pos_vx !== Fx8(0)) this.pos_x = Fx.add(this.pos_x, Fx.mul(this.pos_vx, delta));
-            if (this.pos_vy !== Fx8(0)) this.pos_y = Fx.add(this.pos_y, Fx.mul(this.pos_vy, delta));
-            if (this.pos_vz !== Fx8(0)) this.pos_z = Fx.add(this.pos_z, Fx.mul(this.pos_vz, delta));
+            if (this.pos_vx !== fv0) this.pos_x = Fx.add(this.pos_x, Fx.mul(this.pos_vx, delta));
+            if (this.pos_vy !== fv0) this.pos_y = Fx.add(this.pos_y, Fx.mul(this.pos_vy, delta));
+            if (this.pos_vz !== fv0) this.pos_z = Fx.add(this.pos_z, Fx.mul(this.pos_vz, delta));
         });
     }
 
