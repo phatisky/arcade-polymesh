@@ -25,15 +25,13 @@ namespace Polymesh {
 
     // Bilinear interpolation on quad
     export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
-        let t0 = p0, t1 = p1
-        const x0 = t0.x + ((t1.x - t0.x) * u);
-        const y0 = t0.y + ((t1.y - t0.y) * u);
-        t0 = p3, t1 = p2
-        const x1 = t0.x + ((t1.x - t0.x) * u);
-        const y1 = t0.y + ((t1.y - t0.y) * u);
+        const x0 = p0.x + (p1.x - p0.x) * u;
+        const y0 = p0.y + (p1.y - p0.y) * u;
+        const x1 = p3.x + (p2.x - p3.x) * u;
+        const y1 = p3.y + (p2.y - p3.y) * u;
         return {
-            x: Math.trunc(x0 + ((x1 - x0) * v)),
-            y: Math.trunc(y0 + ((y1 - y0) * v))
+            x: Math.trunc(x0 + (x1 - x0) * v),
+            y: Math.trunc(y0 + (y1 - y0) * v)
         };
     }
 
@@ -45,15 +43,17 @@ namespace Polymesh {
         p0: Pt, p1: Pt, p2: Pt, p3: Pt,
         center?: boolean) {
         const w = from.width, h = from.height;
-        const w_ = 1 / w, h_ = 1 / h;
+        const fromBuf = pins.createBuffer(from.height)
         for (let sx = 0; sx < w; sx++) {
             const ix = cocktailSum(sx, w, center)
-            const u0 = (ix * w_), u1 = ((ix + 1) * w_);
+            from.getRows(ix, fromBuf)
+            if (fromBuf.toArray(NumberFormat.UInt8LE).every(v => v === 0)) continue;
+            const u0 = (ix / w), u1 = ((ix + 1) / w);
             for (let sy = 0; sy < h; sy++) {
                 const iy = cocktailSum(sy, h, center)
                 const color = from.getPixel(w - ix - 1, iy);
                 if (color === 0) continue; // transparent
-                const v0 = (iy * h_), v1 = ((iy + 1) * h_);
+                const v0 = (iy / h), v1 = ((iy + 1) / h);
                 // Map quad on 1 pixel
                 const qd = [
                     lerpQuad(p0, p1, p2, p3, u0, v0),
@@ -147,29 +147,22 @@ namespace Polymesh {
 
     export const meshDepthZ = (plm: polymesh) => {
         if (plm.isDel()) return NaN;
-        let tmp = 0
-
-        const sinX = Math.sin(angle.x), cosX = Math.cos(angle.x)
-        const sinY = Math.sin(angle.y), cosY = Math.cos(angle.y)
-        const sinZ = Math.sin(angle.z), cosZ = Math.cos(angle.z)
+        let x = plm.pos.x - camx;
+        let y = plm.pos.y - camy;
+        let z = plm.pos.z - camz;
 
         // rotate camera
-        let x = plm.pos.x - cam.x;
-        let y = plm.pos.y - cam.y;
-        let z = plm.pos.z - cam.z;
+        let tx = x * Math.cos(ay) + z * Math.sin(ay);
+        z = -x * Math.sin(ay) + z * Math.cos(ay);
+        x = tx;
 
-        // rotate around x
-        tmp = (y * cosX) - (z * sinX);
-        z = (y * sinX) + (z * cosX);
-        y = tmp;
-        // rotate around y
-        tmp = (x * cosY) + (z * sinY);
-        z = (-x * sinY) + (z * cosY);
-        x = tmp;
-        // rotate around z
-        tmp = (x * cosZ) - (y * sinZ);
-        y = (x * sinZ) + (y * cosZ);
-        x = tmp;
+        let ty = y * Math.cos(ax) - z * Math.sin(ax);
+        z = y * Math.sin(ax) + z * Math.cos(ax);
+        y = ty;
+
+        tx = x * Math.cos(az) - y * Math.sin(az);
+        y = x * Math.sin(az) + y * Math.cos(az);
+        x = tx;
 
         return z;
     }

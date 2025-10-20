@@ -256,7 +256,7 @@ class polymesh {
     //% group="Mesh util"
     //% weight=8
     distFromCamera() {
-        const distPos = { x: Polymesh.cam.x - this.pos.x, y: Polymesh.cam.y - this.pos.y, z: Polymesh.cam.z - this.pos.z }
+        const distPos = { x: Polymesh.camx - this.pos.x, y: Polymesh.camy - this.pos.y, z: Polymesh.camz - this.pos.z }
         const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
         return distSum * Polymesh.q_rsqrt(distSum)
     }
