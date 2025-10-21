@@ -2,8 +2,8 @@
 //% block="Poly mesh" color="#279139" icon="\uf1b2" groups='["Create","Controls","Styling"]'
 namespace Polymesh {
 
-    interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
-    interface Vector3 { x: number, y: number, z: number }
+    export interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
+    export interface Vector3 { x: number, y: number, z: number }
 
     export const __mesh: polymesh[][] = []
     export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.06
