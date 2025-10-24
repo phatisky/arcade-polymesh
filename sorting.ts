@@ -1,10 +1,10 @@
 
 namespace Polymesh {
 
-    const mid = (lo: number, hi: number) => lo + ((hi - lo - ((hi - lo) & 1)) >> 1)
+    const mid = (lo: number, hi: number) => lo + ((hi - lo) >> 1)
 
     const duoPartition = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
-        const mi = mid(lo, hi); swap(arr, mi, hi);
+        const mi = zigzum(0, arr.length - 1, mid(lo, hi)); swap(arr, pz, hi);
         if (cmp(arr[lo], arr[hi]) > 0) swap(arr, lo, hi);
         const p = arr[lo], q = arr[hi]; 
         let lp = lo + 1, rp = hi - 1;
@@ -37,7 +37,7 @@ namespace Polymesh {
     }
 
     const partition = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
-        const mi = mid(lo, hi), pivot = arr[mi];
+        const mi = zigzum(0, arr.length-1, mid(lo, hi)), pivot = arr[mi];
         let i = lo; swap(arr, mi, hi);
         for (let j = lo; j < hi; j++) if (cmp(arr[j], pivot) < 0) swap(arr, i++, j);
         swap(arr, i, hi); return i;
