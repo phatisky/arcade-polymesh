@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    const mid = (lo: number, hi: number) => lo + ((hi - lo) >> 1)
+    const mid = (lo: number, hi: number) => lo + ((hi - lo) >> 1) + ((hi - lo) & 1)
 
     const duoPartition = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
         const mi = zigzum(0, arr.length - 1, mid(lo, hi)); swap(arr, mi, hi);
