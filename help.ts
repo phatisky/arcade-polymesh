@@ -35,12 +35,7 @@ namespace Polymesh {
         };
     }
 
-    export const zigzum = (l: number, r: number, n: number, c?: boolean) =>
-        +((l + n - 1) < r) * (
-            (+((n & 1) > 0) * (l + (n >> 1) + ((+(c) | 0) * 0.5))) +
-            (+((n & 1) < 1) * (l + ((r - l) - (n >> 1) - ((+(c) | 0) * 0.5))))
-        );
-
+    export const zigzum = (l: number, r: number, n: number, c?: boolean) => +((l + n - 1) < r) * ((+((n & 1) > 0) * (l + (n >> 1) + ((+(c) | 0) * 0.5))) + (+((n & 1) < 1) * (l + ((r - l) - (n >> 1) - ((+(c) | 0) * 0.5)))));
     
     const cocktailSum = (n: number, r: number, c?: boolean) => ((n & 1) === 0) ? (n >> 1) + (c ? 0.5 : 0) : r - (n >> 1) - (c ? 1.5 : 1)
 
