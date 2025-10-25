@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3) => {
+    export function rotatePoint3D(point: Vector3, pivot: Vector3, angle: Vector3) {
         let tmp = 0
         const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
         const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
