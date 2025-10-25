@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    export function rotatePoint3D(point: Vector3, pivot: Vector3, angle: Vector3) {
+    const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3) => {
         let tmp = 0
         const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
         const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
@@ -69,13 +69,36 @@ namespace Polymesh {
         const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
 
         // Transform vertices
-        const rotated = msh.points_ren.map(v => {
+        const rotated = msh.points.map(v => {
+            const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
+            const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
+            const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
+            // camera offset
+            let x = vpos.x - cam.x;
+            let y = vpos.y - cam.y;
+            let z = vpos.z - cam.z;
+
+            // --- rotate around x ---
+            tmp = y * cosX - z * sinX;
+            z = y * sinX + z * cosX;
+            y = tmp;
+
+            // --- rotate around y ---
+            tmp = x * cosY + z * sinY;
+            z = -x * sinY + z * cosY;
+            x = tmp;
+
+            // --- rotate around z ---
+            tmp = x * cosZ - y * sinZ;
+            y = x * sinZ + y * cosZ;
+            x = tmp;
+
             // Perspective
-            const scale = Math.abs(dist) / (Math.abs(dist) + v.z);
+            const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
-                x: centerX + v.x * scale * zoom,
-                y: centerY + v.y * scale * zoom,
-                z: v.z,
+                x: centerX + x * scale * zoom,
+                y: centerY + y * scale * zoom,
+                z: z,
             };
         })
 

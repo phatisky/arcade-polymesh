@@ -1,63 +1,28 @@
 
 namespace Polymesh {
 
-    let camStaticPosTemp = true, camStaticRotTemp = true;
-
-    function isStaticMotion(motion: Motion3) {
-        return (
-            motion.vx !== 0 &&
-            motion.vy !== 0 &&
-            motion.vz !== 0
-        )
-    }
-
-    function isStaticCamPos() {
-        if (camStaticPosTemp) {
-            camStaticPosTemp = false;
-            return true;
-        }
-        return isStaticMotion(cam);
-    }
-
-    function isStaticCamRot() {
-        if (camStaticRotTemp) {
-            camStaticRotTemp = false;
-            return true;
-        }
-        return isStaticMotion(angle);
-    }
-
     export function updateMotion(motion: Motion3, delta: number) {
         // Acceleration angle of camera
-        motion.vx += +(motion.ax !== 0) * (motion.ax * delta)
-        motion.vy += +(motion.ay !== 0) * (motion.ay * delta)
-        motion.vz += +(motion.az !== 0) * (motion.az * delta)
+        if (motion.ax !== 0) motion.vx += motion.ax * delta
+        if (motion.ay !== 0) motion.vy += motion.ay * delta
+        if (motion.az !== 0) motion.vz += motion.az * delta
 
         // Friction angle of camera
-        motion.vx *= +(motion.fx !== 0) * ((1 - motion.fx) * delta)
-        motion.vy *= +(motion.fy !== 0) * ((1 - motion.fy) * delta)
-        motion.vz *= +(motion.fz !== 0) * ((1 - motion.fz) * delta)
+        if (motion.fx !== 0) motion.vx *= (1 - motion.fx) * delta
+        if (motion.fy !== 0) motion.vy *= (1 - motion.fy) * delta
+        if (motion.fz !== 0) motion.vz *= (1 - motion.fz) * delta
 
         // Velocity angle of camera
-        motion.x += +(motion.vx !== 0) * (motion.vx * delta)
-        motion.y += +(motion.vy !== 0) * (motion.vy * delta)
-        motion.z += +(motion.vz !== 0) * (motion.vz * delta)
-    }
-
-    function updateMeshFacing() {
-        if (isStaticCamPos() && isStaticCamRot()) return;
-        for (const meshes of __mesh)
-            for (const mesh of meshes) {
-                if (mesh == null || (mesh && mesh.isDel())) continue;
-                mesh.updatePointFacing(cam, angle) 
-            }
+        if (motion.vx !== 0) motion.x += motion.vx * delta
+        if (motion.vy !== 0) motion.y += motion.vy * delta
+        if (motion.vz !== 0) motion.z += motion.vz * delta
     }
 
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const delta = control.eventContext().deltaTime
-        updateMotion(angle, delta);
-        updateMotion(cam, delta);
-        updateMeshFacing();
+
+        updateMotion(angle, delta)
+        updateMotion(cam, delta)
     })
 
     //% blockId=poly_camera_setpos
@@ -71,20 +36,19 @@ namespace Polymesh {
     //% group="main angle"
     //% weight=5
     export function changeAngle(choice: PolyAngle, x: number) {
-        camStaticRotTemp = true;
         switch (choice) {
-            case 0x0: if (angle.x  !== angle.x  + x) camStaticRotTemp = false, angle.x  += x; break
-            case 0x1: if (angle.y  !== angle.y  + x) camStaticRotTemp = false, angle.y  += x; break
-            case 0x2: if (angle.z  !== angle.z  + x) camStaticRotTemp = false, angle.z  += x; break
-            case 0x3: if (angle.vx !== angle.vx + x) camStaticRotTemp = false, angle.vx += x; break
-            case 0x4: if (angle.vy !== angle.vy + x) camStaticRotTemp = false, angle.vy += x; break
-            case 0x5: if (angle.vz !== angle.vz + x) camStaticRotTemp = false, angle.vz += x; break
-            case 0x6: if (angle.ax !== angle.ax + x) camStaticRotTemp = false, angle.ax += x; break
-            case 0x7: if (angle.ay !== angle.ay + x) camStaticRotTemp = false, angle.ay += x; break
-            case 0x8: if (angle.az !== angle.az + x) camStaticRotTemp = false, angle.az += x; break
-            case 0x9: if (angle.fx !== angle.fx + x) camStaticRotTemp = false, angle.fx += x; break
-            case 0xA: if (angle.fy !== angle.fy + x) camStaticRotTemp = false, angle.fy += x; break
-            case 0xB: if (angle.fz !== angle.fz + x) camStaticRotTemp = false, angle.fz += x; break
+            case 0x0: if (angle.x  !== angle.x  + x) angle.x  += x; break
+            case 0x1: if (angle.y  !== angle.y  + x) angle.y  += x; break
+            case 0x2: if (angle.z  !== angle.z  + x) angle.z  += x; break
+            case 0x3: if (angle.vx !== angle.vx + x) angle.vx += x; break
+            case 0x4: if (angle.vy !== angle.vy + x) angle.vy += x; break
+            case 0x5: if (angle.vz !== angle.vz + x) angle.vz += x; break
+            case 0x6: if (angle.ax !== angle.ax + x) angle.ax += x; break
+            case 0x7: if (angle.ay !== angle.ay + x) angle.ay += x; break
+            case 0x8: if (angle.az !== angle.az + x) angle.az += x; break
+            case 0x9: if (angle.fx !== angle.fx + x) angle.fx += x; break
+            case 0xA: if (angle.fy !== angle.fy + x) angle.fy += x; break
+            case 0xB: if (angle.fz !== angle.fz + x) angle.fz += x; break
         }
     }
     //% blockId=poly_camera_change
@@ -92,23 +56,22 @@ namespace Polymesh {
     //% group="main camera"
     //% weight=5
     export function changeCam(choice: PolyCam, x: number) {
-        camStaticPosTemp = true;
         switch (choice) {
-            case 0x0: default: if (zoom    !== zoom    + x) camStaticPosTemp = false, zoom    += x; break
-            case 0x1:          if (dist    !== dist    + x) camStaticPosTemp = false, dist    += x; break
-            case 0x2:          if (fardist !== fardist + x) camStaticPosTemp = false, fardist += x; break
-            case 0x3:          if (cam.x   !== cam.x   + x) camStaticPosTemp = false, cam.x   += x; break
-            case 0x4:          if (cam.y   !== cam.y   + x) camStaticPosTemp = false, cam.y   += x; break
-            case 0x5:          if (cam.z   !== cam.z   + x) camStaticPosTemp = false, cam.z   += x; break
-            case 0x6:          if (cam.vx  !== cam.vx  + x) camStaticPosTemp = false, cam.vx  += x; break
-            case 0x7:          if (cam.vy  !== cam.vy  + x) camStaticPosTemp = false, cam.vy  += x; break
-            case 0x8:          if (cam.vz  !== cam.vz  + x) camStaticPosTemp = false, cam.vz  += x; break
-            case 0x9:          if (cam.ax  !== cam.ax  + x) camStaticPosTemp = false, cam.ax  += x; break
-            case 0xA:          if (cam.ay  !== cam.ay  + x) camStaticPosTemp = false, cam.ay  += x; break
-            case 0xB:          if (cam.az  !== cam.az  + x) camStaticPosTemp = false, cam.az  += x; break
-            case 0xC:          if (cam.fx  !== cam.fx  + x) camStaticPosTemp = false, cam.fx  += x; break
-            case 0xD:          if (cam.fy  !== cam.fy  + x) camStaticPosTemp = false, cam.fy  += x; break
-            case 0xE:          if (cam.fz  !== cam.fz  + x) camStaticPosTemp = false, cam.fz  += x; break
+            case 0x0: default: if (zoom    !== zoom    + x) zoom    += x; break
+            case 0x1:          if (dist    !== dist    + x) dist    += x; break
+            case 0x2:          if (fardist !== fardist + x) fardist += x; break
+            case 0x3:          if (cam.x   !== cam.x   + x) cam.x   += x; break
+            case 0x4:          if (cam.y   !== cam.y   + x) cam.y   += x; break
+            case 0x5:          if (cam.z   !== cam.z   + x) cam.z   += x; break
+            case 0x6:          if (cam.vx  !== cam.vx  + x) cam.vx  += x; break
+            case 0x7:          if (cam.vy  !== cam.vy  + x) cam.vy  += x; break
+            case 0x8:          if (cam.vz  !== cam.vz  + x) cam.vz  += x; break
+            case 0x9:          if (cam.ax  !== cam.ax  + x) cam.ax  += x; break
+            case 0xA:          if (cam.ay  !== cam.ay  + x) cam.ay  += x; break
+            case 0xB:          if (cam.az  !== cam.az  + x) cam.az  += x; break
+            case 0xC:          if (cam.fx  !== cam.fx  + x) cam.fx  += x; break
+            case 0xD:          if (cam.fy  !== cam.fy  + x) cam.fy  += x; break
+            case 0xE:          if (cam.fz  !== cam.fz  + x) cam.fz  += x; break
         }
     }
     //% blockId=poly_angle_set
@@ -116,20 +79,19 @@ namespace Polymesh {
     //% group="main angle"
     //% weight=10
     export function setAngle(choice: PolyAngle, x: number) {
-        camStaticRotTemp = true;
         switch (choice) {
-            case 0x0: if (angle.x  !== x) camStaticRotTemp = false, angle.x  = x; break
-            case 0x1: if (angle.y  !== x) camStaticRotTemp = false, angle.y  = x; break
-            case 0x2: if (angle.z  !== x) camStaticRotTemp = false, angle.z  = x; break
-            case 0x3: if (angle.vx !== x) camStaticRotTemp = false, angle.vx = x; break
-            case 0x4: if (angle.vy !== x) camStaticRotTemp = false, angle.vy = x; break
-            case 0x5: if (angle.vz !== x) camStaticRotTemp = false, angle.vz = x; break
-            case 0x6: if (angle.ax !== x) camStaticRotTemp = false, angle.ax = x; break
-            case 0x7: if (angle.ay !== x) camStaticRotTemp = false, angle.ay = x; break
-            case 0x8: if (angle.az !== x) camStaticRotTemp = false, angle.az = x; break
-            case 0x9: if (angle.fx !== x) camStaticRotTemp = false, angle.fx = x; break
-            case 0xA: if (angle.fy !== x) camStaticRotTemp = false, angle.fy = x; break
-            case 0xB: if (angle.fz !== x) camStaticRotTemp = false, angle.fz = x; break
+            case 0x0: if (angle.x  !== x) angle.x  = x; break
+            case 0x1: if (angle.y  !== x) angle.y  = x; break
+            case 0x2: if (angle.z  !== x) angle.z  = x; break
+            case 0x3: if (angle.vx !== x) angle.vx = x; break
+            case 0x4: if (angle.vy !== x) angle.vy = x; break
+            case 0x5: if (angle.vz !== x) angle.vz = x; break
+            case 0x6: if (angle.ax !== x) angle.ax = x; break
+            case 0x7: if (angle.ay !== x) angle.ay = x; break
+            case 0x8: if (angle.az !== x) angle.az = x; break
+            case 0x9: if (angle.fx !== x) angle.fx = x; break
+            case 0xA: if (angle.fy !== x) angle.fy = x; break
+            case 0xB: if (angle.fz !== x) angle.fz = x; break
         }
     }
     //% blockId=poly_camera_set
@@ -137,23 +99,22 @@ namespace Polymesh {
     //% group="main camera"
     //% weight=10
     export function setCam(choice: PolyCam, x: number) {
-        camStaticPosTemp = true;
         switch (choice) {
-            case 0x0: default: if (zoom    !== x) camStaticPosTemp = false, zoom    = x; break
-            case 0x1:          if (dist    !== x) camStaticPosTemp = false, dist    = x; break
-            case 0x2:          if (fardist !== x) camStaticPosTemp = false, fardist = x; break
-            case 0x3:          if (cam.x   !== x) camStaticPosTemp = false, cam.x   = x; break
-            case 0x4:          if (cam.y   !== x) camStaticPosTemp = false, cam.y   = x; break
-            case 0x5:          if (cam.z   !== x) camStaticPosTemp = false, cam.z   = x; break
-            case 0x6:          if (cam.vx  !== x) camStaticPosTemp = false, cam.vx  = x; break
-            case 0x7:          if (cam.vy  !== x) camStaticPosTemp = false, cam.vy  = x; break
-            case 0x8:          if (cam.vz  !== x) camStaticPosTemp = false, cam.vz  = x; break
-            case 0x9:          if (cam.ax  !== x) camStaticPosTemp = false, cam.ax  = x; break
-            case 0xA:          if (cam.ay  !== x) camStaticPosTemp = false, cam.ay  = x; break
-            case 0xB:          if (cam.az  !== x) camStaticPosTemp = false, cam.az  = x; break
-            case 0xC:          if (cam.fx  !== x) camStaticPosTemp = false, cam.fx  = x; break
-            case 0xD:          if (cam.fy  !== x) camStaticPosTemp = false, cam.fy  = x; break
-            case 0xE:          if (cam.fz  !== x) camStaticPosTemp = false, cam.fz  = x; break
+            case 0x0: default: if (zoom    !== x) zoom    = x; break
+            case 0x1:          if (dist    !== x) dist    = x; break
+            case 0x2:          if (fardist !== x) fardist = x; break
+            case 0x3:          if (cam.x   !== x) cam.x   = x; break
+            case 0x4:          if (cam.y   !== x) cam.y   = x; break
+            case 0x5:          if (cam.z   !== x) cam.z   = x; break
+            case 0x6:          if (cam.vx  !== x) cam.vx  = x; break
+            case 0x7:          if (cam.vy  !== x) cam.vy  = x; break
+            case 0x8:          if (cam.vz  !== x) cam.vz  = x; break
+            case 0x9:          if (cam.ax  !== x) cam.ax  = x; break
+            case 0xA:          if (cam.ay  !== x) cam.ay  = x; break
+            case 0xB:          if (cam.az  !== x) cam.az  = x; break
+            case 0xC:          if (cam.fx  !== x) cam.fx  = x; break
+            case 0xD:          if (cam.fy  !== x) cam.fy  = x; break
+            case 0xE:          if (cam.fz  !== x) cam.fz  = x; break
         }
     }
 
