@@ -45,6 +45,15 @@ namespace Polymesh {
         motion.z += +(motion.vz !== 0) * (motion.vz * delta)
     }
 
+    function updateMeshFacing() {
+        if (isStaticCamPos() && isStaticCamRot()) return;
+        for (const meshes of __mesh)
+            for (const mesh of meshes) {
+                if (mesh == null || (mesh && mesh.isDel())) continue;
+                mesh.updatePointFacing()
+            }
+    }
+
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const delta = control.eventContext().deltaTime
         updateMotion(angle, delta);
