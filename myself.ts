@@ -1,6 +1,16 @@
 
 namespace Polymesh {
 
+    let camStaticPos = true, camStaticRot = true;
+
+    export function isStaticMotion(motion: Motion3) {
+        return (
+            motion.vx !== 0 &&
+            motion.vy !== 0 &&
+            motion.vz !== 0
+        )
+    }
+
     export function updateMotion(motion: Motion3, delta: number) {
         // Acceleration angle of camera
         motion.vx += +(motion.ax !== 0) * (motion.ax * delta)
