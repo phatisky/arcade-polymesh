@@ -76,18 +76,62 @@ class polymesh {
         }))
     }
 
+    protected points_ren_xs: Fx8[]; protected points_ren_ys: Fx8[]; protected points_ren_zs: Fx8[];
+    set points_ren(vals: Polymesh.Vector3[]) {
+        if (vals == null || vals.length <= 0) {
+            this.points_ren_xs = [], this.points_ren_ys = [], this.points_ren_zs = [];
+            return;
+        }
+        if (this.isDel()) return;
+        this.points_ren_xs = vals.map(v => Fx8(v.x)), this.points_ren_ys = vals.map(v => Fx8(v.y)), this.points_ren_zs = vals.map(v => Fx8(v.z));
+        this.__upd();
+    }
+    get points_ren() {
+        if (this.isDel()) return null
+        return this.points_ren_xs.map((_, i) => ({
+            x: Fx.toFloat(this.points_ren_xs[i]),
+            y: Fx.toFloat(this.points_ren_ys[i]),
+            z: Fx.toFloat(this.points_ren_zs[i]),
+        }))
+    }
+
+    protected updatePointMotions() {
+        this.points_ren = this.points.map(v => {
+            const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
+            const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
+            const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
+        })
+    }
+
     protected pivot_x: Fx8; protected pivot_y: Fx8; protected pivot_z: Fx8;
     set pivot(v: Polymesh.Vector3) { if (this.isDel()) return; this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z) }
     get pivot() { if (this.isDel()) return null; return { x: Fx.toFloat(this.pivot_x), y: Fx.toFloat(this.pivot_y), z: Fx.toFloat(this.pivot_z) } }
 
     pos: Polymesh.Motion3; rot: Polymesh.Motion3;
 
+    isStaticPos() {
+        return (
+            this.pos.vx !== 0 &&
+            this.pos.vy !== 0 &&
+            this.pos.vz !== 0
+        )
+    }
+
+    isStaticRot() {
+        return (
+            this.rot.vx !== 0 &&
+            this.rot.vy !== 0 &&
+            this.rot.vz !== 0
+        )
+    }
+    
     flag: { invisible: boolean, noncull: boolean, lod: boolean }
     loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = control.eventContext().deltaTime
             Polymesh.updateMotion(this.rot, delta);
             Polymesh.updateMotion(this.pos, delta);
+            if (!this.isStaticPos() || !this.isStaticRot()) this.updatePointMotions();
         });
     }
 
