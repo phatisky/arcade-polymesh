@@ -1,8 +1,6 @@
 
 namespace Polymesh {
 
-    const mid = (lo: number, hi: number) => lo + ((hi - lo) >> 1) + ((hi - lo) & 1)
-
     const rint = (lo: number, hi: number): number => {
         if (lo >= hi) return lo;
         const range = hi - lo + 1;

@@ -30,8 +30,8 @@ namespace Polymesh {
         const x1 = p3.x + (p2.x - p3.x) * u;
         const y1 = p3.y + (p2.y - p3.y) * u;
         return {
-            x: Math.trunc(x0 + (x1 - x0) * v),
-            y: Math.trunc(y0 + (y1 - y0) * v)
+            x: (x0 + (x1 - x0) * v) >> 0,
+            y: (y0 + (y1 - y0) * v) >> 0
         };
     }
 

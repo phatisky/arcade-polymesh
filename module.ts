@@ -60,39 +60,19 @@ namespace Polymesh {
         if (msh.isDel()) return;
         if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
         if (msh.flag.invisible) return;
-        let tmp = 0
 
         const centerX = output.width >> 1, centerY = output.height >> 1;
-
-        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
-        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
-        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
 
         // Transform vertices
         const rotated = msh.points.map(v => {
             const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
             const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
+            const vrot = rotatePoint3D(vpos, cam, angle)
             // camera offset
-            let x = vpos.x - cam.x;
-            let y = vpos.y - cam.y;
-            let z = vpos.z - cam.z;
-
-            // --- rotate around x ---
-            tmp = y * cosX - z * sinX;
-            z = y * sinX + z * cosX;
-            y = tmp;
-
-            // --- rotate around y ---
-            tmp = x * cosY + z * sinY;
-            z = -x * sinY + z * cosY;
-            x = tmp;
-
-            // --- rotate around z ---
-            tmp = x * cosZ - y * sinZ;
-            y = x * sinZ + y * cosZ;
-            x = tmp;
-
+            const x = vrot.x - cam.x;
+            const y = vrot.y - cam.y;
+            const z = vrot.z - cam.z;
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
