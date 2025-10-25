@@ -121,15 +121,33 @@ class polymesh {
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
             return rotatePoint3D(vpoint, vpivot, msh.rot)
         })
-        this.updatePerspective()
+        this.updatePerspective(Polymesh.cam, Polymesh.angle)
     }
 
-    updatePerspective() {
-        
+    updatePointFacing(pos: Polymesh.Motion3, rot: Polymesh.Motion3) {
+        const cosX = Math.cos(rot.x), sinX = Math.sin(rot.x);
+        const cosY = Math.cos(rot.y), sinY = Math.sin(rot.y);
+        const cosZ = Math.cos(rot.z), sinZ = Math.sin(rot.z);
         this.points_ren = this.points_m.map(v => {
-            const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
-            const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
-            return rotatePoint3D(vpoint, vpivot, msh.rot)
+            let x = v.x - pos.x;
+            let y = v.y - pos.y;
+            let z = v.z - pos.z;
+
+            // --- rotate around x ---
+            tmp = y * cosX - z * sinX;
+            z = y * sinX + z * cosX;
+            y = tmp;
+
+            // --- rotate around y ---
+            tmp = x * cosY + z * sinY;
+            z = -x * sinY + z * cosY;
+            x = tmp;
+
+            // --- rotate around z ---
+            tmp = x * cosZ - y * sinZ;
+            y = x * sinZ + y * cosZ;
+            x = tmp;
+            return { x: x, y: y, z: z }
         })
     }
 
