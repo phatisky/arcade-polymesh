@@ -4,12 +4,28 @@ namespace Polymesh {
     let camStaticPosTemp = true, camStaticRotTemp = true;
     export let camStaticPos = true, let camStaticRot = true;
 
-    export function isStaticMotion(motion: Motion3) {
+    function isStaticMotion(motion: Motion3) {
         return (
             motion.vx !== 0 &&
             motion.vy !== 0 &&
             motion.vz !== 0
         )
+    }
+
+    function isStaticCamPos() {
+        if (camStaticPosTemp) {
+            camStaticPosTemp = false;
+            return true;
+        }
+        return isStaticMotion(cam);
+    }
+
+    function isStaticCamRot() {
+        if (camStaticRotTemp) {
+            camStaticRotTemp = false;
+            return true;
+        }
+        return isStaticMotion(angle);
     }
 
     export function updateMotion(motion: Motion3, delta: number) {
