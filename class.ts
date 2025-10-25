@@ -117,14 +117,15 @@ class polymesh {
     protected updatePointMotions() {
         if (this.isStaticPos() && this.isStaticRot()) return;
         this.points_m = this.points.map(v => {
-            const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
-            const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
-            return rotatePoint3D(vpoint, vpivot, msh.rot)
+            const vpoint = { x: this.pos.x + v.x, y: this.pos.y + v.y, z: this.pos.z + v.z }
+            const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z }
+            return rotatePoint3D(vpoint, vpivot, this.rot)
         })
         this.updatePerspective(Polymesh.cam, Polymesh.angle)
     }
 
     updatePointFacing(pos: Polymesh.Motion3, rot: Polymesh.Motion3) {
+        let tmp = 0;
         const cosX = Math.cos(rot.x), sinX = Math.sin(rot.x);
         const cosY = Math.cos(rot.y), sinY = Math.sin(rot.y);
         const cosZ = Math.cos(rot.z), sinZ = Math.sin(rot.z);
