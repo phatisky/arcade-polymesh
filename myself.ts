@@ -2,7 +2,6 @@
 namespace Polymesh {
 
     let camStaticPosTemp = true, camStaticRotTemp = true;
-    export let camStaticPos = true, let camStaticRot = true;
 
     function isStaticMotion(motion: Motion3) {
         return (
@@ -50,7 +49,7 @@ namespace Polymesh {
         for (const meshes of __mesh)
             for (const mesh of meshes) {
                 if (mesh == null || (mesh && mesh.isDel())) continue;
-                mesh.updatePointFacing()
+                mesh.updatePointFacing(cam, angle) 
             }
     }
 
@@ -58,6 +57,7 @@ namespace Polymesh {
         const delta = control.eventContext().deltaTime
         updateMotion(angle, delta);
         updateMotion(cam, delta);
+        updateMeshFacing();
     })
 
     //% blockId=poly_camera_setpos
