@@ -76,6 +76,25 @@ class polymesh {
         }))
     }
 
+    protected points_m_xs: Fx8[]; protected points_m_ys: Fx8[]; protected points_m_zs: Fx8[];
+    set points_m(vals: Polymesh.Vector3[]) {
+        if (vals == null || vals.length <= 0) {
+            this.points_m_xs = [], this.points_m_ys = [], this.points_m_zs = [];
+            return;
+        }
+        if (this.isDel()) return;
+        this.points_m_xs = vals.map(v => Fx8(v.x)), this.points_m_ys = vals.map(v => Fx8(v.y)), this.points_m_zs = vals.map(v => Fx8(v.z));
+        this.__upd();
+    }
+    get points_m() {
+        if (this.isDel()) return null
+        return this.points_m_xs.map((_, i) => ({
+            x: Fx.toFloat(this.points_m_xs[i]),
+            y: Fx.toFloat(this.points_m_ys[i]),
+            z: Fx.toFloat(this.points_m_zs[i]),
+        }))
+    }
+
     protected points_ren_xs: Fx8[]; protected points_ren_ys: Fx8[]; protected points_ren_zs: Fx8[];
     set points_ren(vals: Polymesh.Vector3[]) {
         if (vals == null || vals.length <= 0) {
@@ -96,10 +115,11 @@ class polymesh {
     }
 
     protected updatePointMotions() {
-        this.points_ren = this.points.map(v => {
+        if (this.isStaticPos() && this.isStaticRot()) return;
+        this.points_m = this.points.map(v => {
             const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
-            const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
+            return rotatePoint3D(vpoint, vpivot, msh.rot)
         })
     }
 
@@ -109,21 +129,31 @@ class polymesh {
 
     pos: Polymesh.Motion3; rot: Polymesh.Motion3;
 
+    protected staticPos: boolean;
     isStaticPos() {
+        if (this.staticPos) {
+            this.staticPos = false
+            return true
+        }
         return (
             this.pos.vx !== 0 &&
             this.pos.vy !== 0 &&
             this.pos.vz !== 0
         )
-    }
+    };
 
+    protected staticRot: boolean;
     isStaticRot() {
+        if (this.staticRot) {
+            this.staticRot = false
+            return true
+        }
         return (
             this.rot.vx !== 0 &&
             this.rot.vy !== 0 &&
             this.rot.vz !== 0
         )
-    }
+    };
     
     flag: { invisible: boolean, noncull: boolean, lod: boolean }
     loop() {
@@ -131,7 +161,7 @@ class polymesh {
             const delta = control.eventContext().deltaTime
             Polymesh.updateMotion(this.rot, delta);
             Polymesh.updateMotion(this.pos, delta);
-            if (!this.isStaticPos() || !this.isStaticRot()) this.updatePointMotions();
+            this.updatePointMotions();
         });
     }
 
@@ -143,7 +173,7 @@ class polymesh {
         this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
         this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
         this.flag = { invisible: false, noncull: false, lod: false };
-        this.__del = false;
+        this.__del = false, this.staticPos = true, this.staticRot = true;
         this.loop();
     }
 
@@ -515,19 +545,20 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=100
     setAngle(choice: PolyAngle, x: number) {
+        this.staticRot = true;
         switch (choice) {
-            case 0x0: if (this.rot.x  !== x) this.rot.x  = Fx8(x); break;
-            case 0x1: if (this.rot.y  !== x) this.rot.y  = Fx8(x); break;
-            case 0x2: if (this.rot.z  !== x) this.rot.z  = Fx8(x); break;
-            case 0x3: if (this.rot.vx !== x) this.rot.vx = Fx8(x); break;
-            case 0x4: if (this.rot.vy !== x) this.rot.vy = Fx8(x); break;
-            case 0x5: if (this.rot.vz !== x) this.rot.vz = Fx8(x); break;
-            case 0x6: if (this.rot.ax !== x) this.rot.ax = Fx8(x); break;
-            case 0x7: if (this.rot.ay !== x) this.rot.ay = Fx8(x); break;
-            case 0x8: if (this.rot.az !== x) this.rot.az = Fx8(x); break;
-            case 0x9: if (this.rot.fx !== x) this.rot.fx = Fx8(x); break;
-            case 0xA: if (this.rot.fy !== x) this.rot.fy = Fx8(x); break;
-            case 0xB: if (this.rot.fz !== x) this.rot.fz = Fx8(x); break;
+            case 0x0: if (this.rot.x  !== x) this.staticRot = false, this.rot.x  = x; break;
+            case 0x1: if (this.rot.y  !== x) this.staticRot = false, ​this.rot.y  = x; break;
+            case 0x2: if (this.rot.z  !== x) this.staticRot = false, this.rot.z  = x; break;
+            case 0x3: if (this.rot.vx !== x) this.staticRot = false, this.rot.vx = x; break;
+            case 0x4: if (this.rot.vy !== x) this.staticRot = false, this.rot.vy = x; break;
+            case 0x5: if (this.rot.vz !== x) this.staticRot = false, this.rot.vz = x; break;
+            case 0x6: if (this.rot.ax !== x) this.staticRot = false, this.rot.ax = x; break;
+            case 0x7: if (this.rot.ay !== x) this.staticRot = false, this.rot.ay = x; break;
+            case 0x8: if (this.rot.az !== x) this.staticRot = false, this.rot.az = x; break;
+            case 0x9: if (this.rot.fx !== x) this.staticRot = false, this.rot.fx = x; break;
+            case 0xA: if (this.rot.fy !== x) this.staticRot = false, this.rot.fy = x; break;
+            case 0xB: if (this.rot.fz !== x) this.staticRot = false, this.rot.fz = x; break;
         };
         this.__upd();
     }
@@ -539,19 +570,20 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=5
     changeAngle(choice: PolyAngle, x: number) {
+        this.staticRot = true;
         switch (choice) {
-            case 0x0: if (this.rot.x  !== (this.rot.x  + x)) this.rot.x  += x; break;
-            case 0x1: if (this.rot.y  !== (this.rot.y  + x)) this.rot.y  += x; break;
-            case 0x2: if (this.rot.z  !== (this.rot.z  + x)) this.rot.z  += x; break;
-            case 0x3: if (this.rot.vx !== (this.rot.vx + x)) this.rot.vx += x; break;
-            case 0x4: if (this.rot.vy !== (this.rot.vy + x)) this.rot.vy += x; break;
-            case 0x5: if (this.rot.vz !== (this.rot.vz + x)) this.rot.vz += x; break;
-            case 0x6: if (this.rot.ax !== (this.rot.ax + x)) this.rot.ax += x; break;
-            case 0x7: if (this.rot.ay !== (this.rot.ay + x)) this.rot.ay += x; break;
-            case 0x8: if (this.rot.az !== (this.rot.az + x)) this.rot.az += x; break;
-            case 0x9: if (this.rot.fx !== (this.rot.fx + x)) this.rot.fx += x; break;
-            case 0xA: if (this.rot.fy !== (this.rot.fy + x)) this.rot.fy += x; break;
-            case 0xB: if (this.rot.fz !== (this.rot.fz + x)) this.rot.fz += x; break;
+            case 0x0: if (this.rot.x  !== (this.rot.x  + x)) this.staticRot = false, this.rot.x  += x; break;
+            case 0x1: if (this.rot.y  !== (this.rot.y  + x)) this.staticRot = false, this.rot.y  += x; break;
+            case 0x2: if (this.rot.z  !== (this.rot.z  + x)) this.staticRot = false, this.rot.z  += x; break;
+            case 0x3: if (this.rot.vx !== (this.rot.vx + x)) this.staticRot = false, this.rot.vx += x; break;
+            case 0x4: if (this.rot.vy !== (this.rot.vy + x)) this.staticRot = false, this.rot.vy += x; break;
+            case 0x5: if (this.rot.vz !== (this.rot.vz + x)) this.staticRot = false, this.rot.vz += x; break;
+            case 0x6: if (this.rot.ax !== (this.rot.ax + x)) this.staticRot = false, this.rot.ax += x; break;
+            case 0x7: if (this.rot.ay !== (this.rot.ay + x)) this.staticRot = false, this.rot.ay += x; break;
+            case 0x8: if (this.rot.az !== (this.rot.az + x)) this.staticRot = false, this.rot.az += x; break;
+            case 0x9: if (this.rot.fx !== (this.rot.fx + x)) this.staticRot = false, this.rot.fx += x; break;
+            case 0xA: if (this.rot.fy !== (this.rot.fy + x)) this.staticRot = false, this.rot.fy += x; break;
+            case 0xB: if (this.rot.fz !== (this.rot.fz + x)) this.staticRot = false, this.rot.fz += x; break;
         };
         this.__upd();
     }
@@ -587,19 +619,20 @@ class polymesh {
     //% group="Mesh position property"
     //% weight=10
     setPos(choice: PolyPos, x: number) {
+        this.staticPos = true;
         switch (choice) {
-            case 0x0: if (this.pos.x  !== x) this.pos.x  = x; break;
-            case 0x1: if (this.pos.y  !== x) this.pos.y  = x; break;
-            case 0x2: if (this.pos.z  !== x) this.pos.z  = x; break;
-            case 0x3: if (this.pos.vx !== x) this.pos.vx = x; break;
-            case 0x4: if (this.pos.vy !== x) this.pos.vy = x; break;
-            case 0x5: if (this.pos.vz !== x) this.pos.vz = x; break;
-            case 0x6: if (this.pos.ax !== x) this.pos.ax = x; break;
-            case 0x7: if (this.pos.ay !== x) this.pos.ay = x; break;
-            case 0x8: if (this.pos.az !== x) this.pos.az = x; break;
-            case 0x9: if (this.pos.fx !== x) this.pos.fx = x; break;
-            case 0xA: if (this.pos.fy !== x) this.pos.fy = x; break;
-            case 0xB: if (this.pos.fz !== x) this.pos.fz = x; break;
+            case 0x0: if (this.pos.x  !== x) this.staticPos = false, this.pos.x  = x; break;
+            case 0x1: if (this.pos.y  !== x) this.staticPos = false, this.pos.y  = x; break;
+            case 0x2: if (this.pos.z  !== x) this.staticPos = false, this.pos.z  = x; break;
+            case 0x3: if (this.pos.vx !== x) this.staticPos = false, this.pos.vx = x; break;
+            case 0x4: if (this.pos.vy !== x) this.staticPos = false, this.pos.vy = x; break;
+            case 0x5: if (this.pos.vz !== x) this.staticPos = false, this.pos.vz = x; break;
+            case 0x6: if (this.pos.ax !== x) this.staticPos = false, this.pos.ax = x; break;
+            case 0x7: if (this.pos.ay !== x) this.staticPos = false, this.pos.ay = x; break;
+            case 0x8: if (this.pos.az !== x) this.staticPos = false, this.pos.az = x; break;
+            case 0x9: if (this.pos.fx !== x) this.staticPos = false, this.pos.fx = x; break;
+            case 0xA: if (this.pos.fy !== x) this.staticPos = false, this.pos.fy = x; break;
+            case 0xB: if (this.pos.fz !== x) this.staticPos = false, this.pos.fz = x; break;
         };
         this.__upd();
     }
@@ -611,19 +644,20 @@ class polymesh {
     //% group="Mesh position property"
     //% weight=9
     changePos(choice: PolyPos, x: number) {
+        this.staticPos = true;
         switch (choice) {
-            case 0x0: if (this.pos.x  !== (this.pos.x  + x)) this.pos.x  += x; break;
-            case 0x1: if (this.pos.y  !== (this.pos.y  + x)) this.pos.y  += x; break;
-            case 0x2: if (this.pos.z  !== (this.pos.z  + x)) this.pos.z  += x; break;
-            case 0x3: if (this.pos.vx !== (this.pos.vx + x)) this.pos.vx += x; break;
-            case 0x4: if (this.pos.vy !== (this.pos.vy + x)) this.pos.vy += x; break;
-            case 0x5: if (this.pos.vz !== (this.pos.vz + x)) this.pos.vz += x; break;
-            case 0x6: if (this.pos.ax !== (this.pos.ax + x)) this.pos.ax += x; break;
-            case 0x7: if (this.pos.ay !== (this.pos.ay + x)) this.pos.ay += x; break;
-            case 0x8: if (this.pos.az !== (this.pos.az + x)) this.pos.az += x; break;
-            case 0x9: if (this.pos.fx !== (this.pos.fx + x)) this.pos.fx += x; break;
-            case 0xA: if (this.pos.fy !== (this.pos.fy + x)) this.pos.fy += x; break;
-            case 0xB: if (this.pos.fz !== (this.pos.fz + x)) this.pos.fz += x; break;
+            case 0x0: if (this.pos.x  !== (this.pos.x  + x)) this.staticPos = false, this.pos.x  += x; break;
+            case 0x1: if (this.pos.y  !== (this.pos.y  + x)) this.staticPos = false, this.pos.y  += x; break;
+            case 0x2: if (this.pos.z  !== (this.pos.z  + x)) this.staticPos = false, this.pos.z  += x; break;
+            case 0x3: if (this.pos.vx !== (this.pos.vx + x)) this.staticPos = false, this.pos.vx += x; break;
+            case 0x4: if (this.pos.vy !== (this.pos.vy + x)) this.staticPos = false, this.pos.vy += x; break;
+            case 0x5: if (this.pos.vz !== (this.pos.vz + x)) this.staticPos = false, this.pos.vz += x; break;
+            case 0x6: if (this.pos.ax !== (this.pos.ax + x)) this.staticPos = false, this.pos.ax += x; break;
+            case 0x7: if (this.pos.ay !== (this.pos.ay + x)) this.staticPos = false, this.pos.ay += x; break;
+            case 0x8: if (this.pos.az !== (this.pos.az + x)) this.staticPos = false, this.pos.az += x; break;
+            case 0x9: if (this.pos.fx !== (this.pos.fx + x)) this.staticPos = false, this.pos.fx += x; break;
+            case 0xA: if (this.pos.fy !== (this.pos.fy + x)) this.staticPos = false, this.pos.fy += x; break;
+            case 0xB: if (this.pos.fz !== (this.pos.fz + x)) this.staticPos = false, this.pos.fz += x; break;
         };
         this.__upd();
     }
