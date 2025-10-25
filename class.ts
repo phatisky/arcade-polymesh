@@ -121,6 +121,16 @@ class polymesh {
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
             return rotatePoint3D(vpoint, vpivot, msh.rot)
         })
+        this.updatePerspective()
+    }
+
+    updatePerspective() {
+        
+        this.points_ren = this.points_m.map(v => {
+            const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
+            const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
+            return rotatePoint3D(vpoint, vpivot, msh.rot)
+        })
     }
 
     protected pivot_x: Fx8; protected pivot_y: Fx8; protected pivot_z: Fx8;
