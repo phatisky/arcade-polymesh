@@ -121,7 +121,7 @@ class polymesh {
             const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z }
             return Polymesh.rotatePoint3D(vpoint, vpivot, this.rot)
         })
-        this.updatePerspective(Polymesh.cam, Polymesh.angle)
+        this.updatePointFacing(Polymesh.cam, Polymesh.angle)
     }
 
     updatePointFacing(pos: Polymesh.Vector3, rot: Polymesh.Vector3) {
