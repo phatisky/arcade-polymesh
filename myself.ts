@@ -3,24 +3,23 @@ namespace Polymesh {
 
     export function updateMotion(motion: Motion3, delta: number) {
         // Acceleration angle of camera
-        if (motion.ax !== 0) motion.vx += motion.ax * delta
-        if (motion.ay !== 0) motion.vy += motion.ay * delta
-        if (motion.az !== 0) motion.vz += motion.az * delta
+        motion.vx += +(motion.ax !== 0) * (motion.ax * delta)
+        motion.vy += +(motion.ay !== 0) * (motion.ay * delta)
+        motion.vz += +(motion.az !== 0) * (motion.az * delta)
 
         // Friction angle of camera
-        if (motion.fx !== 0) motion.vx *= (1 - motion.fx) * delta
-        if (motion.fy !== 0) motion.vy *= (1 - motion.fy) * delta
-        if (motion.fz !== 0) motion.vz *= (1 - motion.fz) * delta
+        motion.vx *= +(motion.fx !== 0) * ((1 - motion.fx) * delta)
+        motion.vy *= +(motion.fy !== 0) * ((1 - motion.fy) * delta)
+        motion.vz *= +(motion.fz !== 0) * ((1 - motion.fz) * delta)
 
         // Velocity angle of camera
-        if (motion.vx !== 0) motion.x += motion.vx * delta
-        if (motion.vy !== 0) motion.y += motion.vy * delta
-        if (motion.vz !== 0) motion.z += motion.vz * delta
+        motion.x += +(motion.vx !== 0) * (motion.vx * delta)
+        motion.y += +(motion.vy !== 0) * (motion.vy * delta)
+        motion.z += +(motion.vz !== 0) * (motion.vz * delta)
     }
 
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const delta = control.eventContext().deltaTime
-
         updateMotion(angle, delta)
         updateMotion(cam, delta)
     })
