@@ -119,36 +119,19 @@ class polymesh {
         this.points_m = this.points.map(v => {
             const vpoint = { x: this.pos.x + v.x, y: this.pos.y + v.y, z: this.pos.z + v.z }
             const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z }
-            return rotatePoint3D(vpoint, vpivot, this.rot)
+            return Polymesh.rotatePoint3D(vpoint, vpivot, this.rot)
         })
         this.updatePerspective(Polymesh.cam, Polymesh.angle)
     }
 
-    updatePointFacing(pos: Polymesh.Motion3, rot: Polymesh.Motion3) {
-        let tmp = 0;
-        const cosX = Math.cos(rot.x), sinX = Math.sin(rot.x);
-        const cosY = Math.cos(rot.y), sinY = Math.sin(rot.y);
-        const cosZ = Math.cos(rot.z), sinZ = Math.sin(rot.z);
+    updatePointFacing(pos: Polymesh.Vector3, rot: Polymesh.Vector3) {
         this.points_ren = this.points_m.map(v => {
-            let x = v.x - pos.x;
-            let y = v.y - pos.y;
-            let z = v.z - pos.z;
-
-            // --- rotate around x ---
-            tmp = y * cosX - z * sinX;
-            z = y * sinX + z * cosX;
-            y = tmp;
-
-            // --- rotate around y ---
-            tmp = x * cosY + z * sinY;
-            z = -x * sinY + z * cosY;
-            x = tmp;
-
-            // --- rotate around z ---
-            tmp = x * cosZ - y * sinZ;
-            y = x * sinZ + y * cosZ;
-            x = tmp;
-            return { x: x, y: y, z: z }
+            const vpoint = Polymesh.rotatePoint3D(v, pos, rot)
+            return {
+                x: vpoint.x - pos.x,
+                y: vpoint.y - pos.y,
+                z: vpoint.z - pos.z
+            }
         })
     }
 
