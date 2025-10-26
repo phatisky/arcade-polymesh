@@ -68,20 +68,11 @@ namespace Polymesh {
         };
     }
 
-    const zigzet = (l: number, r: number, n: number, c?: boolean): number => {
-        const isValidN = (l + n - 1) < r;
-        if (!isValidN) return NaN;
-
-        const halfOffset = +(c) | 0;
-        const halfStep = halfOffset * 0.5;
-        const isOdd = (n % 2) > 0;
-        const step = n >> 1
-
-        let pos = NaN;
-        if (isOdd) pos = l + step + halfStep;
-        else pos = l + ((r - l) - step - halfStep);
-        return pos;
-    };
+    const zigzet = (l: number, r: number, n: number, c?: boolean) =>
+        +((l + n - 1) < r) * (
+            (+((n & 1) > 0) * (l + (n >> 1) + ((+(c) | 0) * 0.5))) +
+            (+((n & 1) < 1) * (l + ((r - l) - (n >> 1) - ((+(c) | 0) * 0.5))))
+        ) / +((l + n - 1) < r);
 
     // main distortImage function
     export function distortImageUtil(
