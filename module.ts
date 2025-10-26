@@ -2,10 +2,10 @@
 namespace Polymesh {
 
     //% blockId=poly_rendermesh_all
-    //% block=" render all mesh of kind $id=poly_kind_shadow to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
+    //% block=" render all mesh of kind $id=poly_kind_shadow to $output=screen_image_picker|| form unnormalize $unnormal=toggleYesNo and line render $lineren=toggleYesNo"
     //% group="render"
     //% weight=9
-    export function renderAll(id: number, output: Image, linecolor?: number) {
+    export function renderAll(id: number, output: Image, unnormal?: boolean, lineren?: boolean) {
         if ((id == null || isNaN(id)) || !output) return;
         const sorted = Polymesh.__mesh[id].filter( msh => msh != null || (msh && !msh.isDel())).map(msh => ({ mesh: msh, depth: meshDepthZ(msh) }));
         if (sorted.length <= 0) return;
@@ -15,15 +15,15 @@ namespace Polymesh {
             case 0x2:
             default:  duoQuickSort(sorted, (a, b) => b.depth - a.depth); break;
         }
-        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, linecolor);
+        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, unnormal, lineren);
     }
 
     //% blockId=poly_rendermesh
-    //% block=" $msh render to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
+    //% block=" $msh render to $output=screen_image_picker|| form unnormalize $unnormal=toggleYesNo and line render $lineren=toggleYesNo"
     //% msh.shadow=variables_get msh.defl=myMesh
     //% group="render"
     //% weight=10
-    export function render(msh: polymesh, output: Image, linecolor?: number) {
+    export function render(msh: polymesh, output: Image, unnormal?: boolean, lineren?: boolean) {
         if (msh.isDel()) return;
         if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
         if (msh.flag.invisible) return;
@@ -36,7 +36,7 @@ namespace Polymesh {
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
             const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
             const vrot = rotatePoint3D(vpos, cam, angle)
-            const vsum = q_rsqrt((vrot.x * vrot.x) + (vrot.y * vrot.y) + (vrot.z * vrot.z))
+            const vsum = unnormal ? 0 : q_rsqrt((vrot.x * vrot.x) + (vrot.y * vrot.y) + (vrot.z * vrot.z))
             // camera offset
             const x = (vrot.x + vsum) - cam.x;
             const y = (vrot.y + vsum) - cam.y;
@@ -160,12 +160,12 @@ namespace Polymesh {
 
             if (inds.length < 2) continue;
             // Draw line canvas when have line color index
-            if (linecolor && linecolor > 0) {
-                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor);
+            if (lineren) {
+                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, t.color);
                 if (inds.length < 3) continue;
-                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
-                if (inds.length > 3) helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, linecolor), helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
-                else helpers.imageDrawLine(output, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, linecolor);
+                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
+                if (inds.length > 3) helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, t.color), helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
+                else helpers.imageDrawLine(output, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
                 continue;
             }
             if (t.color > 0) {
