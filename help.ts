@@ -68,11 +68,20 @@ namespace Polymesh {
         };
     }
 
-    const zigzum = (l: number, r: number, n: number, c?: boolean) =>
-        +((l + n - 1) < r) * (
-            (+((n & 1) > 0) * (l + (n >> 1) + ((+(c) | 0) * 0.5))) + 
-            (+((n & 1) < 1) * (l + ((r - l) - (n >> 1) - ((+(c) | 0) * 0.5))))
-        );
+    const zigzet = (l: number, r: number, n: number, c?: boolean): number => {
+        const isValidN = (l + n - 1) < r;
+        if (!isValidN) return NaN;
+
+        const halfOffset = +(c) | 0;
+        const halfStep = halfOffset * 0.5;
+        const isOdd = (n % 2) > 0;
+        const step = n >> 1
+
+        let pos = NaN;
+        if (isOdd) pos = l + step + halfStep;
+        else pos = l + ((r - l) - step - halfStep);
+        return pos;
+    };
 
     // main distortImage function
     export function distortImageUtil(
@@ -82,10 +91,10 @@ namespace Polymesh {
         const w = from.width, h = from.height;
         const w_ = 1 / w, h_ = 1 / h;
         for (let sx = 0; sx < w; sx++) {
-            const ix = zigzum(0, w-1, sx, center)
+            const ix = zigzet(0, w-1, sx, center)
             const u0 = (ix * w_), u1 = ((ix + 1) * w_);
             for (let sy = 0; sy < h; sy++) {
-                const iy = zigzum(0, h-1, sy, center)
+                const iy = zigzet(0, h-1, sy, center)
                 const color = from.getPixel(w - ix - 1, iy);
                 if (color === 0) continue; // transparent
                 const v0 = (iy * h_), v1 = ((iy + 1) * h_);
