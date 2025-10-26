@@ -1,39 +1,6 @@
 
 namespace Polymesh {
 
-    const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3) => {
-        let tmp = 0
-        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
-        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
-        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
-        // move point with pivot to 1st place
-        let dx  = point.x - pivot.x;
-        let dy  = point.y - pivot.y;
-        let dz  = point.z - pivot.z;
-
-        // --- rotate around x ---
-        tmp = dy * cosX - dz * sinX;
-        dz = dy * sinX + dz * cosX;
-        dy = tmp;
-
-        // --- rotate around y ---
-        tmp = dx * cosY + dz * sinY;
-        dz = -dx * sinY + dz * cosY;
-        dx = tmp;
-
-        // --- rotate around z ---
-        tmp = dx * cosZ - dy * sinZ;
-        dy = dx * sinZ + dy * cosZ;
-        dx = tmp;
-
-        // move back to real position
-        return {
-            x: dx + pivot.x,
-            y: dy + pivot.y,
-            z: dz + pivot.z
-        };
-    };
-
     //% blockId=poly_rendermesh_all
     //% block=" render all mesh of kind $id=poly_kind_shadow to $output=screen_image_picker|| as line render color? $linecolor=colorindexpicker"
     //% group="render"

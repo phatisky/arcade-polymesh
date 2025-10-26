@@ -20,7 +20,6 @@ namespace Polymesh {
 
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const delta = control.eventContext().deltaTime
-
         updateMotion(angle, delta)
         updateMotion(cam, delta)
     })
