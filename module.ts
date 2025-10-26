@@ -36,7 +36,7 @@ namespace Polymesh {
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
             const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
             const vrot = rotatePoint3D(vpos, cam, angle)
-            const vsum = 1 / Math.sqrt((vrot.x * vrot.x) + (vrot.y * vrot.y) + (vrot.z * vrot.z))
+            const vsum = 0.1 / Math.sqrt((vrot.x * vrot.x) + (vrot.y * vrot.y) + (vrot.z * vrot.z))
             // camera offset
             const x = (vrot.x + vsum) - cam.x;
             const y = (vrot.y + vsum) - cam.y;
