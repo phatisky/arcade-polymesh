@@ -5,7 +5,7 @@ namespace Polymesh {
     //% block=" render all mesh of kind $id=poly_kind_shadow to $output=screen_image_picker|| form line render $lineren=toggleYesNo"
     //% group="render"
     //% weight=9
-    export function renderAll(id: number, output: Image, unnormal?: boolean, lineren?: boolean) {
+    export function renderAll(id: number, output: Image, lineren?: boolean) {
         if ((id == null || isNaN(id)) || !output) return;
         const sorted = Polymesh.__mesh[id].filter( msh => msh != null || (msh && !msh.isDel())).map(msh => ({ mesh: msh, depth: meshDepthZ(msh) }));
         if (sorted.length <= 0) return;
