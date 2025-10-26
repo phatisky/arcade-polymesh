@@ -165,7 +165,7 @@ class polymesh {
     distFromCamera() {
         const distPos = { x: Polymesh.cam.x - this.pos.x, y: Polymesh.cam.y - this.pos.y, z: Polymesh.cam.z - this.pos.z }
         const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
-        return distSum * Polymesh.q_rsqrt(distSum)
+        return Math.sqrt(distSum)
     }
 
     //% blockId=poly_dist_othermesh
@@ -179,7 +179,7 @@ class polymesh {
         if (otherMesh.isDel()) return NaN
         const distPos = { x: otherMesh.pos.x - this.pos.x, y: otherMesh.pos.y - this.pos.y, z: otherMesh.pos.z - this.pos.z }
         const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
-        return distSum * Polymesh.q_rsqrt(distSum)
+        return Math.sqrt(distSum)
     }
 
     //% blockId=poly_normal_speed
@@ -191,7 +191,7 @@ class polymesh {
     normalSpeed() {
         const distPosV = { vx: this.pos.vx, vy: this.pos.vy, vz: this.pos.vz }
         const distSum = (distPosV.vx * distPosV.vx) + (distPosV.vy * distPosV.vy) + (distPosV.vz * distPosV.vz)
-        return distSum * Polymesh.q_rsqrt(distSum)
+        return Math.sqrt(distSum)
     }
 
     //% blockId=poly_flag_set

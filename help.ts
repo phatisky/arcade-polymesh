@@ -160,26 +160,6 @@ namespace Polymesh {
         return true;
     }
 
-    export const logb = (x: number) => {
-        let r = 0;
-        while (x >>= 1) r++;
-        return r;
-    };
-
-    /** Fast inverse square root **/
-    export const q_rsqrt = (x: number) => {
-        if (x <= 0) return 0;
-        const buf = pins.createBuffer(4);
-        buf.setNumber(NumberFormat.Float32LE, 0, x);
-        let i = buf.getNumber(NumberFormat.Int32LE, 0);
-        i = 0x5f3759df - (i >> 1);
-        buf.setNumber(NumberFormat.Int32LE, 0, i);
-        let y = buf.getNumber(NumberFormat.Float32LE, 0);
-        // One iteration Newton-Raphson
-        y = y * (1.5 - (0.5 * x * y * y));
-        return y;
-    }
-
     export const meshDepthZ = (plm: polymesh) => {
         if (plm.isDel()) return NaN;
         return rotatePoint3D(plm.pos, cam, angle).z;

@@ -5,9 +5,9 @@ namespace Polymesh {
         if (lo >= hi) return lo;
         const range = hi - lo + 1;
         if (range < 256) // Small range: simple float mul + floor (fast)
-            return lo + (Math.random() * range | 0);
+            return lo + (Math.random() * range >> 0);
         // Large range: gen 16-bit rand, mask, then bit-scale (no slow * or %)
-        const rand16 = Math.random() * 0x10000 | 0;  // 16-bit random int (0-65535)
+        const rand16 = Math.random() * 0x10000 >> 0;  // 16-bit random int (0-65535)
         const mask = 0xFFFF;  // 16-bit mask (adjust if needed for precision)
         const r = rand16 & mask;
         // Scale with bit shift: (r * range) >> 16 ≈ r / 65536 * range

@@ -2,7 +2,7 @@
 namespace Polymesh {
 
     //% blockId=poly_rendermesh_all
-    //% block=" render all mesh of kind $id=poly_kind_shadow to $output=screen_image_picker|| form unnormalize $unnormal=toggleYesNo and line render $lineren=toggleYesNo"
+    //% block=" render all mesh of kind $id=poly_kind_shadow to $output=screen_image_picker|| form line render $lineren=toggleYesNo"
     //% group="render"
     //% weight=9
     export function renderAll(id: number, output: Image, unnormal?: boolean, lineren?: boolean) {
@@ -15,15 +15,15 @@ namespace Polymesh {
             case 0x2:
             default:  duoQuickSort(sorted, (a, b) => b.depth - a.depth); break;
         }
-        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, unnormal, lineren);
+        for (const m of sorted) if (!m.mesh.flag.invisible) render(m.mesh, output, lineren);
     }
 
     //% blockId=poly_rendermesh
-    //% block=" $msh render to $output=screen_image_picker|| form unnormalize $unnormal=toggleYesNo and line render $lineren=toggleYesNo"
+    //% block=" $msh render to $output=screen_image_picker|| as line render $lineren=toggleYesNo"
     //% msh.shadow=variables_get msh.defl=myMesh
     //% group="render"
     //% weight=10
-    export function render(msh: polymesh, output: Image, unnormal?: boolean, lineren?: boolean) {
+    export function render(msh: polymesh, output: Image, lineren?: boolean) {
         if (msh.isDel()) return;
         if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
         if (msh.flag.invisible) return;
@@ -36,7 +36,7 @@ namespace Polymesh {
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
             const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
             const vrot = rotatePoint3D(vpos, cam, angle)
-            const vsum = unnormal ? 0 : q_rsqrt((vrot.x * vrot.x) + (vrot.y * vrot.y) + (vrot.z * vrot.z))
+            const vsum = 1 / Math.sqrt((vrot.x * vrot.x) + (vrot.y * vrot.y) + (vrot.z * vrot.z))
             // camera offset
             const x = (vrot.x + vsum) - cam.x;
             const y = (vrot.y + vsum) - cam.y;
