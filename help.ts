@@ -11,20 +11,9 @@ namespace Polymesh {
         let dy = point.y - pivot.y;
         let dz = point.z - pivot.z;
 
-        // --- rotate around x ---
-        tmp = dy * cosX - dz * sinX;
-        dz = dy * sinX + dz * cosX;
-        dy = tmp;
-
-        // --- rotate around y ---
-        tmp = dx * cosY + dz * sinY;
-        dz = -dx * sinY + dz * cosY;
-        dx = tmp;
-
-        // --- rotate around z ---
-        tmp = dx * cosZ - dy * sinZ;
-        dy = dx * sinZ + dy * cosZ;
-        dx = tmp;
+        tmp = dy * cosX - dz * sinX; dz =  dy * sinX + dz * cosX; dy = tmp; // --- rotate around x ---
+        tmp = dx * cosY + dz * sinY; dz = -dx * sinY + dz * cosY; dx = tmp; // --- rotate around y ---
+        tmp = dx * cosZ - dy * sinZ; dy =  dx * sinZ + dy * cosZ; dx = tmp; // --- rotate around z ---
 
         // move back to real position
         return {

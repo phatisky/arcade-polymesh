@@ -30,17 +30,29 @@ namespace Polymesh {
 
         const centerX = output.width >> 1, centerY = output.height >> 1;
 
+        let tmp = 0
+        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
+        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
+        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
+
         // Transform vertices
         const rotated = msh.points.map(v => {
             const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
             const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
             const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
-            const vrot = rotatePoint3D(vpos, cam, angle)
-            const vsum = 0.1 / Math.sqrt((vrot.x * vrot.x) + (vrot.y * vrot.y) + (vrot.z * vrot.z))
+
+            let x = vpos.x - cam.x;
+            let y = vpos.y - cam.y;
+            let z = vpos.z - cam.z;
+            tmp = x * cosY + z * sinY; z = -x * sinY + z * cosY; x = tmp; // --- rotate around y ---
+            tmp = y * cosX - z * sinX; z =  y * sinX + z * cosX; y = tmp; // --- rotate around x ---
+            tmp = x * cosZ - y * sinZ; y =  x * sinZ + y * cosZ; x = tmp; // --- rotate around z ---
+
+            const vsum = 0.1 / Math.sqrt((x * x) + (y * y) + (z * z))
             // camera offset
-            let x = vrot.x - cam.x; if (x !== 0) x += vsum;
-            let y = vrot.y - cam.y; if (y !== 0) y += vsum;
-            let z = vrot.z - cam.z; if (z !== 0) z += vsum;
+            x += (x === 0 ? 0 : vsum);
+            y += (y === 0 ? 0 : vsum);
+            z += (z === 0 ? 0 : vsum);
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
