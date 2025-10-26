@@ -38,9 +38,9 @@ namespace Polymesh {
             const vrot = rotatePoint3D(vpos, cam, angle)
             const vsum = 0.1 / Math.sqrt((vrot.x * vrot.x) + (vrot.y * vrot.y) + (vrot.z * vrot.z))
             // camera offset
-            const x = (vrot.x + vsum) - cam.x;
-            const y = (vrot.y + vsum) - cam.y;
-            const z = (vrot.z + vsum) - cam.z;
+            let x = vrot.x - cam.x; if (x !== 0) x += vsum;
+            let y = vrot.y - cam.y; if (y !== 0) y += vsum;
+            let z = vrot.z - cam.z; if (z !== 0) z += vsum;
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
