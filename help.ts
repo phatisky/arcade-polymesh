@@ -43,8 +43,6 @@ namespace Polymesh {
         return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
     }
 
-    export interface pos { x: number; y: number; }
-
     const zigzet = (l: number, r: number, n: number, c?: boolean) =>
         +((l + n - 1) < r) * (
             (+((n & 1) > 0) * (l + (n >> 1) + ((+(c) | 0) * 0.5))) +
@@ -57,56 +55,51 @@ namespace Polymesh {
  * เรนเดอร์ Mode7 จากภาพต้นฉบับไปยังภาพเป้าหมาย
  * ใช้ p0, p1, p2, p3? สำหรับสี่เหลี่ยม perspective
  */
-    export function mode7Image(
+    function mode7ImageUtil(
         from: Image,
         to: Image,
-        p0: pos,
-        p1: pos,
-        p2: pos,
-        p3?: pos
+        p0: pt,
+        p1: pt,
+        p2: pt,
+        p3?: pt
     ): void {
-    const w = to.width, w1 = 1 / (w - 1)
-    const h = to.height, h1 = 1 / (h - 1)
+        const w = to.width, w1 = 1 / (w - 1)
+        const h = to.height, h1 = 1 / (h - 1)
 
-    // ถ้า p3 ไม่กำหนด ให้คำนวณเป็นสี่เหลี่ยมสมบูรณ์
-    if (!p3) {
-        p3 = { x: p2.x + (p1.x - p0.x), y: p2.y + (p1.y - p0.y) };
-    }
+        // ถ้า p3 ไม่กำหนด ให้คำนวณเป็นสี่เหลี่ยมสมบูรณ์
+        if (!p3) p3 = { x: p2.x + (p1.x - p0.x), y: p2.y + (p1.y - p0.y) };
 
-    // precompute vectors สำหรับ bilinear interpolation
-    for (let y = 0; y < h; y++) {
-        const ty = y / h1;
-        // interpolate พิกัดซ้ายและขวาของแถว
-        const leftX = p0.x + (p2.x - p0.x) * ty;
-        const leftY = p0.y + (p2.y - p0.y) * ty;
-        const rightX = p1.x + (p3.x - p1.x) * ty;
-        const rightY = p1.y + (p3.y - p1.y) * ty;
+        // precompute vectors สำหรับ bilinear interpolation
+        for (let y = 0; y < h; y++) {
+            const ty = y * h1;
+            // interpolate พิกัดซ้ายและขวาของแถว
+            const leftX = p0.x + (p2.x - p0.x) * ty;
+            const leftY = p0.y + (p2.y - p0.y) * ty;
+            const rightX = p1.x + (p3.x - p1.x) * ty;
+            const rightY = p1.y + (p3.y - p1.y) * ty;
 
-        for (let x = 0; x < w; x++) {
-            const tx = x / w1;
-            const srcX = Math.round(leftX + (rightX - leftX) * tx);
-            const srcY = Math.round(leftY + (rightY - leftY) * tx);
-            const color = from.getPixel(srcX, srcY);
-            if (color <= 0) continue;
-
-            // ตรวจสอบขอบเขตของต้นฉบับ
-            if (srcX >= 0 && srcX < from.width && srcY >= 0 && srcY < from.height) {
+            for (let x = 0; x < w; x++) {
+                const tx = x * w1;
+                const srcX = Math.round(leftX + (rightX - leftX) * tx);
+                const srcY = Math.round(leftY + (rightY - leftY) * tx);
+                const color: uint8 = from.getPixel(srcX, srcY);
+                if (color <= 0) continue;
+                // ตรวจสอบขอบเขตของต้นฉบับ
+                if (isOutOfArea(srcX, srcY, from.width, from.height)) continue;
                 to.setPixel(x, y, from.getPixel(srcX, srcY));
             }
         }
     }
-}
 
-    export function distortImage(from: Image, to: Image,
-        x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
-        center?: boolean) {
-        distortImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 }, center)
+    export function mode7Image(from: Image, to: Image,
+        x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3?: number, y3?: number) {
+        mode7ImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 })
     }
 
     export function resizeImage(from: Image, to: Image, center?: boolean) {
         if (isEmptyImage(from)) return;
         if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
-        distortImage(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, center)
+        mode7Image(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, center)
     }
 
     export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
