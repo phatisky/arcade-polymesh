@@ -159,9 +159,9 @@ namespace Polymesh {
                 halfH /= 1.1
 
                 // Draw Simple 2D image (billboard) as quad pixel on image
-                // use distortImage or drawing without perspective distortion
+                // use mode7Image or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
-                distortImage(im, output,
+                mode7Image(im, output,
                     cx + halfW, cy - halfH,
                     cx - halfW, cy - halfH,
                     cx - halfW, cy + halfH,
@@ -208,7 +208,7 @@ namespace Polymesh {
 
             // Draw texture over
             if (inds.length === 4 && t.img) {
-                distortImage(im, output,
+                mode7Image(im, output,
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[0]].x, rotated[inds[0]].y,
