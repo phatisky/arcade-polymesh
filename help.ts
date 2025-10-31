@@ -43,63 +43,67 @@ namespace Polymesh {
         return isOutOfArea(avgXYs.x, avgXYs.y, width, height, 5)
     }
 
+    interface Pt { x: number; y: number; }
+
+    // Bilinear interpolation on quad
+    export function lerpQuad(p0: Pt, p1: Pt, p2: Pt, p3: Pt, u: number, v: number): Pt {
+        const x0 = p0.x + (p1.x - p0.x) * u;
+        const y0 = p0.y + (p1.y - p0.y) * u;
+        const x1 = p3.x + (p2.x - p3.x) * u;
+        const y1 = p3.y + (p2.y - p3.y) * u;
+        return {
+            x: (x0 + (x1 - x0) * v) >> 0,
+            y: (y0 + (y1 - y0) * v) >> 0
+        };
+    }
+
     const zigzet = (l: number, r: number, n: number, c?: boolean) =>
         +((l + n - 1) < r) * (
             (+((n & 1) > 0) * (l + (n >> 1) + ((+(c) | 0) * 0.5))) +
             (+((n & 1) < 1) * (l + ((r - l) - (n >> 1) - ((+(c) | 0) * 0.5))))
         ) / +((l + n - 1) < r);
 
-    type pt = { x: number, y: number };
-
-/**
- * เรนเดอร์ Mode7 จากภาพต้นฉบับไปยังภาพเป้าหมาย
- * ใช้ p0, p1, p2, p3? สำหรับสี่เหลี่ยม perspective
- */
-    function mode7ImageUtil(
-        from: Image,
-        to: Image,
-        p0: pt,
-        p1: pt,
-        p2: pt,
-        p3?: pt
-    ): void {
-        const w = to.width, w1 = 1 / (w - 1)
-        const h = to.height, h1 = 1 / (h - 1)
-
-        // ถ้า p3 ไม่กำหนด ให้คำนวณเป็นสี่เหลี่ยมสมบูรณ์
-        if (!p3) p3 = { x: p2.x + (p1.x - p0.x), y: p2.y + (p1.y - p0.y) };
-
-        // precompute vectors สำหรับ bilinear interpolation
-        for (let y = 0; y < h; y++) {
-            const ty = y * h1;
-            // interpolate พิกัดซ้ายและขวาของแถว
-            const leftX = p0.x + (p2.x - p0.x) * ty;
-            const leftY = p0.y + (p2.y - p0.y) * ty;
-            const rightX = p1.x + (p3.x - p1.x) * ty;
-            const rightY = p1.y + (p3.y - p1.y) * ty;
-
-            for (let x = 0; x < w; x++) {
-                const tx = x * w1;
-                const srcX = Math.round(leftX + (rightX - leftX) * tx);
-                const srcY = Math.round(leftY + (rightY - leftY) * tx);
-                const color: uint8 = from.getPixel(srcX, srcY);
-                if (color <= 0) continue;
-                // ตรวจสอบขอบเขตของต้นฉบับ
-                if (isOutOfArea(srcX, srcY, from.width, from.height)) continue;
-                to.setPixel(x, y, from.getPixel(srcX, srcY));
+    // main distortImage function
+    export function distortImageUtil(
+        from: Image, to: Image,
+        p0: Pt, p1: Pt, p2: Pt, p3: Pt,
+        center?: boolean) {
+        const w = from.width, h = from.height;
+        const w_ = 1 / w, h_ = 1 / h;
+        for (let sx = 0; sx < w; sx++) {
+            const ix = zigzet(0, w-1, sx, center)
+            const u0 = (ix * w_), u1 = ((ix + 1) * w_);
+            for (let sy = 0; sy < h; sy++) {
+                const iy = zigzet(0, h-1, sy, center)
+                const color = from.getPixel(w - ix - 1, iy);
+                if (color === 0) continue; // transparent
+                const v0 = (iy * h_), v1 = ((iy + 1) * h_);
+                // Map quad on 1 pixel
+                const qd = [
+                    lerpQuad(p0, p1, p2, p3, u0, v0),
+                    lerpQuad(p0, p1, p2, p3, u1, v0),
+                    lerpQuad(p0, p1, p2, p3, u0, v1),
+                    lerpQuad(p0, p1, p2, p3, u1, v1),
+                ]
+                if (isOutOfAreaOnAvg(qd, to.width, to.height)) if (qd.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
+                // stamp 2 triangles by pixel
+                helpers.imageFillTriangle(to, qd[1].x, qd[1].y, qd[0].x, qd[0].y, qd[3].x, qd[3].y, color);
+                helpers.imageFillTriangle(to, qd[2].x, qd[2].y, qd[0].x, qd[0].y, qd[3].x, qd[3].y, color);
+                //helpers.imageFillPolygon4(to, qd[3].x, qd[3].y, qd[2].x, qd[2].y, qd[0].x, qd[0].y, qd[1].x, qd[1].y, colorIdx);
             }
         }
     }
 
-    export function mode7Image(from: Image, to: Image,
-        x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3?: number, y3?: number) {
-        mode7ImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 })
+    export function distortImage(from: Image, to: Image,
+        x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number,
+        center?: boolean) {
+        distortImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 }, center)
     }
 
-    export function resizeImage(from: Image, to: Image) {
+    export function resizeImage(from: Image, to: Image, center?: boolean) {
         if (isEmptyImage(from)) return;
         if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
-        mode7Image(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height)
+        distortImage(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, center)
     }
 
     export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {

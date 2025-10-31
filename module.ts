@@ -82,7 +82,7 @@ namespace Polymesh {
                 if (msh.flag.lod) {
                     const scaleD = ((Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, inds))) * zoom) / LOD_DIST
                     im = image.create(Math.clamp(1, t.img.width, scaleD * t.img.width), Math.clamp(1, t.img.height, scaleD * t.img.height))
-                    resizeImage(t.img.clone(), im)
+                    resizeImage(t.img.clone(), im, true)
                 }
             }
             if (t.indices.length === 1) {
@@ -159,9 +159,9 @@ namespace Polymesh {
                 halfH /= 1.1
 
                 // Draw Simple 2D image (billboard) as quad pixel on image
-                // use mode7Image or drawing without perspective distortion
+                // use distortImage or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
-                mode7Image(im, output,
+                distortImage(im, output,
                     cx + halfW, cy - halfH,
                     cx - halfW, cy - halfH,
                     cx - halfW, cy + halfH,
@@ -208,7 +208,7 @@ namespace Polymesh {
 
             // Draw texture over
             if (inds.length === 4 && t.img) {
-                mode7Image(im, output,
+                distortImage(im, output,
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[0]].x, rotated[inds[0]].y,
