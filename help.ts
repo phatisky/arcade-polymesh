@@ -96,10 +96,10 @@ namespace Polymesh {
         mode7ImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 })
     }
 
-    export function resizeImage(from: Image, to: Image, center?: boolean) {
+    export function resizeImage(from: Image, to: Image) {
         if (isEmptyImage(from)) return;
         if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
-        mode7Image(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, center)
+        mode7Image(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height)
     }
 
     export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
