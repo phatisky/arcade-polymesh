@@ -18,6 +18,14 @@ namespace Polymesh {
         if (motion.vz !== 0) motion.z += motion.vz * delta
     }
 
+    export function isMotionUpdate(mot: Motion3) {
+        return (
+            mot.vx !== 0 ||
+            mot.vy !== 0 ||
+            mot.vz !== 0
+        )
+    }
+
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const delta = control.eventContext().deltaTime
         updateMotion(angle, delta)

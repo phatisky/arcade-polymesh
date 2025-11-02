@@ -1,19 +1,16 @@
 
 namespace Polymesh {
 
-    export const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3) => {
+    export const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: SinCos3) => {
         let tmp = 0
-        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
-        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
-        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
         // move point with pivot to 1st place
         let dx = point.x - pivot.x;
         let dy = point.y - pivot.y;
         let dz = point.z - pivot.z;
 
-        tmp = dy * cosX - dz * sinX; dz =  dy * sinX + dz * cosX; dy = tmp; // --- rotate around x ---
-        tmp = dx * cosY + dz * sinY; dz = -dx * sinY + dz * cosY; dx = tmp; // --- rotate around y ---
-        tmp = dx * cosZ - dy * sinZ; dy =  dx * sinZ + dy * cosZ; dx = tmp; // --- rotate around z ---
+        tmp = dy * angle.cosX - dz * angle.sinX; dz =  dy * angle.sinX + dz * angle.cosX; dy = tmp; // --- rotate around x ---
+        tmp = dx * angle.cosY + dz * angle.sinY; dz = -dx * angle.sinY + dz * angle.cosY; dx = tmp; // --- rotate around y ---
+        tmp = dx * angle.cosZ - dy * angle.sinZ; dy =  dx * angle.sinZ + dy * angle.cosZ; dx = tmp; // --- rotate around z ---
 
         // move back to real position
         return {
@@ -151,7 +148,12 @@ namespace Polymesh {
 
     export const meshDepthZ = (plm: polymesh) => {
         if (plm.isDel()) return NaN;
-        return rotatePoint3D(plm.pos, cam, angle).z;
+        const rot = {
+            cosX: Math.cos(angle.x), sinX: Math.sin(angle.x),
+            cosY: Math.cos(angle.y), sinY: Math.sin(angle.y),
+            cosZ: Math.cos(angle.z), sinZ: Math.sin(angle.z),
+        }
+        return rotatePoint3D(plm.pos, cam, rot).z;
     }
 
     export const meshDistZ = (plm: polymesh) => (Math.abs(dist) / (Math.abs(dist) + meshDepthZ(plm)))

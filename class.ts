@@ -1,7 +1,7 @@
 
 class polymesh {
 
-    data: {[id: string]: any};
+    data: {[id: string]: any}; inRender: boolean;
     protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; kind_idx: number;
 
     __upd() {
@@ -57,6 +57,40 @@ class polymesh {
         }))
     }
 
+    protected points_xs_m: Fx8[]; protected points_ys_m: Fx8[]; protected points_zs_m: Fx8[];
+    set points_m(vals: Polymesh.Vector3[]) {
+        if (vals == null || vals.length <= 0) {
+            this.points_xs_m = [], this.points_ys_m = [], this.points_zs_m = [];
+            return;
+        }
+        if (this.isDel()) return;
+        this.points_xs_m = vals.map(v => Fx8(v.x)), this.points_ys_m = vals.map(v => Fx8(v.y)), this.points_zs_m = vals.map(v => Fx8(v.z));
+        this.__upd();
+    }
+    get points_m() {
+        if (this.isDel()) return null
+        return this.points_xs.map((_, i) => ({
+            x: Fx.toFloat(this.points_xs_m[i]),
+            y: Fx.toFloat(this.points_ys_m[i]),
+            z: Fx.toFloat(this.points_zs_m[i]),
+        }))
+    }
+
+    protected __upd_motion() {
+        if (this.isDel()) return;
+        if (this.inRender) return;
+        const rot = {
+            cosX: Math.cos(this.rot.x), sinX: Math.sin(this.rot.x),
+            cosY: Math.cos(this.rot.y), sinY: Math.sin(this.rot.y),
+            cosZ: Math.cos(this.rot.z), sinZ: Math.sin(this.rot.z),
+        }
+        this.points_m = this.points.map(v => {
+            const vpoint = { x: this.pos.x + v.x, y: this.pos.y + v.y, z: this.pos.z + v.z }
+            const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z }
+            return Polymesh.rotatePoint3D(vpoint, vpivot, rot)
+        })
+    }
+
     protected points_xs: Fx8[]; protected points_ys: Fx8[]; protected points_zs: Fx8[];
     set points(vals: Polymesh.Vector3[]) {
         if (vals == null || vals.length <= 0) {
@@ -65,6 +99,7 @@ class polymesh {
         }
         if (this.isDel()) return;
         this.points_xs = vals.map(v => Fx8(v.x)), this.points_ys = vals.map(v => Fx8(v.y)), this.points_zs = vals.map(v => Fx8(v.z));
+        this.__upd_motion();
         this.__upd();
     }
     get points() {
@@ -83,23 +118,25 @@ class polymesh {
     rot: Polymesh.Motion3; pos: Polymesh.Motion3;
 
     flag: { invisible: boolean, noncull: boolean, lod: boolean }
-    loop() {
+    protected loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = control.eventContext().deltaTime
             Polymesh.updateMotion(this.pos, delta);
             Polymesh.updateMotion(this.rot, delta);
+            if (Polymesh.isMotionUpdate(this.rot) || Polymesh.isMotionUpdate(this.pos)) this.__upd_motion();
         });
     }
 
-    init() {
-        this.data = {};
-        this.faces = [];
+    protected init() {
+        this.data   = {};
+        this.faces  = [];
         this.points = [];
-        this.pivot = { x: 0, y: 0, z: 0 };
-        this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
-        this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
-        this.flag = { invisible: false, noncull: false, lod: false };
-        this.__del = false;
+        this.pivot  = { x: 0, y: 0, z: 0 };
+        this.rot    = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
+        this.pos    = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
+        this.flag   = { invisible: false, noncull: false, lod: false };
+        this.__del  = false; this.inRender = false;
+        this.__upd_motion();
         this.loop();
     }
 
@@ -122,7 +159,7 @@ class polymesh {
     //% weight=15
     del() {
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
-        this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
+        this.faces = null, this.points = null, this.points_m = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
         Polymesh.__mesh[this.kind][this.kind_idx] = null;
     }
 
@@ -234,7 +271,7 @@ class polymesh {
     setVertice(idx: number, point3: Polymesh.shadowPoint3) {
         if (Polymesh.isOutOfRange(idx, this.points.length + 1)) return;
         this.points_xs[idx] = Fx8(point3.x), this.points_ys[idx] = Fx8(point3.y), this.points_zs[idx] = Fx8(point3.z);// this.points[idx] = { x: point3.x, y: point3.y, z: point3.z }
-        this.__upd();
+        this.__upd(); this.__upd_motion();
     }
 
     //% blockId=poly_vertice_add
@@ -246,7 +283,7 @@ class polymesh {
     //% weight=9
     addVertice(point3: Polymesh.shadowPoint3) {
         this.points_xs.push(Fx8(point3.x)), this.points_ys.push(Fx8(point3.y)), this.points_zs.push(Fx8(point3.z));// this.points.push({ x: point3.x, y: point3.y, z: point3.z })
-        this.__upd();
+        this.__upd(); this.__upd_motion();
     }
 
     //% blockId=poly_vertice_del
@@ -258,7 +295,7 @@ class polymesh {
     delVertice(idx?: number) {
         if (idx) this.points_xs.removeAt(idx), this.points_ys.removeAt(idx), this.points_zs.removeAt(idx);// this.points.removeAt(idx);
         else this.points_xs.pop(), this.points_ys.pop(), this.points_zs.pop();// this.points.pop();
-        this.__upd();
+        this.__upd(); this.__upd_motion();
     }
 
     //% blockId=poly_face_set

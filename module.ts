@@ -27,6 +27,7 @@ namespace Polymesh {
         if (msh.isDel()) return;
         if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
         if (msh.flag.invisible) return;
+        msh.inRender = true;
 
         const centerX = output.width >> 1, centerY = output.height >> 1;
 
@@ -36,14 +37,10 @@ namespace Polymesh {
         const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
 
         // Transform vertices
-        const rotated = msh.points.map(v => {
-            const vpoint = { x: msh.pos.x + v.x, y: msh.pos.y + v.y, z: msh.pos.z + v.z }
-            const vpivot = { x: msh.pos.x + msh.pivot.x, y: msh.pos.y + msh.pivot.y, z: msh.pos.z + msh.pivot.z }
-            const vpos = rotatePoint3D(vpoint, vpivot, msh.rot)
-
-            let x = vpos.x - cam.x;
-            let y = vpos.y - cam.y;
-            let z = vpos.z - cam.z;
+        const rotated = msh.points_m.map(v => {
+            let x = v.x - cam.x;
+            let y = v.y - cam.y;
+            let z = v.z - cam.z;
             tmp = x * cosY + z * sinY; z = -x * sinY + z * cosY; x = tmp; // --- rotate around y ---
             tmp = y * cosX - z * sinX; z =  y * sinX + z * cosX; y = tmp; // --- rotate around x ---
             tmp = x * cosZ - y * sinZ; y =  x * sinZ + y * cosZ; x = tmp; // --- rotate around z ---
@@ -217,6 +214,7 @@ namespace Polymesh {
             }
 
         }
+        msh.inRender = false;
 
     }
     

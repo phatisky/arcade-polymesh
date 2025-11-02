@@ -4,6 +4,7 @@ namespace Polymesh {
 
     export interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
     export interface Vector3 { x: number, y: number, z: number }
+    export interface SinCos3 { sinX: number, cosX: number, sinY: number, cosY: number, sinZ: number, cosZ: number }
 
     export const __mesh: polymesh[][] = []
     export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.06
