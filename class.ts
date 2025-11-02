@@ -86,8 +86,7 @@ class polymesh {
     loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = control.eventContext().deltaTime
-            Polymesh.updateMotion(this.pos, delta);
-            Polymesh.updateMotion(this.rot, delta);
+            Polymesh.updateMotion(this.pos, delta); Polymesh.updateMotion(this.rot, delta);
         });
     }
 

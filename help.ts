@@ -75,8 +75,8 @@ namespace Polymesh {
                 const v0 = (iy * h_), v1 = ((iy + 1) * h_);
                 // Map quad on 1 pixel
                 const qd = [v0, v0, v1, v1].map((v, i) => ({
-                    x: Math.trunc(qc[i % qc.length].x0 + (qc[i % qc.length].x1 - qc[i % qc.length].x0) * v),
-                    y: Math.trunc(qc[i % qc.length].y0 + (qc[i % qc.length].y1 - qc[i % qc.length].y0) * v)
+                    x: Math.trunc(qc[i & 1].x0 + (qc[i & 1].x1 - qc[i & 1].x0) * v),
+                    y: Math.trunc(qc[i & 1].y0 + (qc[i & 1].y1 - qc[i & 1].y0) * v)
                 }))
                 if (isOutOfAreaOnAvg(qd, to.width, to.height)) if (qd.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
