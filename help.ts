@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    export const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3) => {
+    export const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3): Vector3 => {
         let tmp = 0
         const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
         const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
@@ -45,12 +45,14 @@ namespace Polymesh {
 
     interface Pt { x: number; y: number; }
 
-    const zigzet = (l: number, r: number, n: number, c?: boolean) =>
-        +((l + n - 1) < r) * (
-            (+((n & 1) > 0) * (l + (n >> 1) + ((+(c) | 0) * 0.5))) +
-            (+((n & 1) < 1) * (l + ((r - l) - (n >> 1) - ((+(c) | 0) * 0.5))))
-        ) / +((l + n - 1) < r);
-
+    const zigzet = (l: number, r: number, n: number, c?: boolean) => {
+        if (l + n > r) return NaN;
+        const size = (r - l);
+        const n2 = Math.idiv(n, 2);
+        const half = (c ? 0.5 : 0)
+        if (n % 2 > 0) return l + (n2 + half);
+        return l + (size - n2 - half);
+    }
     // main distortImage function
     export function distortImageUtil(
         from: Image, to: Image,
@@ -58,11 +60,11 @@ namespace Polymesh {
         center?: boolean) {
         if (!p3) p3 = { x: p2.x + (p1.x - p0.x), y: p2.y + (p1.y - p0.y) };
         const w = from.width, h = from.height;
-        const w_ = 1 / w, h_ = 1 / h;
+        const w_ = (1 / w), h_ = (1 / h);
         for (let sx = 0; sx < w; sx++) {
             const ix = zigzet(0, w-1, sx, center)
             const u0 = (ix * w_), u1 = ((ix + 1) * w_);
-            const qc = [u0, u1].map(u => ({
+            const qu = [u0, u1].map(u => ({
                 x0: p0.x + (p1.x - p0.x) * u,
                 y0: p0.y + (p1.y - p0.y) * u,
                 x1: p3.x + (p2.x - p3.x) * u,
@@ -74,14 +76,14 @@ namespace Polymesh {
                 if (color === 0) continue; // transparent
                 const v0 = (iy * h_), v1 = ((iy + 1) * h_);
                 // Map quad on 1 pixel
-                const qd = [v0, v0, v1, v1].map((v, i) => ({
-                    x: Math.trunc(qc[i & 1].x0 + (qc[i & 1].x1 - qc[i & 1].x0) * v),
-                    y: Math.trunc(qc[i & 1].y0 + (qc[i & 1].y1 - qc[i & 1].y0) * v)
+                const qv = [v0, v0, v1, v1].map((v, i) => ({
+                    x: Math.trunc(qu[i % 2].x0 + (qu[i % 2].x1 - qu[i % 2].x0) * v),
+                    y: Math.trunc(qu[i % 2].y0 + (qu[i % 2].y1 - qu[i % 2].y0) * v)
                 }))
-                if (isOutOfAreaOnAvg(qd, to.width, to.height)) if (qd.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
+                if (isOutOfAreaOnAvg(qv, to.width, to.height)) if (qv.every(v => isOutOfArea(v.x, v.y, to.width, to.height))) continue; // skipped if out of screen
                 // stamp 2 triangles by pixel
-                helpers.imageFillTriangle(to, qd[1].x, qd[1].y, qd[0].x, qd[0].y, qd[3].x, qd[3].y, color);
-                helpers.imageFillTriangle(to, qd[2].x, qd[2].y, qd[0].x, qd[0].y, qd[3].x, qd[3].y, color);
+                helpers.imageFillTriangle(to, qv[1].x, qv[1].y, qv[0].x, qv[0].y, qv[3].x, qv[3].y, color);
+                helpers.imageFillTriangle(to, qv[2].x, qv[2].y, qv[0].x, qv[0].y, qv[3].x, qv[3].y, color);
                 //helpers.imageFillPolygon4(to, qd[3].x, qd[3].y, qd[2].x, qd[2].y, qd[0].x, qd[0].y, qd[1].x, qd[1].y, colorIdx);
             }
         }
@@ -115,7 +117,7 @@ namespace Polymesh {
     export function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number, w?: number, h?: number): boolean {
         // Simple normal calculation for culling
         if (indices.length > 0) {
-            if (oface < 1 && oface > -1) if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
+            if (oface === 0) if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
             const xyzs = indices.map(ind => rotated[ind])
 
             // Average depth comparison

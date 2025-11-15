@@ -14,7 +14,7 @@
         "sorting.ts",
         "me.ts",
         "myself.ts",
-        "module.ts",
+        "render.ts",
         "kind.ts",
         "class.ts",
         "enum.ts",

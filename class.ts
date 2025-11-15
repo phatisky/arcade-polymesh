@@ -76,6 +76,14 @@ class polymesh {
         }))
     }
 
+    pointCam_map(f: (v: Polymesh.Vector3) => Polymesh.Vector3) {
+        return this.points.map(v => {
+            const vpoint = { x: this.pos.x + v.x, y: this.pos.y + v.y, z: this.pos.z + v.z };
+            const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z };
+            return f(Polymesh.rotatePoint3D(vpoint, vpivot, this.rot));
+        })
+    }
+
     protected pivot_x: Fx8; protected pivot_y: Fx8; protected pivot_z: Fx8;
     set pivot(v: Polymesh.Vector3) { if (this.isDel()) return; this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z) }
     get pivot() { if (this.isDel()) return null; return { x: Fx.toFloat(this.pivot_x), y: Fx.toFloat(this.pivot_y), z: Fx.toFloat(this.pivot_z) } }
