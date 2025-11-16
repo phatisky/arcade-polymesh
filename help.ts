@@ -117,7 +117,7 @@ namespace Polymesh {
     export function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number, w?: number, h?: number): boolean {
         // Simple normal calculation for culling
         if (indices.length > 0) {
-            if (oface === 0) if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
+            if (oface == 0) if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
             const xyzs = indices.map(ind => rotated[ind])
 
             // Average depth comparison

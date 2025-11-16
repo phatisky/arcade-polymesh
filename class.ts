@@ -39,8 +39,8 @@ class polymesh {
 
     protected upd_faceImg(idx: number, size: number) {
         const cimg = this.faces_img[idx];
-        if (!cimg) return [];
         this.faces_imgs[idx] = [];
+        if (!cimg) return;
         let img = image.create(1, 1), scale = 0.2;
         while (img.width < cimg.width || img.height < cimg.height) {
             Polymesh.resizeImage(cimg.clone(), img, true);
@@ -49,7 +49,6 @@ class polymesh {
             img = image.create(Math.trunc(scaleD * cimg.width), Math.trunc(scaleD * cimg.height));
             scale *= 2;
         } this.faces_imgs[idx].push(cimg.clone());
-        return this.faces_imgs[idx];
     }
 
     protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[]; faces_imgs: Image[][];
@@ -62,10 +61,11 @@ class polymesh {
         this.faces_indices = vals.map(vs => vs.indices.map(v => Fx8(v))), this.faces_color = vals.map(v => Fx8(v.color))
         this.faces_offset = vals.map(v => v.offset ? Fx8(v.offset) : Fx8(0)), this.faces_scale = vals.map(v => v.scale ? Fx8(v.scale) : Fx8(1))
         this.faces_img = vals.map(v => v.img ? v.img : null);
-        for (let i = 0; this.faces_img.length; i++) vals[i].imgs = this.upd_faceImg(i, 2)
+        this.faces_imgs = []
+        for (let i = 0; i < this.faces_img.length; i++) this.upd_faceImg(i, 2)
         this.__upd();
     }
-    get faces(): Polymesh.Face[] {
+    get faces() {
         if (this.isDel()) return null
         return this.faces_indices.map((_, i) => ({
             indices: this.faces_indices[i].map(v => Fx.toFloat(v)), color: Fx.toInt(this.faces_color[i]),

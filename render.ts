@@ -203,15 +203,17 @@ namespace Polymesh {
                 }
             }
 
+            if ((t.img && isEmptyImage(t.img)) || !t.img) continue;
+
             // Draw texture over
-            if (inds.length > 2 && (!isEmptyImage(t.img) && t.img)) {
+            if (inds.length > 2) {
                 distortImage(im, output,
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y
                 );
-            } else if (inds.length > 3 && (!isEmptyImage(t.img) && t.img)) {
+            } else if (inds.length > 3) {
                 distortImage(im, output,
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
