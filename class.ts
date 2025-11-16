@@ -18,7 +18,7 @@ class polymesh {
     setKind(id: number) {
         if (Math.round(this.kind) === Math.round(id)) return;
         Polymesh.__mesh[Math.round(this.kind)][this.kind_idx] = null;
-        this.kind = (id >> 0);
+        this.kind = Math.floor(id);
         const kind = this.kind;
         if (!Polymesh.__mesh[kind]) Polymesh.__mesh[kind] = [];
         const kind_idx = Polymesh.__mesh[kind].indexOf(null)
@@ -34,21 +34,21 @@ class polymesh {
     //% group="mesh kind"
     //% weight=9
     getKind() {
-        return (this.kind >> 0);
+        return Math.floor(this.kind);
     }
 
     protected upd_faceImg(idx: number, size: number) {
-        const cimg = this.faces_img[idx]
-        let img = image.create(1, 1)
-        this.faces_imgs[idx] = []
-        let scale = 0.2
+        const cimg = this.faces_img[idx];
+        if (!cimg) return [];
+        this.faces_imgs[idx] = [];
+        let img = image.create(1, 1), scale = 0.2;
         while (img.width < cimg.width || img.height < cimg.height) {
-            Polymesh.resizeImage(cimg.clone(), img, true)
-            this.faces_imgs[idx].push(img.clone())
-            const scaleD = scale
-            img = image.create(Math.trunc(scaleD * cimg.width), Math.trunc(scaleD * cimg.height))
-            scale *= 2
-        } this.faces_imgs[idx].push(cimg.clone())
+            Polymesh.resizeImage(cimg.clone(), img, true);
+            this.faces_imgs[idx].push(img.clone());
+            const scaleD = scale;
+            img = image.create(Math.trunc(scaleD * cimg.width), Math.trunc(scaleD * cimg.height));
+            scale *= 2;
+        } this.faces_imgs[idx].push(cimg.clone());
         return this.faces_imgs[idx];
     }
 
