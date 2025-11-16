@@ -1,8 +1,10 @@
 
 namespace Polymesh {
 
+    const rng = new Math.FastRandom();
+
     const duoPartition = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
-        const mi = randint(lo, hi); swap(arr, mi, hi);
+        const mi = rng.randomRange(lo, hi); swap(arr, mi, hi);
         if (cmp(arr[lo], arr[hi]) > 0) swap(arr, lo, hi);
         const p = arr[lo], q = arr[hi]; 
         let lp = lo + 1, rp = hi - 1;
@@ -35,7 +37,7 @@ namespace Polymesh {
     }
 
     const partition = <T>(arr: T[], cmp: (a: T, b: T) => number, lo: number, hi: number) => {
-        const mi = randint(lo, hi), pivot = arr[mi];
+        const mi = rng.randomRange(lo, hi), pivot = arr[mi];
         let i = lo; swap(arr, mi, hi);
         for (let j = lo; j < hi; j++) if (cmp(arr[j], pivot) < 0) swap(arr, i++, j);
         swap(arr, i, hi); return i;

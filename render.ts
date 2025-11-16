@@ -36,13 +36,13 @@ namespace Polymesh {
         const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
 
         // Transform vertices
-        const rotated = msh.pointCam_map((v) => {
+        const rotated = msh.pointCam((v) => {
             let x = v.x - cam.x;
             let y = v.y - cam.y;
             let z = v.z - cam.z;
-            tmp = x * cosY + z * sinY; z = -x * sinY + z * cosY; x = tmp; // --- rotate around y ---
-            tmp = y * cosX - z * sinX; z = y * sinX + z * cosX; y = tmp; // --- rotate around x ---
-            tmp = x * cosZ - y * sinZ; y = x * sinZ + y * cosZ; x = tmp; // --- rotate around z ---
+            tmp = x * cosY + z * sinY, z = -x * sinY + z * cosY, x = tmp; // --- rotate around y ---
+            tmp = y * cosX - z * sinX, z =  y * sinX + z * cosX, y = tmp; // --- rotate around x ---
+            tmp = x * cosZ - y * sinZ, y =  x * sinZ + y * cosZ, x = tmp; // --- rotate around z ---
 
             const vsum = 0.1 / Math.sqrt((x * x) + (y * y) + (z * z))
             // camera offset
@@ -68,7 +68,7 @@ namespace Polymesh {
         }
 
         // Render
-        let idx: number, pt: Vector3, cx: number, cy: number, range: number, baseW: number, baseH: number, halfW: number, halfH: number, square: number, im: Image
+        let cx: number, cy: number, range: number, square: number, im: Image
         for (const t of tris) {
             const inds = t.indices;
             const scale = (Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, t.indices)));
@@ -77,14 +77,13 @@ namespace Polymesh {
             if (t.img) {
                 im = t.img.clone();
                 if (msh.flag.lod) {
-                    const scaleD = ((Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, inds))) * zoom) / LOD_DIST
-                    im = image.create(Math.clamp(1, t.img.width, scaleD * t.img.width), Math.clamp(1, t.img.height, scaleD * t.img.height))
-                    resizeImage(t.img.clone(), im, true)
+                    const scaleD = (scale * zoom) / LOD_DIST
+                    im = t.imgs[Math.clamp(0, t.imgs.length - 1, Math.trunc((Math.sqrt(scaleD / 2) * PHI) * (t.imgs.length - 1)))]
                 }
             }
             if (t.indices.length === 1) {
-                idx = t.indices[0];
-                pt = rotated[idx];
+                const idx = t.indices[0];
+                const pt = rotated[idx];
 
                 // center image
                 cx = pt.x;
@@ -100,10 +99,10 @@ namespace Polymesh {
                 square = 1.5 * scale * t.scale * zoom
                 if (im) {
                     // set scale image from camera distance
-                    baseW = im.width;
-                    baseH = im.height;
-                    halfW = (baseW / 3) * scale * t.scale * zoom;
-                    halfH = (baseH / 3) * scale * t.scale * zoom;
+                    const baseW = im.width;
+                    const baseH = im.height;
+                    const halfW = (baseW / 3) * scale * t.scale * zoom;
+                    const halfH = (baseH / 3) * scale * t.scale * zoom;
 
                     bq[0].x += halfW, bq[0].y += halfH
                     bq[1].x -= halfW, bq[1].y += halfH
@@ -122,18 +121,21 @@ namespace Polymesh {
             // Backface culling
             if (!msh.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
 
-            idx = t.indices[0];
-            pt = rotated[idx];
+            const idx = t.indices[0];
+            const pt = rotated[idx];
             // center image
             cx = pt.x;
             cy = pt.y;
 
             square = 1.5 * scale * t.scale * zoom
 
+            let halfW = 0;
+            let halfH = 0;
+
             if (t.img) {
                 // set scale image from camera distance
-                baseW = im.width;
-                baseH = im.height;
+                const baseW = im.width;
+                const baseH = im.height;
 
                 halfW = (baseW / 3) * scale * t.scale * zoom;
                 halfH = (baseH / 3) * scale * t.scale * zoom;
@@ -150,8 +152,8 @@ namespace Polymesh {
                 // fill circle if image is empty
                 if (isEmptyImage(t.img)) { fillCircleImage(output, cx, cy, Math.floor(square), t.color); continue; }
 
-                halfW /= 1.1
-                halfH /= 1.1
+                halfW /= 1.1;
+                halfH /= 1.1;
 
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
@@ -202,7 +204,14 @@ namespace Polymesh {
             }
 
             // Draw texture over
-            if (inds.length === 4 && t.img) {
+            if (inds.length > 2 && (!isEmptyImage(t.img) && t.img)) {
+                distortImage(im, output,
+                    rotated[inds[3]].x, rotated[inds[3]].y,
+                    rotated[inds[2]].x, rotated[inds[2]].y,
+                    rotated[inds[0]].x, rotated[inds[0]].y,
+                    rotated[inds[1]].x, rotated[inds[1]].y
+                );
+            } else if (inds.length > 3 && (!isEmptyImage(t.img) && t.img)) {
                 distortImage(im, output,
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
