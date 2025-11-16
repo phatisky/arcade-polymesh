@@ -46,7 +46,7 @@ class polymesh {
             Polymesh.resizeImage(cimg.clone(), img, true);
             this.faces_imgs[idx].push(img.clone());
             const scaleD = scale;
-            img = image.create(Math.trunc(scaleD * cimg.width), Math.trunc(scaleD * cimg.height));
+            img = image.create(Math.max(1, Math.trunc(scaleD * cimg.width)), Math.max(1, Math.trunc(scaleD * cimg.height)));
             scale *= 2;
         } this.faces_imgs[idx].push(cimg.clone());
     }

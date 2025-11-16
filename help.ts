@@ -23,6 +23,47 @@ namespace Polymesh {
         };
     };
 
+    const calcMode7 = (a: number, b: number) => a + 0.5 * b
+
+    const mode7img = (from: Image, to: Image, H_scroll: number, V_scroll: number, A: number, B: number, C: number, D: number) => {
+        let Center_x = calcMode7(H_scroll, to.width)
+        let Center_y = calcMode7(V_scroll, to.height)
+        let color = 0
+        for (let y = 0; y < to.height; y++) {
+            for (let x = 0; x < to.width; x++) {
+                color = from.getPixel(Math.trunc(Center_x + (0.00390625 * A * (x + (H_scroll - Center_x)) + 0.00390625 * B * (y + (V_scroll - Center_y)))), Math.trunc(Center_y + (0.00390625 * C * (x + (H_scroll - Center_x)) + 0.00390625 * D * (y + (V_scroll - Center_y)))))
+                to.setPixel(x, y, color)
+            }
+        }
+    }
+
+    export function resizeImage(from: Image, to: Image, center?: boolean) {
+        if (isEmptyImage(from)) return;
+
+        // ถ้าขนาดเท่ากันก็ copy ตรง ๆ
+        if (from.width === to.width && from.height === to.height) {
+            to.drawTransparentImage(from.clone(), 0, 0);
+            return;
+        }
+
+        // คำนวณอัตราส่วนการขยาย
+        const scaleX = from.width  / to.width;
+        const scaleY = from.height / to.height;
+
+        // คำนวณ offset ถ้าต้องการให้อยู่ตรงกลาง
+        let H_scroll = 0;
+        let V_scroll = 0;
+        if (center) {
+            H_scroll = ((to.width  - from.width)  * scaleX) / 2;
+            V_scroll = ((to.height - from.height) * scaleY) / 2;
+        }
+
+        // เรียก mode7img โดยใช้ scale factor
+        // A = scaleX * 256, D = scaleY * 256 (เพราะใน mode7img มีตัวหาร 1/256)
+        mode7img(from, to, -H_scroll, -V_scroll, scaleX * 256, 0, 0, scaleY * 256);
+    }
+
+
     export const swap = <T>(arr: T[], i: number, j: number) => { const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp; };
 
     export function isOutOfRange(x: number, range: number, scale?: number) { return (scale ? x < -(range * scale) || x >= range + (range * scale) : x < 0 || x >= range); }
@@ -93,12 +134,6 @@ namespace Polymesh {
         x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, x3?: number, y3?: number,
         center?: boolean) {
         distortImageUtil(from, to, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x2, y: y2 },(isNaN(x3) || isNaN(y3)) ? null : { x: x3, y: y3 }, center)
-    }
-
-    export function resizeImage(from: Image, to: Image, center?: boolean) {
-        if (isEmptyImage(from)) return;
-        if (from.width === to.width && from.height === to.height) { to.drawTransparentImage(from.clone(), 0, 0); return; }
-        distortImage(from, to, to.width, 0, 0, 0, 0, to.height, to.width, to.height, center)
     }
 
     export function fillCircleImage(dest: Image, x: number, y: number, r: number, c: number) {
