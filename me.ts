@@ -7,7 +7,7 @@ namespace Polymesh {
     export interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
     export interface Vector3 { x: number, y: number, z: number }
 
-    export const __mesh: polymesh[][] = []
+    const __mesh: {[kind: number]: polymesh[]} = {}
     export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2
 
     export const angle: Motion3 = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
