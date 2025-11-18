@@ -52,7 +52,6 @@ class polymesh {
         this.faces_img = vals.map(v => v.img ? v.img : null);
         this.faces_imgs = []
         for (let i = 0; i < this.faces_img.length; i++) this.upd_faceImg(i, 2)
-        this.__upd();
     }
     get faces() {
         if (this.isDel()) return null
@@ -70,7 +69,6 @@ class polymesh {
         }
         if (this.isDel()) return;
         this.points_xs = vals.map(v => Fx8(v.x)), this.points_ys = vals.map(v => Fx8(v.y)), this.points_zs = vals.map(v => Fx8(v.z));
-        this.__upd();
     }
     get points() {
         if (this.isDel()) return null
