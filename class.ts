@@ -467,20 +467,7 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=100
     setAngle(choice: PolyAngle, x: number) {
-        switch (choice) {
-            case 0x0: if (this.rot.x  !== x) this.rot.x  = x; break;
-            case 0x1: if (this.rot.y  !== x) this.rot.y  = x; break;
-            case 0x2: if (this.rot.z  !== x) this.rot.z  = x; break;
-            case 0x3: if (this.rot.vx !== x) this.rot.vx = x; break;
-            case 0x4: if (this.rot.vy !== x) this.rot.vy = x; break;
-            case 0x5: if (this.rot.vz !== x) this.rot.vz = x; break;
-            case 0x6: if (this.rot.ax !== x) this.rot.ax = x; break;
-            case 0x7: if (this.rot.ay !== x) this.rot.ay = x; break;
-            case 0x8: if (this.rot.az !== x) this.rot.az = x; break;
-            case 0x9: if (this.rot.fx !== x) this.rot.fx = x; break;
-            case 0xA: if (this.rot.fy !== x) this.rot.fy = x; break;
-            case 0xB: if (this.rot.fz !== x) this.rot.fz = x; break;
-        };
+        Polymesh.setMotion(this.rot, choice, x)
     }
 
     //% blockId=poly_mesh_rot_change
@@ -490,20 +477,7 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=5
     changeAngle(choice: PolyAngle, x: number) {
-        switch (choice) {
-            case 0x0: if (this.rot.x  !== this.rot.x  + x) this.rot.x  += x; break;
-            case 0x1: if (this.rot.y  !== this.rot.y  + x) this.rot.y  += x; break;
-            case 0x2: if (this.rot.z  !== this.rot.z  + x) this.rot.z  += x; break;
-            case 0x3: if (this.rot.vx !== this.rot.vx + x) this.rot.vx += x; break;
-            case 0x4: if (this.rot.vy !== this.rot.vy + x) this.rot.vy += x; break;
-            case 0x5: if (this.rot.vz !== this.rot.vz + x) this.rot.vz += x; break;
-            case 0x6: if (this.rot.ax !== this.rot.ax + x) this.rot.ax += x; break;
-            case 0x7: if (this.rot.ay !== this.rot.ay + x) this.rot.ay += x; break;
-            case 0x8: if (this.rot.az !== this.rot.az + x) this.rot.az += x; break;
-            case 0x9: if (this.rot.fx !== this.rot.fx + x) this.rot.fx += x; break;
-            case 0xA: if (this.rot.fy !== this.rot.fy + x) this.rot.fy += x; break;
-            case 0xB: if (this.rot.fz !== this.rot.fz + x) this.rot.fz += x; break;
-        };
+        Polymesh.changeMotion(this.rot, choice, x)
     }
 
     //% blockId=poly_mesh_rot_get
@@ -513,21 +487,7 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=4
     getAngle(choice: PolyAngle) {
-        switch (choice) {
-            case 0x0: return this.rot.x;
-            case 0x1: return this.rot.y;
-            case 0x2: return this.rot.z;
-            case 0x3: return this.rot.vx;
-            case 0x4: return this.rot.vy;
-            case 0x5: return this.rot.vz;
-            case 0x6: return this.rot.ax;
-            case 0x7: return this.rot.ay;
-            case 0x8: return this.rot.az;
-            case 0x9: return this.rot.fx;
-            case 0xA: return this.rot.fy;
-            case 0xB: return this.rot.fz;
-        };
-        return NaN;
+        return Polymesh.getAngle(this.rot, choice)
     }
 
     //% blockId=poly_mesh_pos_set
@@ -537,20 +497,7 @@ class polymesh {
     //% group="Mesh position property"
     //% weight=10
     setPos(choice: PolyPos, x: number) {
-        switch (choice) {
-            case 0x0: if (this.pos.x  !== x) this.pos.x  = x; break;
-            case 0x1: if (this.pos.y  !== x) this.pos.y  = x; break;
-            case 0x2: if (this.pos.z  !== x) this.pos.z  = x; break;
-            case 0x3: if (this.pos.vx !== x) this.pos.vx = x; break;
-            case 0x4: if (this.pos.vy !== x) this.pos.vy = x; break;
-            case 0x5: if (this.pos.vz !== x) this.pos.vz = x; break;
-            case 0x6: if (this.pos.ax !== x) this.pos.ax = x; break;
-            case 0x7: if (this.pos.ay !== x) this.pos.ay = x; break;
-            case 0x8: if (this.pos.az !== x) this.pos.az = x; break;
-            case 0x9: if (this.pos.fx !== x) this.pos.fx = x; break;
-            case 0xA: if (this.pos.fy !== x) this.pos.fy = x; break;
-            case 0xB: if (this.pos.fz !== x) this.pos.fz = x; break;
-        };
+        Polymesh.setMotion(this.pos, choice, x)
     }
 
     //% blockId=poly_mesh_pos_change
@@ -560,20 +507,7 @@ class polymesh {
     //% group="Mesh position property"
     //% weight=9
     changePos(choice: PolyPos, x: number) {
-        switch (choice) {
-            case 0x0: if (this.pos.x  !== this.pos.x  + x) this.pos.x  += x; break;
-            case 0x1: if (this.pos.y  !== this.pos.y  + x) this.pos.y  += x; break;
-            case 0x2: if (this.pos.z  !== this.pos.z  + x) this.pos.z  += x; break;
-            case 0x3: if (this.pos.vx !== this.pos.vx + x) this.pos.vx += x; break;
-            case 0x4: if (this.pos.vy !== this.pos.vy + x) this.pos.vy += x; break;
-            case 0x5: if (this.pos.vz !== this.pos.vz + x) this.pos.vz += x; break;
-            case 0x6: if (this.pos.ax !== this.pos.ax + x) this.pos.ax += x; break;
-            case 0x7: if (this.pos.ay !== this.pos.ay + x) this.pos.ay += x; break;
-            case 0x8: if (this.pos.az !== this.pos.az + x) this.pos.az += x; break;
-            case 0x9: if (this.pos.fx !== this.pos.fx + x) this.pos.fx += x; break;
-            case 0xA: if (this.pos.fy !== this.pos.fy + x) this.pos.fy += x; break;
-            case 0xB: if (this.pos.fz !== this.pos.fz + x) this.pos.fz += x; break;
-        };
+        Polymesh.changeMotion(this.pos, choice, x)
     }
 
     //% blockId=poly_mesh_pos_get
@@ -583,21 +517,7 @@ class polymesh {
     //% group="Mesh position property"
     //% weight=8
     getPos(choice: PolyPos) {
-        switch (choice) {
-            case 0x0: return this.pos.x;
-            case 0x1: return this.pos.y;
-            case 0x2: return this.pos.z;
-            case 0x3: return this.pos.vx;
-            case 0x4: return this.pos.vy;
-            case 0x5: return this.pos.vz;
-            case 0x6: return this.pos.ax;
-            case 0x7: return this.pos.ay;
-            case 0x8: return this.pos.az;
-            case 0x9: return this.pos.fx;
-            case 0xA: return this.pos.fy;
-            case 0xB: return this.pos.fz;
-        }
-        return NaN
+        return Polymesh.getMotion(this.pos, choice)
     }
 
 }
