@@ -18,6 +18,57 @@ namespace Polymesh {
         if (motion.vz !== 0) motion.z += motion.vz * delta
     }
 
+    export function changeMotion(motion: Motion3, choice: uint8, x: number) {
+        switch (choice) {
+            case 0x0: if (motion.x  !== motion.x  + x) motion.x  += x; break
+            case 0x1: if (motion.y  !== motion.y  + x) motion.y  += x; break
+            case 0x2: if (motion.z  !== motion.z  + x) motion.z  += x; break
+            case 0x3: if (motion.vx !== motion.vx + x) motion.vx += x; break
+            case 0x4: if (motion.vy !== motion.vy + x) motion.vy += x; break
+            case 0x5: if (motion.vz !== motion.vz + x) motion.vz += x; break
+            case 0x6: if (motion.ax !== motion.ax + x) motion.ax += x; break
+            case 0x7: if (motion.ay !== motion.ay + x) motion.ay += x; break
+            case 0x8: if (motion.az !== motion.az + x) motion.az += x; break
+            case 0x9: if (motion.fx !== motion.fx + x) motion.fx += x; break
+            case 0xA: if (motion.fy !== motion.fy + x) motion.fy += x; break
+            case 0xB: if (motion.fz !== motion.fz + x) motion.fz += x; break
+        }
+    }
+
+    export function setMotion(motion: Motion3, choice: uint8, x: number) {
+        switch (choice) {
+            case 0x0: if (motion.x  !== x) motion.x  = x; break
+            case 0x1: if (motion.y  !== x) motion.y  = x; break
+            case 0x2: if (motion.z  !== x) motion.z  = x; break
+            case 0x3: if (motion.vx !== x) motion.vx = x; break
+            case 0x4: if (motion.vy !== x) motion.vy = x; break
+            case 0x5: if (motion.vz !== x) motion.vz = x; break
+            case 0x6: if (motion.ax !== x) motion.ax = x; break
+            case 0x7: if (motion.ay !== x) motion.ay = x; break
+            case 0x8: if (motion.az !== x) motion.az = x; break
+            case 0x9: if (motion.fx !== x) motion.fx = x; break
+            case 0xA: if (motion.fy !== x) motion.fy = x; break
+            case 0xB: if (motion.fz !== x) motion.fz = x; break
+        }
+    }
+
+    export function getMotion(motion: Motion3, choice: uint8, x: number) {
+        switch (choice) {
+            case 0x0: return motion.x;
+            case 0x1: return motion.y;
+            case 0x2: return motion.z;
+            case 0x3: return motion.vx;
+            case 0x4: return motion.vy;
+            case 0x5: return motion.vz;
+            case 0x6: return motion.ax;
+            case 0x7: return motion.ay;
+            case 0x8: return motion.az;
+            case 0x9: return motion.fx;
+            case 0xA: return motion.fy;
+            case 0xB: return motion.fz;
+        } return NaN
+    }
+
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const delta = control.eventContext().deltaTime
         updateMotion(angle, delta); updateMotion(cam, delta);
