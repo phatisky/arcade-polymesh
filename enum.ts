@@ -27,35 +27,35 @@ enum PolyAngle {
 }
 enum PolyCam {
     //% block="Camera zoom"
-    zoom    = 0x0,
+    zoom    = 0xC,
     //% block="Camera distance"
-    dist    = 0x1,
+    dist    = 0xD,
     //% block="Camera far distance"
-    fardist = 0x2,
+    fardist = 0xE,
     //% block="Camera x"
-    x  = 0x3,
+    x  = 0x0,
     //% block="Camera y"
-    y  = 0x4,
+    y  = 0x1,
     //% block="Camera z"
-    z  = 0x5,
+    z  = 0x2,
     //% block="Camera vx"
-    vx = 0x6,
+    vx = 0x3,
     //% block="Camera vy"
-    vy = 0x7,
+    vy = 0x4,
     //% block="Camera vz"
-    vz = 0x8,
+    vz = 0x5,
     //% block="Camera ax"
-    ax = 0x9,
+    ax = 0x6,
     //% block="Camera ay"
-    ay = 0xA,
+    ay = 0x7,
     //% block="Camera az"
-    az = 0xB,
+    az = 0x8,
     //% block="Camera fx"
-    fx = 0xC,
+    fx = 0x9,
     //% block="Camera fy"
-    fy = 0xD,
+    fy = 0xA,
     //% block="Camera fz"
-    fz = 0xE,
+    fz = 0xB,
 }
 enum PolyPos {
     //% block="x"
