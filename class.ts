@@ -487,7 +487,7 @@ class polymesh {
     //% group="Mesh angle"
     //% weight=4
     getAngle(choice: PolyAngle) {
-        return Polymesh.getAngle(this.rot, choice)
+        return Polymesh.getMotion(this.rot, choice)
     }
 
     //% blockId=poly_mesh_pos_set

@@ -1,13 +1,15 @@
 
 namespace Polymesh {
-
+I 
     //% blockId=poly_rendermesh_all
     //% block=" render all mesh of kind $id=poly_kind_shadow to $output=screen_image_picker|| form line render $lineren=toggleYesNo"
-    //% group="render"
-    //% weight=9
+    //% group="rendeer"
+    //% weight=9qee
     export function renderAll(id: number, output: Image, lineren?: boolean) {
         if ((id == null || isNaN(id)) || !output) return;
-        const sorted = Polymesh.__mesh[id].filter(msh => msh != null || (msh && !msh.isDel())).map(msh => ({ mesh: msh, depth: meshDepthZ(msh) }));
+        const sorted = meshAll(id).map()
+      
+
         if (sorted.length <= 0) return;
         switch (sort) {
             case 0x0: sorted.sort((a, b) => b.depth - a.depth); break;

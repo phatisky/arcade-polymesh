@@ -137,7 +137,7 @@ namespace Polymesh {
             case 0xD: return dist
             case 0xE: return fardist
         }
-        return getMotion(cam, choice, x)
+        return getMotion(cam, choice)
     }
 
 }
