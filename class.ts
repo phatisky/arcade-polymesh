@@ -30,7 +30,7 @@ class polymesh {
         const cimg = this.faces_img[idx];
         this.faces_imgs[idx] = [];
         if (!cimg) return;
-        let img = image.create(1, 1), scale = 0.2;
+        let img = image.create(1, 1), scale = 0.1;
         while (img.width < cimg.width || img.height < cimg.height) {
             Polymesh.resizeImage(cimg.clone(), img, true);
             this.faces_imgs[idx].push(img.clone());
@@ -79,7 +79,7 @@ class polymesh {
         }))
     }
 
-    pointCam(f: (v: Polymesh.Vector3) => Polymesh.Vector3) {
+    pointCam<T>(f: (v: Polymesh.Vector3) => T) {
         return this.points.map(v => {
             const vpoint = { x: this.pos.x + v.x, y: this.pos.y + v.y, z: this.pos.z + v.z };
             const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z };

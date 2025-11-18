@@ -6,6 +6,7 @@ namespace Polymesh {
 
     export interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
     export interface Vector3 { x: number, y: number, z: number }
+    export interface Vector3_ { x: number, y: number, z: number, x_: number, y_: number, z_: number }
 
     const __meshes: polymesh[] = [];
     const __meshes_ref: {[id: number]: number[]} = {};

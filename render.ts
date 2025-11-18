@@ -55,8 +55,11 @@ namespace Polymesh {
                 x: centerX + x * scale * zoom,
                 y: centerY + y * scale * zoom,
                 z: z,
+                x_: v.x,
+                y_: v.y,
+                z_: v.z,
             };
-        })
+        }) as Vector3_[];
 
         // Sort triangles
         const tris = msh.faces.slice();
@@ -71,14 +74,17 @@ namespace Polymesh {
         let cx: number, cy: number, range: number, square: number, im: Image
         for (const t of tris) {
             const inds = t.indices;
+            const inds_ = [];
+            if (inds.length > 2) inds_[0] = [t.indices[0], t.indices[1], t.indices[2]];
+            if (inds.length > 3) inds_[1] = [t.indices[3], t.indices[1], t.indices[2]];
             const scale = (Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, t.indices)));
             if (inds.some(i => rotated[i].z < -Math.abs(dist) || (fardist > 0 && rotated[i].z > Math.abs(fardist)))) continue;
             // LOD calculating?
             if (t.img) {
                 im = t.img.clone();
                 if (msh.flag.lod) {
-                    const scaleD = (scale * zoom) / LOD_DIST
-                    im = t.imgs[Math.clamp(0, t.imgs.length - 1, Math.trunc((Math.sqrt(scaleD / 2) * PHI) * (t.imgs.length - 1)))]
+                    const scaleD = (scale * zoom)
+                    im = t.imgs[Math.clamp(0, t.imgs.length - 1, Math.trunc((Math.sqrt(scaleD / 1.5) * PHI) * (t.imgs.length - 1)))]
                     if (im == null) im = image.create(1, 1)
                 }
             }
@@ -119,8 +125,12 @@ namespace Polymesh {
                 }
             } else if (isOutOfAreaOnFace(rotated, inds, output.width, output.height)) if (inds.every(i => isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height))) continue;
 
+            const culling = (!msh.flag.noncull || t.offset !== 0)
+
             // Backface culling
-            if (!msh.flag.noncull) if (isFaceVisible(rotated, inds, t.offset)) continue;
+            if (culling)
+                if ((inds_[0] && !shouldRenderFace(rotated, inds_[0], cam, t.offset)) &&
+                    (inds_[1] && !shouldRenderFace(rotated, inds_[1], cam, t.offset))) continue;
 
             const idx = t.indices[0];
             const pt = rotated[idx];
@@ -180,11 +190,13 @@ namespace Polymesh {
             }
             if (t.color > 0) {
                 // Draw line when no shape
-                helpers.imageDrawLine(output,
-                    rotated[inds[0]].x, rotated[inds[0]].y,
-                    rotated[inds[1]].x, rotated[inds[1]].y,
-                    t.color
-                );
+                if (inds.length < 3) {
+                    helpers.imageDrawLine(output,
+                        rotated[inds[0]].x, rotated[inds[0]].y,
+                        rotated[inds[1]].x, rotated[inds[1]].y,
+                        t.color
+                    );
+                }
                 if (inds.length > 2) {
                     // Draw solid when is vertice shape
                     helpers.imageFillTriangle(output,

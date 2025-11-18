@@ -23,6 +23,65 @@ namespace Polymesh {
         };
     };
 
+    const normalLen3 = (n: number) => Math.sqrt((n * n) + (n * n) + (n * n))
+
+    export const rotatePointLen3D = (len: number, pivot: Vector3, angle: Vector3, code: Buffer): Vector3 =>
+        rotatePoint3D({ x: pivot.x + (code[0] ? normalLen3(len) : 0), y: pivot.y + (code[1] ? -normalLen3(len) : 0), z: pivot.z + (code[2] ? normalLen3(len) : 0)}, pivot, angle);
+
+    const computeNormal = (v0: Vector3_, v1: Vector3_, v2: Vector3_): Vector3 => {
+        // make vector from triangle
+        const u = {
+            x: v1.x_ - v0.x_,
+            y: v1.y_ - v0.y_,
+            z: v1.z_ - v0.z_
+        };
+        const v = {
+            x: v2.x_ - v0.x_,
+            y: v2.y_ - v0.y_,
+            z: v2.z_ - v0.z_
+        };
+
+        // cross product เพื่อหาทิศทางตั้งฉาก
+        const normal = {
+            x: (u.y * v.z) - (u.z * v.y),
+            y: (u.z * v.x) - (u.x * v.z),
+            z: (u.x * v.y) - (u.y * v.x)
+        };
+
+        // normalize ให้มีความยาว = 1
+        const length = Math.sqrt((normal.x * normal.x) + (normal.y * normal.y) + (normal.z * normal.z));
+        return {
+            x: normal.x / length,
+            y: normal.y / length,
+            z: normal.z / length
+        };
+    }
+
+    const dot3 = (a: Vector3, b: Vector3): number =>
+        (a.x + a.y + a.z) !== 0
+            ? (a.x + a.y + a.z)
+        : (b.x + b.y + b.z) !== 0
+            ? (b.x + b.y + b.z)
+        : ((a.x * b.x) + (a.y * b.y) + (a.z * b.z));
+
+    export function shouldRenderFace(rotated: Vector3_[], inds: number[], cam: Vector3, offset: number): boolean {
+        if (inds.length !== 3) return false;
+        const normal = computeNormal(rotated[inds[0]], rotated[inds[1]], rotated[inds[2]]);
+        const threshold = 0
+
+        if (offset > 0) {
+            const sum = dot3(normal, cam);
+            // show outside face
+            return (sum >= -threshold);
+        } else if (offset < 0) {
+            const sum = dot3(normal, cam);
+            // show inside face
+            return (sum <= threshold);
+        }
+        // offset == 0 -> show two side
+        return true;
+    }
+
     const calcMode7 = (a: number, b: number) => a + 0.5 * b
 
     const mode7img = (from: Image, to: Image, H_scroll: number, V_scroll: number, A: number, B: number, C: number, D: number) => {
@@ -70,7 +129,9 @@ namespace Polymesh {
 
     export function isOutOfArea(x: number, y: number, width: number, height: number, scale?: number) { return (isOutOfRange(x, width, scale) || isOutOfRange(y, height, scale)); }
 
-    export function avgZ(rot: { z: number }[], inds: number[]) { return (inds.reduce((s, i) => s + rot[i].z, 0) / inds.length); }
+    export function avgZ(rot: Vector3[], inds: number[]) { return (inds.reduce((s, i) => s + rot[i].z, 0) / inds.length); }
+
+    export function avgZs(rot: Vector3[][], n: number, inds: number[]) { return (inds.reduce((s, i) => s + rot[i][n].z, 0) / inds.length); }
 
     export function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)); }
 
@@ -145,38 +206,6 @@ namespace Polymesh {
         src0.flipY(), src.drawTransparentImage(src0.clone(), 0, 0)
         src0.flipX(), src.drawTransparentImage(src0.clone(), 0, 0)
         dest.drawTransparentImage(src, x - r, y - r)
-    }
-
-    const isCull = (b: boolean, x: number, y: number) => (b ? x < y : x > y)
-
-    export function isFaceVisible(rotated: { x: number, y: number, z: number }[], indices: number[], oface: number, w?: number, h?: number): boolean {
-        // Simple normal calculation for culling
-        if (indices.length > 0) {
-            if (oface == 0) if (w || h) return (indices.every(i => isOutOfArea(rotated[i].x, rotated[i].y, w, h)));
-            const xyzs = indices.map(ind => rotated[ind])
-
-            // Average depth comparison
-            const avgZ = xyzs.reduce((sum, v) => sum + v.z, 0) / xyzs.length;
-            // const avgY = xyzs.reduce((sum, v) => sum + v.y, 0) / xyzs.length;
-            // const avgX = xyzs.reduce((sum, v) => sum + v.x, 0) / xyzs.length;
-
-            const otherXYZs: { xs: number[], ys: number[], zs: number[] } = { xs: [], ys: [], zs: [] }
-            // otherXYZs.xs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.x);
-            // otherXYZs.ys = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.y);
-            otherXYZs.zs = rotated.filter((_, i) => indices.indexOf(i) < 0).map(v => v.z);
-
-            // if (otherXYZs.xs.length <= 0 || otherXYZs.ys.length <= 0 || otherXYZs.zs.length <= 0) return false;
-            if (otherXYZs.zs.length <= 0) return true;
-            // const otherAvgX = otherXYZs.xs.reduce((sum, x) => sum + x, 0) / otherXYZs.xs.length;
-            // const otherAvgY = otherXYZs.ys.reduce((sum, y) => sum + y, 0) / otherXYZs.ys.length;
-            const otherAvgZ = otherXYZs.zs.reduce((sum, z) => sum + z, 0) / otherXYZs.zs.length;
-
-            if (oface < 0) return avgZ < 0
-            if (oface > 0) return avgZ > otherAvgZ
-            return false;
-            // return (inner ? avgZ < otherAvgZ && (avgX !== otherAvgX && avgY !== otherAvgY) : avgZ > otherAvgZ && (avgX === otherAvgX && avgY === otherAvgY));
-        }
-        return true;
     }
 
     export const meshDepthZ = (plm: polymesh) => {
