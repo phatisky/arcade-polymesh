@@ -1,12 +1,8 @@
 
 class polymesh {
 
-    data: {[id: string]: any}; hash: string;
+    data: {[id: string]: any};
     protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; idx: number;
-
-    __upd() {
-        this.hash = convertToText(this)
-    }
 
     //% blockId=poly_kind_set
     //% blockNamespace=Polymesh
@@ -16,15 +12,8 @@ class polymesh {
     //% group="mesh kind"
     //% weight=11
     setKind(id: number) {
-        if (Math.round(this.kind) === Math.round(id)) return;
-        Polymesh.__mesh[Math.round(this.kind)][this.kind_idx] = null;
-        this.kind = Math.floor(id);
-        const kind = this.kind;
-        if (!Polymesh.__mesh[kind]) Polymesh.__mesh[kind] = [];
-        const kind_idx = Polymesh.__mesh[kind].indexOf(null)
-        if (kind_idx < 0) Polymesh.__mesh[kind].push(null)
-        this.kind_idx = (kind_idx >= 0) ? kind_idx : Polymesh.__mesh[kind].length - 1
-        Polymesh.__mesh[kind][this.kind_idx] = this;
+        if (this.kind === Math.floor(id)) return;
+        Polymesh.__meshes_upd_kind(this, id)
     }
 
     //% blockId=poly_kind_get
@@ -141,6 +130,7 @@ class polymesh {
     del() {
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
         this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
+        Polymesh.__meshes_del(this);
     }
 
     //% blockId=poly_dist_isdel
@@ -223,7 +213,6 @@ class polymesh {
             case 0x1:          this.flag.noncull   = ok; break;
             case 0x2:          this.flag.lod       = ok; break;
         }
-        this.__upd();
     }
 
     //% blockId=poly_flag_get
@@ -251,7 +240,6 @@ class polymesh {
     setVertice(idx: number, point3: Polymesh.shadowPoint3) {
         if (Polymesh.isOutOfRange(idx, this.points.length + 1)) return;
         this.points_xs[idx] = Fx8(point3.x), this.points_ys[idx] = Fx8(point3.y), this.points_zs[idx] = Fx8(point3.z);// this.points[idx] = { x: point3.x, y: point3.y, z: point3.z }
-        this.__upd();
     }
 
     //% blockId=poly_vertice_add
@@ -263,7 +251,6 @@ class polymesh {
     //% weight=9
     addVertice(point3: Polymesh.shadowPoint3) {
         this.points_xs.push(Fx8(point3.x)), this.points_ys.push(Fx8(point3.y)), this.points_zs.push(Fx8(point3.z));// this.points.push({ x: point3.x, y: point3.y, z: point3.z })
-        this.__upd();
     }
 
     //% blockId=poly_vertice_del
@@ -275,7 +262,6 @@ class polymesh {
     delVertice(idx?: number) {
         if (idx) this.points_xs.removeAt(idx), this.points_ys.removeAt(idx), this.points_zs.removeAt(idx);// this.points.removeAt(idx);
         else this.points_xs.pop(), this.points_ys.pop(), this.points_zs.pop();// this.points.pop();
-        this.__upd();
     }
 
     //% blockId=poly_face_set
@@ -296,7 +282,6 @@ class polymesh {
         if (img) this.faces_indices[idx] = indice, this.faces_color[idx] = Fx8(c), this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = img;
         else this.faces_indices[idx] = indice, this.faces_color[idx] = Fx8(c), this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = null;
         this.upd_faceImg(idx, 2)
-        this.__upd();
     }
 
     //% blockId=poly_face_add
@@ -317,7 +302,6 @@ class polymesh {
         if (img) this.faces_indices.push(indice), this.faces_color.push(Fx8(c)), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(img);
         else this.faces_indices.push(indice), this.faces_color.push(Fx8(c)), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(null);
         this.upd_faceImg(this.faces_img.length - 1, 2)
-        this.__upd();
     }
 
     //% blockId=poly_face_del
@@ -329,7 +313,6 @@ class polymesh {
     delFace(idx?: number) {
         if (idx) this.faces_indices.removeAt(idx), this.faces_color.removeAt(idx), this.faces_offset.removeAt(idx), this.faces_scale.removeAt(idx), this.faces_img.removeAt(idx);// this.faces.removeAt(idx);
         else this.faces_indices.pop(), this.faces_color.pop(), this.faces_offset.pop(), this.faces_scale.pop(), this.faces_img.pop();// this.faces.pop();
-        this.__upd();
     }
 
     //% blockId=poly_getfacecolor
@@ -376,7 +359,6 @@ class polymesh {
         if (this.faces_img[idx] && this.faces_img[idx].equals(img)) return;
         this.faces_img[idx] = img
         this.upd_faceImg(idx, 2)
-        this.__upd();
     }
 
     //% blockId=poly_clearfaceimage
@@ -389,7 +371,6 @@ class polymesh {
         if (!this.faces_img[idx]) return;
         this.faces_img[idx] = null
         this.faces_imgs[idx] = []
-        this.__upd();
     }
 
     //% blockId=poly_getfaceoffset
@@ -413,7 +394,6 @@ class polymesh {
     setFaceOffset(idx: number, oface: number) {;
         if (this.faces_offset[idx] === Fx8(oface)) return;
         this.faces_offset[idx] = Fx8(oface);
-        this.__upd();
     }
 
     //% blockId=poly_getfacescale
@@ -437,7 +417,6 @@ class polymesh {
     setFaceScale(idx: number, scale: number) {
         if (this.faces_scale[idx] === Fx8(scale)) return;
         this.faces_scale[idx] = Fx8(scale);
-        this.__upd();
     }
 
     //% blockId=poly_mesh_pivot_set
@@ -452,7 +431,6 @@ class polymesh {
             case 0x1: if (this.pivot_y !== Fx8(x)) this.pivot_y = Fx8(x); break;
             case 0x2: if (this.pivot_z !== Fx8(x)) this.pivot_z = Fx8(x); break;
         };
-        this.__upd();
     }
 
     //% blockId=poly_mesh_pivot_change
@@ -467,7 +445,6 @@ class polymesh {
             case 0x1: if (this.pivot_y !== Fx.add(this.pivot_y, Fx8(x))) this.pivot_y = Fx.add(this.pivot_y, Fx8(x)); break;
             case 0x2: if (this.pivot_z !== Fx.add(this.pivot_z, Fx8(x))) this.pivot_z = Fx.add(this.pivot_z, Fx8(x)); break;
         };
-        this.__upd();
     }
 
     //% blockId=poly_mesh_pivot_get
@@ -506,7 +483,6 @@ class polymesh {
             case 0xA: if (this.rot.fy !== x) this.rot.fy = x; break;
             case 0xB: if (this.rot.fz !== x) this.rot.fz = x; break;
         };
-        this.__upd();
     }
 
     //% blockId=poly_mesh_rot_change
@@ -530,7 +506,6 @@ class polymesh {
             case 0xA: if (this.rot.fy !== this.rot.fy + x) this.rot.fy += x; break;
             case 0xB: if (this.rot.fz !== this.rot.fz + x) this.rot.fz += x; break;
         };
-        this.__upd();
     }
 
     //% blockId=poly_mesh_rot_get
@@ -578,7 +553,6 @@ class polymesh {
             case 0xA: if (this.pos.fy !== x) this.pos.fy = x; break;
             case 0xB: if (this.pos.fz !== x) this.pos.fz = x; break;
         };
-        this.__upd();
     }
 
     //% blockId=poly_mesh_pos_change
@@ -602,7 +576,6 @@ class polymesh {
             case 0xA: if (this.pos.fy !== this.pos.fy + x) this.pos.fy += x; break;
             case 0xB: if (this.pos.fz !== this.pos.fz + x) this.pos.fz += x; break;
         };
-        this.__upd();
     }
 
     //% blockId=poly_mesh_pos_get
