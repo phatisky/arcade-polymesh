@@ -7,8 +7,7 @@ namespace Polymesh {
     export interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
     export interface Vector3 { x: number, y: number, z: number }
 
-    const __mesh: {[hash: string]: polymesh} = {}
-    const __mesh_hash: {[key: string]: boolean}[] = {}
+    const __meshes: polymesh[] = [];
     export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2
 
     export const angle: Motion3 = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
@@ -39,7 +38,14 @@ namespace Polymesh {
     //% group="create"
     //% weight=10
     export function create(kind: number) {
-        return new polymesh(Math.round(kind));
+        let idx = __meshes.indexOf(null)
+        if (idx < 0) {
+            idx = __meshes.length
+            __meshes.push(new polymesh(Math.floor(kind), idx);
+            return __meshes[idx]
+        }
+        __meshes[idx] = new polymesh(Math.floor(kind), idx);
+        return __meshes[idx]
     }
 
     //% blockId=poly_kind_allmesh
