@@ -2,7 +2,7 @@
 class polymesh {
 
     data: {[id: string]: any}; hash: string;
-    protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; kind_idx: number;
+    protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; idx: number;
 
     __upd() {
         this.hash = convertToText(this)
@@ -126,14 +126,9 @@ class polymesh {
         this.loop();
     }
 
-    constructor(id: number) {
-        this.kind = Math.round(id);
-        const kind = this.kind;
-        if (!Polymesh.__mesh[kind]) Polymesh.__mesh[kind] = [];
-        const kind_idx = Polymesh.__mesh[kind].indexOf(null)
-        if (kind_idx < 0) Polymesh.__mesh[kind].push(null)
-        this.kind_idx = (kind_idx >= 0) ? kind_idx : Polymesh.__mesh[kind].length - 1
-        Polymesh.__mesh[kind][this.kind_idx] = this;
+    constructor(kind: number, idx: number) {
+        this.kind = Math.floor(kind);
+        this.idx = Math.floor(idx);
         this.init();
     }
 
@@ -146,7 +141,6 @@ class polymesh {
     del() {
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
         this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
-        Polymesh.__mesh[this.kind][this.kind_idx] = null;
     }
 
     //% blockId=poly_dist_isdel
