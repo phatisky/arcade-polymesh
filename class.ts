@@ -1,11 +1,11 @@
 
 class polymesh {
 
-    data: {[id: string]: any};
+    data: {[id: string]: any}; hash: string;
     protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; kind_idx: number;
 
     __upd() {
-        Polymesh.__mesh[this.kind][this.kind_idx] = this;
+        this.hash = convertToText(this)
     }
 
     //% blockId=poly_kind_set
