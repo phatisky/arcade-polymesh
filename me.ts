@@ -19,7 +19,7 @@ namespace Polymesh {
         if (msh.kind === Math.floor(kind)) return;
         __meshes_ref[msh.kind].removeAt(__meshes_ref[msh.kind].indexOf(msh.idx));
         msh.kind = Math.floor(kind);
-        if (!__meshes_ref[kind]) __meshes_ref[kind] = []
+        if (!__meshes_ref[msh.kind]) __meshes_ref[msh.kind] = []
         __meshes_ref[msh.kind].push(msh.idx);
     }
 
@@ -48,7 +48,7 @@ namespace Polymesh {
         if (idx < 0) {
             idx = __meshes.length
             __meshes_ref[kind].push(idx)
-            __meshes.push(new polymesh(Math.floor(kind), idx);
+            __meshes[idx] = new polymesh(Math.floor(kind), idx);
             return __meshes[idx]
         }
         __meshes_ref[kind].push(idx)
