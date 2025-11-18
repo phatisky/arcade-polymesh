@@ -7,7 +7,7 @@ namespace Polymesh {
     //% weight=9qee
     export function renderAll(id: number, output: Image, lineren?: boolean) {
         if ((id == null || isNaN(id)) || !output) return;
-        const sorted = meshAll(id).map(msh => { mesh: msh, depth: msh.zDepth() })
+        const sorted = meshAll(id).map(msh => ({ mesh: msh, depth: msh.zDepth() }))
         if (sorted.length <= 0) return;
         switch (sort) {
             case 0x0: sorted.sort((a, b) => b.depth - a.depth); break;

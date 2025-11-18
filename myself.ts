@@ -18,7 +18,7 @@ namespace Polymesh {
         if (motion.vz !== 0) motion.z += motion.vz * delta
     }
 
-    export function changeMotion(motion: Motion3, choice: uint8, x: number) {
+    export function changeMotion(motion: Motion3, choice: number, x: number) {
         switch (choice) {
             case 0x0: if (motion.x  !== motion.x  + x) motion.x  += x; break
             case 0x1: if (motion.y  !== motion.y  + x) motion.y  += x; break
@@ -35,7 +35,7 @@ namespace Polymesh {
         }
     }
 
-    export function setMotion(motion: Motion3, choice: uint8, x: number) {
+    export function setMotion(motion: Motion3, choice: number, x: number) {
         switch (choice) {
             case 0x0: if (motion.x  !== x) motion.x  = x; break
             case 0x1: if (motion.y  !== x) motion.y  = x; break
@@ -52,7 +52,7 @@ namespace Polymesh {
         }
     }
 
-    export function getMotion(motion: Motion3, choice: uint8) {
+    export function getMotion(motion: Motion3, choice: number) {
         switch (choice) {
             case 0x0: return motion.x;
             case 0x1: return motion.y;
