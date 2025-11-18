@@ -48,12 +48,14 @@ namespace Polymesh {
         if (idx < 0) {
             idx = __meshes.length
             __meshes_ref[kind].push(idx)
-            __meshes[idx] = new polymesh(Math.floor(kind), idx);
-            return __meshes[idx]
+            const msh = new polymesh(Math.floor(kind), idx);
+            __meshes.push(msh)
+            return msh
         }
         __meshes_ref[kind].push(idx)
-        __meshes[idx] = new polymesh(Math.floor(kind), idx);
-        return __meshes[idx]
+        const msh = new polymesh(Math.floor(kind), idx);
+        __meshes[idx] = msh
+        return msh
     }
 
     //% blockId=poly_kind_allmesh
