@@ -16,9 +16,9 @@ namespace Polymesh {
     export let zoom = 1, sort = 0x0, dist = 150, fardist = 0;
 
     export function __meshes_upd_kind(msh: polymesh, kind: number) {
-        if (this.kind === Math.floor(kind)) return;
+        if (msh.kind === Math.floor(kind)) return;
         __meshes_ref[msh.kind].removeAt(__meshes_ref[msh.kind].indexOf(msh.idx));
-        this.kind = Math.floor(kind);
+        msh.kind = Math.floor(kind);
         if (!__meshes_ref[kind]) __meshes_ref[kind] = []
         __meshes_ref[msh.kind].push(msh.idx);
     }
