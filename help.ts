@@ -1,12 +1,18 @@
 
 namespace Polymesh {
 
+    const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+
     export const hashImage = (img: Image): number => {
+        let htxt = ""
         let h = 0;
-        for (let x = 0; x < img.height; x++)
-            for (let y = 0; y < img.width; y++)
+        for (let x = 0; x < img.width; x++) {
+            for (let y = 0; y < img.height; y++) {
                 h = ((h * 32) - h + img.getPixel(x, y));
-        return h;
+            }
+            htxt += BASE32[h % BASE32.length]
+        }
+        return htxt;
     }
 
     export const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3): Vector3 => {
