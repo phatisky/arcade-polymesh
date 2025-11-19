@@ -1,6 +1,14 @@
 
 namespace Polymesh {
 
+    export const hashImage = (img: Image): number => {
+        let h = 0;
+        for (let x = 0; x < img.height; x++)
+            for (let y = 0; y < img.width; y++)
+                h = ((h * 32) - h + img.getPixel(x, y));
+        return h;
+    }
+
     export const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3): Vector3 => {
         let tmp = 0
         const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
