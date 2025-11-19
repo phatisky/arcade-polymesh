@@ -83,9 +83,9 @@ namespace Polymesh {
             if (t.img) {
                 im = t.img.clone();
                 if (msh.flag.lod) {
-                    const scaleD = (scale * zoom)
-                    im = t.imgs[Math.clamp(0, t.imgs.length - 1, Math.trunc((Math.sqrt(scaleD / 1.5) * PHI) * (t.imgs.length - 1)))]
-                    if (im == null) im = image.create(1, 1)
+                    const scaleD = (scale * zoom);
+                    const imi = t.imgs[Math.clamp(0, t.imgs.length - 1, Math.trunc((Math.sqrt(scaleD / 1.5) * PHI) * (t.imgs.length - 1)))]
+                    if (imi) im = imi.clone();
                 }
             }
             if (t.indices.length === 1) {

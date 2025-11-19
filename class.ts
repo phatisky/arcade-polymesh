@@ -396,6 +396,7 @@ class polymesh {
         if (!this.faces_img[idx]) return;
         this.faces_img[idx] = null
         const imgh = Polymesh.hashImage(this.faces_img[idx])
+        if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
         this.faces_imgs[idx][imgh] = []
     }
 
