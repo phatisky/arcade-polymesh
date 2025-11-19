@@ -98,6 +98,11 @@ class polymesh {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = control.eventContext().deltaTime
             Polymesh.updateMotion(this.pos, delta); Polymesh.updateMotion(this.rot, delta);
+            const faces_img_update = this.faces.filter((_, i) => !this.faces[i].imgs[this.faces[i].imgs.length - 1].equals(this.faces[i] .img)).map((_, i) => i)
+            if (faces_img_update.length > 0) while (faces_img_update.length > 0) {
+                const n = faces_img_update.pop();
+                this.upd_faceImg(n, 2);
+            }
         });
     }
 
