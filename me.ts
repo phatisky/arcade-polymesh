@@ -18,14 +18,14 @@ namespace Polymesh {
 
     export function __meshes_upd_kind(msh: polymesh, kind: number) {
         if (msh.kind === Math.floor(kind)) return;
-        __meshes_ref[msh.kind] = __meshes_ref[msh.kind].fillter(idx => idx !== msh.idx);
+        __meshes_ref[msh.kind] = __meshes_ref[msh.kind].filter(idx => idx !== msh.idx);
         msh.kind = Math.floor(kind);
         if (!__meshes_ref[msh.kind]) __meshes_ref[msh.kind] = []
         __meshes_ref[msh.kind].push(msh.idx);
     }
 
     export function __meshes_del(msh: polymesh) {
-        __meshes_ref[msh.kind] = __meshes_ref[msh.kind].fillter(idx => idx !== msh.idx);
+        __meshes_ref[msh.kind] = __meshes_ref[msh.kind].filter(idx => idx !== msh.idx);
         __meshes[msh.idx] = null;
     }
 
