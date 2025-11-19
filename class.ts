@@ -28,19 +28,21 @@ class polymesh {
 
     protected upd_faceImg(idx: number, size: number) {
         const cimg = this.faces_img[idx];
-        this.faces_imgs[idx] = [];
+        if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
         if (!cimg) return;
+        const imgh = JSON.stringify(this.faces_img[idx])
+        this.faces_imgs[idx][imgh] = [];
         let img = image.create(1, 1), scale = 0.1;
         while (img.width < cimg.width || img.height < cimg.height) {
             Polymesh.resizeImage(cimg.clone(), img, true);
-            this.faces_imgs[idx].push(img.clone());
+            this.faces_imgs[idx][imgh].push(img.clone());
             const scaleD = scale;
             img = image.create(Math.max(1, Math.trunc(scaleD * cimg.width)), Math.max(1, Math.trunc(scaleD * cimg.height)));
             scale *= 2;
-        } this.faces_imgs[idx].push(cimg.clone());
+        } this.faces_imgs[idx][imgh].push(cimg.clone());
     }
 
-    protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[]; faces_imgs: Image[][];
+    protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[]; faces_imgs: {[imgh: string]: Image[]}[];
     set faces(vals: Polymesh.Face[]) {
         if (vals == null || vals.length <= 0) {
             this.faces_indices = [], this.faces_color = [], this.faces_offset = [], this.faces_scale = [], this.faces_img = [], this.faces_imgs = [];
@@ -57,7 +59,7 @@ class polymesh {
         if (this.isDel()) return null
         return this.faces_indices.map((_, i) => ({
             indices: this.faces_indices[i].map(v => Fx.toFloat(v)), color: Fx.toInt(this.faces_color[i]),
-            offset: Fx.toInt(this.faces_offset[i]), scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i], imgs: this.faces_imgs[i]
+            offset: Fx.toInt(this.faces_offset[i]), scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i], imgs: this.faces_imgs[i][JSON.stringify(this.faces_img[i])]
         }))
     }
 
@@ -98,10 +100,13 @@ class polymesh {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = control.eventContext().deltaTime
             Polymesh.updateMotion(this.pos, delta); Polymesh.updateMotion(this.rot, delta);
-            const faces_img_update = this.faces.filter((_, i) => !this.faces[i].imgs[this.faces[i].imgs.length - 1].equals(this.faces[i] .img)).map((_, i) => i)
-            if (this.flag.lod && faces_img_update.length > 0) while (faces_img_update.length > 0) {
-                const n = faces_img_update.pop();
-                this.upd_faceImg(n, 2);
+            if (this.flag.lod) {
+                const imgNewData = this.faces_imgs.filter((v, i) => {
+                    if (!this.faces_img[i]) return false;
+                    const imgh = JSON.stringify(this.faces_img[i])
+                    return !v[imgh][v[imgh].length - 1].equals(this.faces_img[i]);
+                }).map((_, i) => i)
+                if (imgNewData.length > 0) while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop(), 2)
             }
         });
     }
@@ -390,7 +395,8 @@ class polymesh {
         if (this.isDel()) return
         if (!this.faces_img[idx]) return;
         this.faces_img[idx] = null
-        this.faces_imgs[idx] = []
+        const imgh = JSON.stringify(this.faces_img[idx])
+        this.faces_imgs[idx][imgh] = []
     }
 
     //% blockId=poly_getfaceoffset
