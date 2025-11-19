@@ -59,7 +59,7 @@ class polymesh {
         if (this.isDel()) return null
         return this.faces_indices.map((_, i) => ({
             indices: this.faces_indices[i].map(v => Fx.toFloat(v)), color: Fx.toInt(this.faces_color[i]),
-            offset: Fx.toInt(this.faces_offset[i]), scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i], imgs: this.faces_imgs[i][JSON.stringify(this.faces_img[i])]
+            offset: Fx.toInt(this.faces_offset[i]), scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i], imgs: this.faces_imgs[i][Polymesh.hashImage(this.faces_img[i])]
         }))
     }
 
