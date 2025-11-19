@@ -3,7 +3,7 @@ namespace Polymesh {
 
     const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 
-    export const hashImage = (img: Image): number => {
+    export const hashImage = (img: Image): string => {
         let htxt = ""
         let h = 0;
         for (let x = 0; x < img.width; x++) {
