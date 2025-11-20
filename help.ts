@@ -4,14 +4,11 @@ namespace Polymesh {
     const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 
     export const hashImage = (img: Image): string => {
-        let htxt = ""
-        let h = 0;
-        for (let x = 0; x < img.width; x++) {
-            for (let y = 0; y < img.height; y++) {
-                h = ((h * 32) - h + img.getPixel(x, y));
-            }
-            htxt += BASE32[h % BASE32.length]
-        }
+        let htxt = "";
+        const imgBuf = pins.createBuffer(img.height)
+        for (let x = 0; x < img.width; x++)
+            img.getRows(x, imgBuf),
+            htxt += BASE32[imgBuf.hash(img.width * 2) % BASE32.length];
         return htxt;
     }
 
