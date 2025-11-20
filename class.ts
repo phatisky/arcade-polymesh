@@ -30,7 +30,7 @@ class polymesh {
         const cimg = this.faces_img[idx];
         if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
         if (!cimg) return;
-        const imgh = Polymesh.hashImage(this.faces_img[idx])
+        const imgh = JSON.stringify(this.faces_img[idx])
         this.faces_imgs[idx][imgh] = [];
         let img = image.create(1, 1), scale = 0.1;
         while (img.width < cimg.width || img.height < cimg.height) {
@@ -59,7 +59,7 @@ class polymesh {
         if (this.isDel()) return null
         return this.faces_indices.map((_, i) => ({
             indices: this.faces_indices[i].map(v => Fx.toFloat(v)), color: Fx.toInt(this.faces_color[i]),
-            offset: Fx.toInt(this.faces_offset[i]), scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i], imgs: this.faces_imgs[i][Polymesh.hashImage(this.faces_img[i])]
+            offset: Fx.toInt(this.faces_offset[i]), scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i], imgs: this.faces_imgs[i][JSON.stringify(this.faces_img[i])]
         }))
     }
 
@@ -103,7 +103,7 @@ class polymesh {
             if (this.flag.lod) {
                 const imgNewData = this.faces_imgs.filter((v, i) => {
                     if (!this.faces_img[i]) return false;
-                    const imgh = Polymesh.hashImage(this.faces_img[i])
+                    const imgh = JSON.stringify(this.faces_img[i])
                     return !v[imgh][v[imgh].length - 1].equals(this.faces_img[i]);
                 }).map((_, i) => i)
                 if (imgNewData.length > 0) while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop(), 2)
@@ -395,8 +395,7 @@ class polymesh {
         if (this.isDel()) return
         if (!this.faces_img[idx]) return;
         this.faces_img[idx] = null
-        const imgh = Polymesh.hashImage(this.faces_img[idx])
-        if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
+        const imgh = JSON.stringify(this.faces_img[idx])
         this.faces_imgs[idx][imgh] = []
     }
 
