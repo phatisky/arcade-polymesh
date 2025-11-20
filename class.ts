@@ -30,7 +30,7 @@ class polymesh {
         const cimg = this.faces_img[idx];
         if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
         if (!cimg) return;
-        const imgh = JSON.stringify(this.faces_img[idx])
+        const imgh = convertToText(this.faces_img[idx])
         this.faces_imgs[idx][imgh] = [];
         let img = image.create(1, 1), scale = 0.1;
         while (img.width < cimg.width || img.height < cimg.height) {
@@ -59,7 +59,7 @@ class polymesh {
         if (this.isDel()) return null
         return this.faces_indices.map((_, i) => ({
             indices: this.faces_indices[i].map(v => Fx.toFloat(v)), color: Fx.toInt(this.faces_color[i]),
-            offset: Fx.toInt(this.faces_offset[i]), scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i], imgs: this.faces_imgs[i][JSON.stringify(this.faces_img[i])]
+            offset: Fx.toInt(this.faces_offset[i]), scale: Fx.toFloat(this.faces_scale[i]), img: this.faces_img[i], imgs: this.faces_imgs[i][convertToText(this.faces_img[i])]
         }))
     }
 
@@ -95,19 +95,23 @@ class polymesh {
 
     rot: Polymesh.Motion3; pos: Polymesh.Motion3;
 
+    protected upd_img_lod_cache() {
+        if (!this.flag.lod) return;
+        const imgNewData = this.faces_imgs.filter((v, i) => {
+            if (!this.faces_img[i]) return false;
+            const imgh = convertToText(this.faces_img[i])
+            return !v[imgh][v[imgh].length - 1].equals(this.faces_img[i]);
+        }).map((_, i) => i)
+        if (imgNewData.length <= 0) return;
+        while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop(), 2)
+    }
+
     flag: { invisible: boolean, noncull: boolean, lod: boolean }
     loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = control.eventContext().deltaTime
             Polymesh.updateMotion(this.pos, delta); Polymesh.updateMotion(this.rot, delta);
-            if (this.flag.lod) {
-                const imgNewData = this.faces_imgs.filter((v, i) => {
-                    if (!this.faces_img[i]) return false;
-                    const imgh = JSON.stringify(this.faces_img[i])
-                    return !v[imgh][v[imgh].length - 1].equals(this.faces_img[i]);
-                }).map((_, i) => i)
-                if (imgNewData.length > 0) while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop(), 2)
-            }
+            this.upd_img_lod_cache();
         });
     }
 
@@ -395,7 +399,7 @@ class polymesh {
         if (this.isDel()) return
         if (!this.faces_img[idx]) return;
         this.faces_img[idx] = null
-        const imgh = JSON.stringify(this.faces_img[idx])
+        const imgh = convertToText(this.faces_img[idx])
         this.faces_imgs[idx][imgh] = []
     }
 
