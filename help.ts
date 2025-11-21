@@ -3,12 +3,16 @@ namespace Polymesh {
 
     const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 
+    const BASE16 = "0123456789​ABCDEF"
+
     export const hashImage = (img: Image): string => {
         let htxt = ""
         let imgBuf = control.createBuffer(img.height)
+        let hashBuf = control.createBuffer(4)
         for (let x = 0; x < img.width; x++) {
             img.getRows(x, imgBuf)
-            htxt += `${imgBuf.toHex().toUpperCase()}FF`
+            hashBuf.setNumber(NumberFormat.UInt32LE, 0, imgBuf.hash(img.width * 2))
+            htxt += `${hashBuf.toHex()}FF`
         }
         return htxt;
     }
