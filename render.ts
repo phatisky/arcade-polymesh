@@ -27,6 +27,7 @@ namespace Polymesh {
         if (msh.isDel()) return;
         if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
         if (msh.flag.invisible) return;
+        if (msh.flag.lod) msh.upd_img_lod_cache();
 
         const centerX = Math.idiv(output.width, 2), centerY = Math.idiv(output.height, 2);
 
