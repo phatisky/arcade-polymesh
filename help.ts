@@ -176,6 +176,7 @@ namespace Polymesh {
         from: Image, to: Image,
         p0: Pt, p1: Pt, p2: Pt, p3?: Pt,
         center?: boolean) {
+        if (Polymesh.isEmptyImage(from)) return;
         if (!p3) p3 = { x: p2.x + (p1.x - p0.x), y: p2.y + (p1.y - p0.y) };
         const w = from.width, h = from.height;
         const w_ = (1 / w), h_ = (1 / h);
