@@ -104,7 +104,7 @@ class polymesh {
         const imgNewData = this.faces_imgs.filter((v, i) => {
             if (!this.faces_img[i]) return false;
             const imgh = Polymesh.hashImage(this.faces_img[i])
-            return !v[imgh];
+            return v[imgh].length <= 0;
         }).map((_, i) => i)
         if (imgNewData.length <= 0) return;
         while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop(), 2)
