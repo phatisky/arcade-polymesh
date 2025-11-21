@@ -32,6 +32,10 @@ class polymesh {
         if (!cimg) return;
         const imgh = Polymesh.hashImage(this.faces_img[idx])
         this.faces_imgs[idx][imgh] = [];
+        if (Polymesh.isEmptyImage(cimg)) {
+            this.faces_imgs[idx][imgh].push(image.create(cimg.width, cimg.height))
+            return
+        }
         let img = image.create(1, 1), scale = 0.1;
         while (img.width < cimg.width || img.height < cimg.height) {
             Polymesh.resizeImage(cimg.clone(), img, true);
