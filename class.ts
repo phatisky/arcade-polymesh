@@ -46,7 +46,7 @@ class polymesh {
         } this.faces_imgs[idx][imgh].push(cimg.clone());
     }
 
-    private faces_indices: Fx8[][]; private faces_color: Fx8[]; private faces_offset: Fx8[]; private faces_scale: Fx8[]; private faces_img: Image[]; private faces_imgs: {[imgh: string]: Image[]}[];
+    faces_indices: Fx8[][]; faces_color: Fx8[]; faces_offset: Fx8[]; faces_scale: Fx8[]; faces_img: Image[]; faces_imgs: {[imgh: string]: Image[]}[];
     set faces(vals: Polymesh.Face[]) {
         if (vals == null || vals.length <= 0) {
             this.faces_indices = [], this.faces_color = [], this.faces_offset = [], this.faces_scale = [], this.faces_img = [], this.faces_imgs = [];
@@ -67,7 +67,7 @@ class polymesh {
         }))
     }
 
-    protected points_xs: Fx8[]; protected points_ys: Fx8[]; protected points_zs: Fx8[];
+    points_xs: Fx8[]; points_ys: Fx8[]; points_zs: Fx8[];
     set points(vals: Polymesh.Vector3[]) {
         if (vals == null || vals.length <= 0) {
             this.points_xs = [], this.points_ys = [], this.points_zs = [];
@@ -93,7 +93,7 @@ class polymesh {
         })
     }
 
-    protected pivot_x: Fx8; protected pivot_y: Fx8; protected pivot_z: Fx8;
+    pivot_x: Fx8; pivot_y: Fx8; pivot_z: Fx8;
     set pivot(v: Polymesh.Vector3) { if (this.isDel()) return; this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z) }
     get pivot() { if (this.isDel()) return null; return { x: Fx.toFloat(this.pivot_x), y: Fx.toFloat(this.pivot_y), z: Fx.toFloat(this.pivot_z) } }
 
