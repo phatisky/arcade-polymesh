@@ -72,7 +72,8 @@ namespace Polymesh {
 
         // Render
         let cx: number, cy: number, range: number, square: number, im: Image
-        for (const t of tris) {
+        for (let i = 0;i < tris.length;i++) {
+            const t = tris[i]
             const inds = t.indices;
             const inds_ = [];
             if (inds.length > 2) inds_[0] = [t.indices[0], t.indices[1], t.indices[2]];
@@ -82,6 +83,7 @@ namespace Polymesh {
             // LOD calculating?
             if (t.img) {
                 im = t.img.clone();
+                msh.upd_faceImg(i, im);
                 if (msh.flag.lod) {
                     const scaleD = (scale * zoom)
                     im = t.imgs[Math.clamp(0, t.imgs.length - 1, Math.trunc((Math.sqrt(scaleD / 1.5) * PHI) * (t.imgs.length - 1)))]

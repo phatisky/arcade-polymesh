@@ -26,11 +26,12 @@ class polymesh {
         return Math.floor(this.kind);
     }
 
-    upd_faceImg(idx: number, size: number) {
-        const cimg = this.faces_img[idx];
+    upd_faceImg(idx: number, im?: Image) {
+        const cimg = im ? im : this.faces_img[idx];
         if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
         if (!cimg) return;
         const imgh = Polymesh.hashImage(cimg)
+        if (this.faces_imgs[idx][imgh]) return;
         this.faces_imgs[idx][imgh] = [];
         if (Polymesh.isEmptyImage(cimg)) {
             this.faces_imgs[idx][imgh].push(image.create(cimg.width, cimg.height))
@@ -57,7 +58,7 @@ class polymesh {
         this.faces_offset = vals.map(v => v.offset ? Fx8(v.offset) : Fx8(0)), this.faces_scale = vals.map(v => v.scale ? Fx8(v.scale) : Fx8(1))
         this.faces_img = vals.map(v => v.img ? v.img : null);
         this.faces_imgs = []
-        for (let i = 0; i < this.faces_img.length; i++) this.upd_faceImg(i, 2)
+        for (let i = 0; i < this.faces_img.length; i++) this.upd_faceImg(i)
     }
     get faces() {
         if (this.isDel()) return null
@@ -108,7 +109,7 @@ class polymesh {
             return !v[imgh];
         }).map((_, i) => i)
         if (imgNewData.length <= 0) return;
-        while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop(), 2)
+        while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop())
     }
 
     flag: { invisible: boolean, noncull: boolean, lod: boolean }
@@ -309,7 +310,7 @@ class polymesh {
         if (inds.i4) indice.push(Fx8(inds.i4));
         if (img) this.faces_indices[idx] = indice, this.faces_color[idx] = Fx8(c), this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = img;
         else this.faces_indices[idx] = indice, this.faces_color[idx] = Fx8(c), this.faces_offset[idx] = Fx8(clface.oface), this.faces_scale[idx] = Fx8(billscale.scale), this.faces_img[idx] = null;
-        this.upd_faceImg(idx, 2)
+        this.upd_faceImg(idx)
     }
 
     //% blockId=poly_face_add
@@ -330,7 +331,7 @@ class polymesh {
         if (inds.i4) indice.push(Fx8(inds.i4));
         if (img) this.faces_indices.push(indice), this.faces_color.push(Fx8(c)), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(img);
         else this.faces_indices.push(indice), this.faces_color.push(Fx8(c)), this.faces_offset.push(Fx8(clface.oface)), this.faces_scale.push(Fx8(billscale.scale)), this.faces_img.push(null);
-        this.upd_faceImg(this.faces_img.length - 1, 2)
+        this.upd_faceImg(this.faces_img.length - 1)
     }
 
     //% blockId=poly_face_del
@@ -391,7 +392,7 @@ class polymesh {
         if (this.isDel()) return
         if (this.faces_img[idx] && this.faces_img[idx].equals(img)) return;
         this.faces_img[idx] = img
-        this.upd_faceImg(idx, 2)
+        this.upd_faceImg(idx)
     }
 
     //% blockId=poly_clearfaceimage
