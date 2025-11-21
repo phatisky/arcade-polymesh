@@ -26,8 +26,8 @@ class polymesh {
         return Math.floor(this.kind);
     }
 
-    protected upd_faceImg(idx: number, size: number) {
-        const cimg = this.faces[idx].img;
+    upd_faceImg(idx: number, size: number) {
+        const cimg = this.faces_img[idx];
         if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
         if (!cimg) return;
         const imgh = Polymesh.hashImage(cimg)
@@ -46,7 +46,7 @@ class polymesh {
         } this.faces_imgs[idx][imgh].push(cimg.clone());
     }
 
-    faces_indices: Fx8[][]; faces_color: Fx8[]; faces_offset: Fx8[]; faces_scale: Fx8[]; faces_img: Image[]; faces_imgs: {[imgh: string]: Image[]}[];
+    protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; public faces_img: Image[]; public faces_imgs: {[imgh: string]: Image[]}[];
     set faces(vals: Polymesh.Face[]) {
         if (vals == null || vals.length <= 0) {
             this.faces_indices = [], this.faces_color = [], this.faces_offset = [], this.faces_scale = [], this.faces_img = [], this.faces_imgs = [];
@@ -67,7 +67,7 @@ class polymesh {
         }))
     }
 
-    points_xs: Fx8[]; points_ys: Fx8[]; points_zs: Fx8[];
+    protected points_xs: Fx8[]; protected points_ys: Fx8[]; protected points_zs: Fx8[];
     set points(vals: Polymesh.Vector3[]) {
         if (vals == null || vals.length <= 0) {
             this.points_xs = [], this.points_ys = [], this.points_zs = [];
@@ -93,7 +93,7 @@ class polymesh {
         })
     }
 
-    pivot_x: Fx8; pivot_y: Fx8; pivot_z: Fx8;
+    protected pivot_x: Fx8; protected pivot_y: Fx8; protected pivot_z: Fx8;
     set pivot(v: Polymesh.Vector3) { if (this.isDel()) return; this.pivot_x = Fx8(v.x), this.pivot_y = Fx8(v.y), this.pivot_z = Fx8(v.z) }
     get pivot() { if (this.isDel()) return null; return { x: Fx.toFloat(this.pivot_x), y: Fx.toFloat(this.pivot_y), z: Fx.toFloat(this.pivot_z) } }
 
@@ -102,8 +102,9 @@ class polymesh {
     upd_img_lod_cache() {
         if (!this.flag.lod) return;
         const imgNewData = this.faces_imgs.filter((v, i) => {
-            if (!this.faces[i].img) return false;
-            const imgh = Polymesh.hashImage(this.faces[i].img)
+            const cimg = this.faces_img[i]
+            if (!cimg) return false;
+            const imgh = Polymesh.hashImage(cimg)
             return !v[imgh];
         }).map((_, i) => i)
         if (imgNewData.length <= 0) return;
