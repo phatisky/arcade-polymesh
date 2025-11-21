@@ -46,7 +46,7 @@ class polymesh {
         } this.faces_imgs[idx][imgh].push(cimg.clone());
     }
 
-    protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[]; protected faces_imgs: {[imgh: string]: Image[]}[];
+    private faces_indices: Fx8[][]; private faces_color: Fx8[]; private faces_offset: Fx8[]; private faces_scale: Fx8[]; private faces_img: Image[]; private faces_imgs: {[imgh: string]: Image[]}[];
     set faces(vals: Polymesh.Face[]) {
         if (vals == null || vals.length <= 0) {
             this.faces_indices = [], this.faces_color = [], this.faces_offset = [], this.faces_scale = [], this.faces_img = [], this.faces_imgs = [];
