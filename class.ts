@@ -102,8 +102,8 @@ class polymesh {
     upd_img_lod_cache() {
         if (!this.flag.lod) return;
         const imgNewData = this.faces_imgs.filter((v, i) => {
-            if (!this.getFaceImage(i)) return false;
-            const imgh = Polymesh.hashImage(this.getFaceImage(i))
+            if (!this.faces_img[i]) return false;
+            const imgh = Polymesh.hashImage(this.faces_img[i])
             return v[imgh].length <= 0;
         }).map((_, i) => i)
         if (imgNewData.length <= 0) return;
