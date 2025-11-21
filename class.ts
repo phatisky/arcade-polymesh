@@ -46,7 +46,7 @@ class polymesh {
         } this.faces_imgs[idx][imgh].push(cimg.clone());
     }
 
-    protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[]; faces_imgs: {[imgh: string]: Image[]}[];
+    protected faces_indices: Fx8[][]; protected faces_color: Fx8[]; protected faces_offset: Fx8[]; protected faces_scale: Fx8[]; protected faces_img: Image[]; protected faces_imgs: {[imgh: string]: Image[]}[];
     set faces(vals: Polymesh.Face[]) {
         if (vals == null || vals.length <= 0) {
             this.faces_indices = [], this.faces_color = [], this.faces_offset = [], this.faces_scale = [], this.faces_img = [], this.faces_imgs = [];
@@ -99,11 +99,11 @@ class polymesh {
 
     rot: Polymesh.Motion3; pos: Polymesh.Motion3;
 
-    protected upd_img_lod_cache() {
+    upd_img_lod_cache() {
         if (!this.flag.lod) return;
         const imgNewData = this.faces_imgs.filter((v, i) => {
-            if (!this.faces_img[i]) return false;
-            const imgh = Polymesh.hashImage(this.faces_img[i])
+            if (!this.getFaceImage(i)) return false;
+            const imgh = Polymesh.hashImage(this.getFaceImage(i))
             return v[imgh].length <= 0;
         }).map((_, i) => i)
         if (imgNewData.length <= 0) return;
