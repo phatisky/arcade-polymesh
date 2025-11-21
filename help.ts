@@ -7,12 +7,14 @@ namespace Polymesh {
 
     export const hashImage = (img: Image): string => {
         let htxt = ""
-        let imgBuf = control.createBuffer(img.height)
-        let hashBuf = control.createBuffer(4)
-        for (let x = 0; x < img.width; x++) {
-            img.getRows(x, imgBuf)
-            hashBuf.setNumber(NumberFormat.UInt32LE, 0, imgBuf.hash(img.width * 2))
-            htxt += `${hashBuf.toHex()}FF`
+        const cimg = image.create(Math.max(2, img.width), Math.max(2, img.height))
+        cimg.drawTransparentImage(img.clone(), 0, 0)
+        const cimgBuf = control.createBuffer(cimg.height)
+        const hashBuf = control.createBuffer(4)
+        for (let x = 0; x < cimg.width; x++) {
+            cimg.getRows(x, cimgBuf)
+            hashBuf.setNumber(NumberFormat.UInt32LE, 0, cimgBuf.hash(img.width * 2))
+            htxt += `${hashBuf.toHex().toUpperCase()}FF`
         }
         return htxt;
     }
