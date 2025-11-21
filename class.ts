@@ -27,10 +27,10 @@ class polymesh {
     }
 
     protected upd_faceImg(idx: number, size: number) {
-        const cimg = this.faces_img[idx];
+        const cimg = this.faces[idx].img;
         if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
         if (!cimg) return;
-        const imgh = Polymesh.hashImage(this.faces_img[idx])
+        const imgh = Polymesh.hashImage(cimg)
         this.faces_imgs[idx][imgh] = [];
         if (Polymesh.isEmptyImage(cimg)) {
             this.faces_imgs[idx][imgh].push(image.create(cimg.width, cimg.height))
@@ -102,9 +102,9 @@ class polymesh {
     upd_img_lod_cache() {
         if (!this.flag.lod) return;
         const imgNewData = this.faces_imgs.filter((v, i) => {
-            if (!this.faces_img[i]) return false;
-            const imgh = Polymesh.hashImage(this.faces_img[i])
-            return v[imgh].length <= 0;
+            if (!this.faces[i].img) return false;
+            const imgh = Polymesh.hashImage(this.faces[i].img)
+            return !v[imgh];
         }).map((_, i) => i)
         if (imgNewData.length <= 0) return;
         while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop(), 2)
