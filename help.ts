@@ -1,6 +1,18 @@
 
 namespace Polymesh {
 
+    const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+
+    export const hashImage = (img: Image): string => {
+        let htxt = ""
+        let imgBuf = control.createBuffer(img.height)
+        for (let x = 0; x < img.width; x++) {
+            img.getRows(x, imgBuf)
+            htxt += `${imgBuf.toHex().toUpperCase()}FF`
+        }
+        return htxt;
+    }
+
     export const rotatePoint3D = (point: Vector3, pivot: Vector3, angle: Vector3): Vector3 => {
         let tmp = 0
         const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
