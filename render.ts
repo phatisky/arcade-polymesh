@@ -83,7 +83,6 @@ namespace Polymesh {
             // LOD calculating?
             if (t.img) {
                 im = t.img.clone();
-                msh.upd_faceImg(i, im);
                 if (msh.flag.lod) {
                     const scaleD = (scale * zoom)
                     im = t.imgs[Math.clamp(0, t.imgs.length - 1, Math.trunc((Math.sqrt(scaleD / 1.5) * PHI) * (t.imgs.length - 1)))]

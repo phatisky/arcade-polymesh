@@ -26,10 +26,14 @@ class polymesh {
         return Math.floor(this.kind);
     }
 
-    upd_faceImg(idx: number, im?: Image) {
+    protected newLODcache() {
+        this.faces_imgs = this.faces.map(_ => ({}))
+    }
+
+    protected updFaceImg(idx: number, im?: Image) {
         const cimg = im ? im : this.faces[idx].img;
         if (!cimg) return;
-        if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {};
+        if (!this.faces_imgs) this.newLODcache();
         const imgh = Polymesh.hashImage(cimg)
         if (this.faces_imgs[idx][imgh]) return;
         this.faces_imgs[idx][imgh] = [];
@@ -72,7 +76,7 @@ class polymesh {
 
     rot: Polymesh.Motion3; pos: Polymesh.Motion3;
 
-    upd_img_lod_cache() {
+    protected updImgLodCache() {
         if (!this.flag.lod) return;
         const imgNewData = this.faces_imgs.filter((v, i) => {
             const cimg = this.faces[i].img
@@ -81,7 +85,13 @@ class polymesh {
             return !v[imgh];
         }).map((_, i) => i)
         if (imgNewData.length <= 0) return;
-        while (imgNewData.length > 0) this.upd_faceImg(imgNewData.pop())
+        while (imgNewData.length > 0) this.updFaceImg(imgNewData.pop())
+    }
+
+    protected updImgLodCacheSlot() {
+        if (this.faces_imgs.length === this.faces.length) return;
+        if (this.faces_imgs.length < this.faces.length) while (this.faces_imgs.length < this.faces.length) this.faces_imgs.push({});
+        if (this.faces_imgs.length > this.faces.length) while (this.faces_imgs.length > this.faces.length) this.faces_imgs.pop();
     }
 
     flag: { invisible: boolean, noncull: boolean, lod: boolean }
@@ -89,7 +99,8 @@ class polymesh {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = control.eventContext().deltaTime
             Polymesh.updateMotion(this.pos, delta); Polymesh.updateMotion(this.rot, delta);
-            this.upd_img_lod_cache();
+            this.updImgLodCacheSlot();
+            this.updImgLodCache();
         });
     }
 
@@ -280,9 +291,9 @@ class polymesh {
         if (inds.i2) indice.push(inds.i2);
         if (inds.i3) indice.push(inds.i3);
         if (inds.i4) indice.push(inds.i4);
-        if (img) this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img };
+        if (img) this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img.clone() };
         else this.faces[idx] = { indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: null }
-        this.upd_faceImg(idx)
+        this.updFaceImg(idx)
     }
 
     //% blockId=poly_face_add
@@ -301,9 +312,9 @@ class polymesh {
         if (inds.i2) indice.push(inds.i2);
         if (inds.i3) indice.push(inds.i3);
         if (inds.i4) indice.push(inds.i4);
-        if (img) this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img });
+        if (img) this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: img.clone() });
         else this.faces.push({ indices: indice, color: c, offset: clface.oface, scale: billscale.scale, img: null });
-        this.upd_faceImg(this.faces.length - 1)
+        this.updFaceImg(this.faces.length - 1)
     }
 
     //% blockId=poly_face_del
@@ -364,7 +375,7 @@ class polymesh {
         if (this.isDel()) return
         if (this.faces[idx].img && this.faces[idx].img.equals(img)) return;
         this.faces[idx].img = img
-        this.upd_faceImg(idx)
+        this.updFaceImg(idx)
     }
 
     //% blockId=poly_clearfaceimage
@@ -377,7 +388,7 @@ class polymesh {
         if (this.isDel()) return
         if (!this.faces[idx].img) return;
         this.faces[idx].img = null
-        this.faces_imgs[idx] = {}
+        this.newLODcache();
     }
 
     //% blockId=poly_getfaceoffset
