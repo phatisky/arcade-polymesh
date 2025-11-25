@@ -2,6 +2,7 @@
 namespace Polymesh {
 
     export const hashImage = (img: Image): string => {
+        if (!img) return ""
         let htxt = "F0"
         const imgBuf = control.createBuffer(img.height)
         const hashBuf = control.createBuffer(4)
