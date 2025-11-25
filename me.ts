@@ -2,7 +2,7 @@
 //% block="Poly mesh" color="#279139" icon="\uf1b2" groups='["Create","Controls","Styling"]'
 namespace Polymesh {
 
-    export interface Face { indices: number[], color: number, offset?: number, scale?: number, img?: Image, imgs?: Image[] }
+    export interface Face { indices: number[], color: number, offset?: number, scale?: number, img?: Image }
 
     export interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
     export interface Vector3 { x: number, y: number, z: number }

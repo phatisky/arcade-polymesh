@@ -62,7 +62,7 @@ namespace Polymesh {
         }) as Vector3_[];
 
         // Sort triangles
-        const tris = msh.faces.slice();
+        const tris = msh.vfaces.slice();
         switch (sort) {
             case 0x0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
             case 0x1: quickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
