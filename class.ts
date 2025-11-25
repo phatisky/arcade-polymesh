@@ -73,7 +73,7 @@ class polymesh {
 
     faces: Polymesh.Face[];
 
-    faces_imgs: {[imgh: string]: Image[]}[];
+    protected faces_imgs: {[imgh: string]: Image[]}[]; protected faces_imgs_cache_ref: {[imgh: string]: number};
     get vfaces() {
         if (this.isDel()) return null
         return this.faces.map((v, i) => ({
