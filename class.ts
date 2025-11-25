@@ -132,7 +132,7 @@ class polymesh {
     //% weight=15
     del() {
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
-        this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
+        this.faces_imgs_cache_ref = null, this.faces_imgs = null, this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
         Polymesh.__meshes_del(this);
     }
 
