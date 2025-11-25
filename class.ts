@@ -30,12 +30,32 @@ class polymesh {
         this.faces_imgs = this.faces.map(_ => ({}))
     }
 
+    protected updImgLodCache() {
+        if (!this.flag.lod) return;
+        const imgNewData = this.faces_imgs.filter((v, i) => {
+            const cimg = this.faces[i].img
+            if (!cimg) return false;
+            const imgh = Polymesh.hashImage(cimg)
+            return !v[imgh];
+        }).map((_, i) => i)
+        if (imgNewData.length <= 0) return;
+        while (imgNewData.length > 0) this.updFaceImg(imgNewData.pop())
+    }
+
+    protected updImgLodCacheSlot() {
+        if (this.faces_imgs.length === this.faces.length) return;
+        if (this.faces_imgs.length < this.faces.length) while (this.faces_imgs.length < this.faces.length) this.faces_imgs.push({});
+        if (this.faces_imgs.length > this.faces.length) while (this.faces_imgs.length > this.faces.length) this.faces_imgs.pop();
+    }
+
     protected updFaceImg(idx: number, im?: Image) {
+        if (!this.faces_imgs) this.newLODcache();
+        this.updImgLodCacheSlot();
         const cimg = im ? im : this.faces[idx].img;
         if (!cimg) return;
-        if (!this.faces_imgs) this.newLODcache();
         const imgh = Polymesh.hashImage(cimg)
         if (this.faces_imgs[idx][imgh]) return;
+        else this.faces_imgs[idx] = {}
         this.faces_imgs[idx][imgh] = [];
         if (Polymesh.isEmptyImage(cimg)) {
             this.faces_imgs[idx][imgh].push(image.create(cimg.width, cimg.height))
@@ -75,24 +95,6 @@ class polymesh {
     pivot: Polymesh.Vector3;
 
     rot: Polymesh.Motion3; pos: Polymesh.Motion3;
-
-    protected updImgLodCache() {
-        if (!this.flag.lod) return;
-        const imgNewData = this.faces_imgs.filter((v, i) => {
-            const cimg = this.faces[i].img
-            if (!cimg) return false;
-            const imgh = Polymesh.hashImage(cimg)
-            return !v[imgh];
-        }).map((_, i) => i)
-        if (imgNewData.length <= 0) return;
-        while (imgNewData.length > 0) this.updFaceImg(imgNewData.pop())
-    }
-
-    protected updImgLodCacheSlot() {
-        if (this.faces_imgs.length === this.faces.length) return;
-        if (this.faces_imgs.length < this.faces.length) while (this.faces_imgs.length < this.faces.length) this.faces_imgs.push({});
-        if (this.faces_imgs.length > this.faces.length) while (this.faces_imgs.length > this.faces.length) this.faces_imgs.pop();
-    }
 
     flag: { invisible: boolean, noncull: boolean, lod: boolean }
     loop() {
