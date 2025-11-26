@@ -53,21 +53,23 @@ class polymesh {
         this.updImgLodCacheSlot();
         const cimg = im ? im : this.faces[idx].img;
         if (!cimg) return;
+        const square = Polymesh.gcd(cimg.width, cimg.height)
         const imgh = Polymesh.hashImage(cimg)
         if (this.faces_imgs[idx][imgh]) return;
-        else this.faces_imgs[idx] = {}
+        else this.faces_imgs[idx] = {};
+        if (this.faces_imgs[idx][imgh] && this.faces_imgs[idx][imgh][this.faces_imgs[idx][imgh].length - 1].equals(cimg)) return;
         this.faces_imgs[idx][imgh] = [];
         if (Polymesh.isEmptyImage(cimg)) {
-            this.faces_imgs[idx][imgh].push(image.create(cimg.width, cimg.height))
-            return
+            this.faces_imgs[idx][imgh].push(image.create(cimg.width, cimg.height));
+            return;
         }
-        let img = image.create(1, 1), scale = 0.1;
+        let img = image.create(1, 1), scale = 0.2;
         while (img.width < cimg.width || img.height < cimg.height) {
             Polymesh.resizeImage(cimg.clone(), img, true);
             this.faces_imgs[idx][imgh].push(img.clone());
             const scaleD = scale;
             img = image.create(Math.max(1, Math.trunc(scaleD * cimg.width)), Math.max(1, Math.trunc(scaleD * cimg.height)));
-            scale *= 2;
+            scale *= square * (scale * 7.95);
         } this.faces_imgs[idx][imgh].push(cimg.clone());
     }
 
@@ -369,15 +371,22 @@ class polymesh {
 
     //% blockId=poly_setfaceimage
     //% blockNamespace=Polymesh
-    //% block=" $this set face image at $idx to $img=screen_image_picker"
+    //% block=" $this set face image at $idx to $img=screen_image_picker|| and LOD as $imgs=lists_create_with"
+    //% imgs.defl=screen_image_picker
     //% this.shadow=variables_get this.defl=myMesh
     //% group="Mesh face property"
     //% weight=7
-    setFaceImage(idx: number, img: Image) {
+    setFaceImage(idx: number, img: Image, imgs?: Image[]) {
         if (this.isDel()) return
         if (this.faces[idx].img && this.faces[idx].img.equals(img)) return;
         this.faces[idx].img = img
-        this.updFaceImg(idx)
+        if (imgs) {
+            const imgh = Polymesh.hashImage(img);
+            if (this.faces_imgs[idx][imgh]) return;
+            else this.faces_imgs[idx] = {};
+            this.faces_imgs[idx][imgh] = imgs.slice();
+            if (this.faces_imgs[idx][imgh][this.faces_imgs[idx][imgh].length - 1]) this.faces_imgs[idx][imgh][this.faces_imgs[idx][imgh].length - 1] = img.clone();
+        } else this.updFaceImg(idx)
     }
 
     //% blockId=poly_clearfaceimage

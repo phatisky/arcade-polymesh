@@ -1,6 +1,12 @@
 
 namespace Polymesh {
 
+    export const gcd = (a: number, b: number): number => {
+        if ((a | b) < 0) return NaN
+        while (a !== b) { if (a > b) a -= b; else b -= a; }
+        return a;
+    }
+
     export const hashImage = (img: Image): string => {
         if (!img) return ""
         let htxt = "F0"

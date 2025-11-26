@@ -104,7 +104,7 @@ namespace Polymesh {
                     { x: cx, y: cy },
                 ]
 
-                square = 1.5 * scale * t.scale * zoom
+                square = dist + (2048 * (scale * t.scale) * zoom)
                 if (im) {
                     // set scale image from camera distance
                     const baseW = im.width;
@@ -139,10 +139,10 @@ namespace Polymesh {
             cx = pt.x;
             cy = pt.y;
 
-            square = 1.5 * scale * t.scale * zoom
+            square = dist + (2048 * (scale * t.scale) * zoom)
 
-            let halfW = 0;
-            let halfH = 0;
+            let halfW = square + dist;
+            let halfH = square + dist;
 
             if (t.img) {
                 // set scale image from camera distance
@@ -152,20 +152,20 @@ namespace Polymesh {
                 halfW = (baseW / 3) * scale * t.scale * zoom;
                 halfH = (baseH / 3) * scale * t.scale * zoom;
 
-                square = Math.min(halfW, halfH)
-            }
+                square = Polymesh.gcd(halfW, halfH)
+            };
             // when have 2D image billboard (indices.length == 1 and img)
             if (t.indices.length === 1) {
                 if (pt.z < -Math.abs(dist)) continue;
 
                 // when no image
-                if (!t.img) { fillCircleImage(output, cx, cy, scale * zoom / 2.2, t.color); continue; }
+                if (!t.img) { fillCircleImage(output, cx, cy, square, t.color); continue; }
 
                 // fill circle if image is empty
-                if (isEmptyImage(t.img)) { fillCircleImage(output, cx, cy, Math.floor(square), t.color); continue; }
+                if (isEmptyImage(t.img)) { fillCircleImage(output, cx, cy, square, t.color); continue; }
 
-                halfW /= 1.1;
-                halfH /= 1.1;
+                halfW /= 1.5;
+                halfH /= 1.5;
 
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
