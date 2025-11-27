@@ -1,7 +1,7 @@
 
 namespace Polymesh {
 
-    const renderMsh = (mshs: polymesh[], output: Image, lineren?: boolean) => {
+    function renderMsh(mshs: polymesh[], output: Image, lineren?: boolean) {
         const sorted = mshs.map(msh => ({ mesh: msh, depth: msh.zDepth() }))
         if (sorted.length <= 0) return;
         switch (sort) {
