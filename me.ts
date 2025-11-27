@@ -11,6 +11,7 @@ namespace Polymesh {
     const __meshes: polymesh[] = [];
     const __meshes_refs: {[id: number]: number[]} = {};
     const __meshes_null_refs: number[] = [];
+    const __meshes_null_refh: {[id: number]: boolean} = {};
     export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2
 
     export const angle: Motion3 = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
@@ -29,6 +30,7 @@ namespace Polymesh {
         __meshes_refs[msh.kind] = __meshes_refs[msh.kind].filter(idx => idx !== msh.idx);
         __meshes[msh.idx] = null;
         __meshes_null_refs.push(msh.idx);
+        __meshes_null_refh[msh.idx] = true;
     }
 
     //% blockId=poly_sorttype
@@ -46,7 +48,11 @@ namespace Polymesh {
     //% weight=10
     export function create(kind: number) {
         if (!__meshes_refs[kind]) __meshes_refs[kind] = []
-        let idx = __meshes_null_refs.length > 0 ? __meshes_null_refs.pop() : -1
+        let idx = -1
+        if (__meshes_null_refs.length > 0) {
+            idx = __meshes_null_refs.pop()
+            __meshes_null_refh[idx] = false
+        }
         if (idx < 0) {
             idx = __meshes.length
             __meshes_refs[kind].push(idx)
@@ -65,8 +71,12 @@ namespace Polymesh {
     //% blockSetVariable=myMeshes
     //% group="mesh kind"
     //% weight=13
-    export function meshAll(kind?: number) {
+    export function meshAll(kind: number) {
         return __meshes_refs[kind].map(i => __meshes[i])
+    }
+
+    export function meshAny() {
+        return __meshes.filter((_, i) => !__meshes_null_refh[i])
     }
 
 }

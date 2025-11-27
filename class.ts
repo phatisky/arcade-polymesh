@@ -84,7 +84,7 @@ class polymesh {
         }))
     }
 
-    points: Polymesh.Vector3[]
+    points: Polymesh.Vector3[]; pivot: Polymesh.Vector3; rot: Polymesh.Motion3; pos: Polymesh.Motion3; flag: { invisible: boolean, noncull: boolean, lod: boolean }
 
     pointCam<T>(f: (v: Polymesh.Vector3) => T) {
         return this.points.map(v => {
@@ -93,12 +93,6 @@ class polymesh {
             return f(Polymesh.rotatePoint3D(vpoint, vpivot, this.rot));
         })
     }
-
-    pivot: Polymesh.Vector3;
-
-    rot: Polymesh.Motion3; pos: Polymesh.Motion3;
-
-    flag: { invisible: boolean, noncull: boolean, lod: boolean }
     loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = control.eventContext().deltaTime
