@@ -26,7 +26,7 @@ class polymesh {
         return Math.floor(this.kind);
     }
 
-    protected newLODcache() {
+    protected createFacesImgLODcache() {
         this.faces_imgs = this.faces.map(_ => ({}))
     }
 
@@ -37,21 +37,24 @@ class polymesh {
             if (!cimg) return false;
             const imgh = Polymesh.hashImage(cimg)
             return !v[imgh];
-        }).map((_, i) => i)
+        })
         if (imgNewData.length <= 0) return;
-        while (imgNewData.length > 0) this.updFaceImg(imgNewData.pop())
+        const imgNewDataInds = imgNewData.map((_, i) => i)
+        while (imgNewDataInds.length > 0) this.updFaceImg(imgNewDataInds.pop());
     }
 
     protected updImgLodCacheSlot() {
+        if (!this.flag.lod) return;
         if (this.faces_imgs.length === this.faces.length) return;
-        if (this.faces_imgs.length < this.faces.length) while (this.faces_imgs.length < this.faces.length) this.faces_imgs.push({});
-        if (this.faces_imgs.length > this.faces.length) while (this.faces_imgs.length > this.faces.length) this.faces_imgs.pop();
+        const newLODcache = this.faces.map((_, i) => {
+            if (this.faces_imgs[i]) return this.faces_imgs[i];
+            return {};
+        });
+        this.faces_imgs = newLODcache
     }
 
     protected updFaceImg(idx: number, im?: Image) {
-        if (!this.faces_imgs) this.newLODcache();
-        this.updImgLodCacheSlot();
-        const cimg = im ? im : this.faces[idx].img;
+        const cimg = im ? im : (this.faces[idx].img ? this.faces[idx].img : null);
         if (!cimg) return;
         const square = Polymesh.gcd(cimg.width, cimg.height)
         const imgh = Polymesh.hashImage(cimg)
@@ -76,17 +79,24 @@ class polymesh {
     faces: Polymesh.Face[];
 
     protected faces_imgs: {[imgh: string]: Image[]}[]; protected faces_imgs_cache_ref: {[imgh: string]: number};
-    get vfaces() {
+    get vfaces(): Polymesh.FaceLOD[] {
         if (this.isDel()) return null
-        return this.faces.map((v, i) => ({
-            indices: v.indices, color: v.color,
-            offset: v.offset, scale: v.scale, img: v.img, imgs: this.faces_imgs[i][Polymesh.hashImage(v.img)] ? this.faces_imgs[i][Polymesh.hashImage(v.img)] : [v.img]
-        }))
+        return this.faces.map((v, i) => {
+            if (v.img) return {
+                    indices: v.indices, color: v.color,
+                    offset: v.offset, scale: v.scale,
+                    img: v.img, imgs: this.faces_imgs[i][Polymesh.hashImage(v.img)] ? this.faces_imgs[i][Polymesh.hashImage(v.img)] : [v.img]
+                };
+            return {
+                indices: v.indices, color: v.color,
+                offset: v.offset, scale: v.scale
+            }
+        })
     }
 
     points: Polymesh.Vector3[]; pivot: Polymesh.Vector3; rot: Polymesh.Motion3; pos: Polymesh.Motion3; flag: { invisible: boolean, noncull: boolean, lod: boolean }
 
-    pointCam<T>(f: (v: Polymesh.Vector3) => T) {
+    pointCam<T>(f: (v: Polymesh.Vector3) => T|Polymesh.Vector3) {
         return this.points.map(v => {
             const vpoint = { x: this.pos.x + v.x, y: this.pos.y + v.y, z: this.pos.z + v.z };
             const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z };
@@ -111,6 +121,7 @@ class polymesh {
         this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
         this.flag = { invisible: false, noncull: false, lod: false };
         this.__del = false;
+        this.createFacesImgLODcache();
         this.loop();
     }
 
@@ -393,7 +404,7 @@ class polymesh {
         if (this.isDel()) return
         if (!this.faces[idx].img) return;
         this.faces[idx].img = null
-        this.newLODcache();
+        this.createFacesImgLODcache();
     }
 
     //% blockId=poly_getfaceoffset

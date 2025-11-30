@@ -60,9 +60,9 @@ namespace Polymesh {
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
-                x: centerX + x * scale * zoom,
-                y: centerY + y * scale * zoom,
-                z: z,
+                x:  centerX + x * scale * zoom,
+                y:  centerY + y * scale * zoom,
+                z:  z,
                 x_: v.x,
                 y_: v.y,
                 z_: v.z,
@@ -83,11 +83,11 @@ namespace Polymesh {
         for (let i = 0;i < tris.length;i++) {
             const t = tris[i]
             const inds = t.indices;
+            if (inds.some(i => (rotated[i].z < -Math.abs(dist) || (fardist > 0 && rotated[i].z > Math.abs(fardist))))) continue;
             const inds_ = [];
             if (inds.length > 2) inds_[0] = [t.indices[0], t.indices[1], t.indices[2]];
             if (inds.length > 3) inds_[1] = [t.indices[3], t.indices[1], t.indices[2]];
             const scale = (Math.abs(dist) / (Math.abs(dist) + avgZ(rotated, t.indices)));
-            if (inds.some(i => rotated[i].z < -Math.abs(dist) || (fardist > 0 && rotated[i].z > Math.abs(fardist)))) continue;
             // LOD calculating?
             if (t.img) {
                 im = t.img.clone();
