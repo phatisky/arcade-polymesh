@@ -2,8 +2,14 @@
 namespace Polymesh {
 
     export const gcd = (a: number, b: number): number => {
-        if ((a | b) < 0) return NaN
-        while (a !== b) { if (a > b) a -= b; else b -= a; }
+        if ((!a || !b) || ((a && b) && (a < 0 || b < 0))) return NaN
+        if (b <= 1) return a;
+        if (a <= 1) return b;
+        while (b !== 0) { // [b, a] = [a % b, b]
+            const tmp = b
+            b = a % b
+            a = tmp
+        }
         return a;
     }
 

@@ -46,7 +46,8 @@ class polymesh {
     protected updImgLodCacheSlot() {
         if (!this.flag.lod) return;
         if (this.faces_imgs.length === this.faces.length) return;
-        const newLODcache = this.faces.map((_, i) => {
+        const newLODcache = this.faces.map((v, i) => {
+            if (!v.img) return {};
             if (this.faces_imgs[i]) return this.faces_imgs[i];
             return {};
         });
@@ -58,9 +59,8 @@ class polymesh {
         if (!cimg) return;
         const square = Polymesh.gcd(cimg.width, cimg.height)
         const imgh = Polymesh.hashImage(cimg)
-        if (this.faces_imgs[idx][imgh]) return;
-        else this.faces_imgs[idx] = {};
-        if (this.faces_imgs[idx][imgh] && this.faces_imgs[idx][imgh][this.faces_imgs[idx][imgh].length - 1].equals(cimg)) return;
+        if (!this.faces_imgs[idx]) this.faces_imgs[idx] = {}
+        else if (this.faces_imgs[idx][imgh] && this.faces_imgs[idx][imgh][this.faces_imgs[idx][imgh].length - 1].equals(cimg)) return;
         this.faces_imgs[idx][imgh] = [];
         if (Polymesh.isEmptyImage(cimg)) {
             this.faces_imgs[idx][imgh].push(image.create(cimg.width, cimg.height));
