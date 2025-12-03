@@ -49,7 +49,7 @@ class polymesh {
         const newLODcache = this.faces.map((v, i) => {
             if (!v.img) return {};
             const imgLodCache = this.faces_imgs[i][Polymesh.hashImage(v.img)]
-            if (imgLodCache && imgLodCache[imgLodCache.length - 1].equals(v.img)) return this.faces_imgs[i];
+            if (imgLodCache) return this.faces_imgs[i];
             return {};
         });
         this.faces_imgs = newLODcache
