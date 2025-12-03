@@ -48,7 +48,7 @@ class polymesh {
         if (this.faces_imgs.length === this.faces.length) return;
         const newLODcache = this.faces.map((v, i) => {
             if (!v.img) return {};
-            const imgLodCache = this.faces_imgs[i][Polymesh.hashImage(v.img)]
+            const imgLodCache = this.faces_imgs[i]
             if (imgLodCache) return this.faces_imgs[i];
             return {};
         });
