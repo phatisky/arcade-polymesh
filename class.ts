@@ -46,21 +46,10 @@ class polymesh {
     protected updImgLodCacheSlot() {
         if (!this.flag.lod) return;
         if (this.faces_imgs.length === this.faces.length) return;
-        const newLODcache = []
-        for (let i = 0; i < this.faces.length; i++) newLODcache.push({})
-        for (let i0 = 0; i0 < this.faces_imgs.length; i0++) {
-            if (i0 >= newLODcache.length) break;
-            const v0 = this.faces_imgs[i0]
-            for (let i1 = 0; i1 < this.faces.length; i1++) {
-                if (i1 >= newLODcache.length) break;
-                const v1 = this.faces[i1];
-                if (!v1.img) continue;
-                if (v0[Polymesh.hashImage(v1.img)]) {
-                    if (newLODcache[i1]) continue;
-                    newLODcache[i0] = v0
-                }
-            }
-        }
+        const newLODcache = this.faces.map((_, i) => {
+            if (this.faces_imgs[i]) return this.faces_imgs[i];
+            return {};
+        });
         this.faces_imgs = newLODcache
     }
 
