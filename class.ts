@@ -46,8 +46,7 @@ class polymesh {
     protected updImgLodCacheSlot() {
         if (!this.flag.lod) return;
         if (this.faces_imgs.length === this.faces.length) return;
-        const newLODcache = this.faces.map((v, i) => {
-            if (v.img == null) return {};
+        const newLODcache = this.faces.map((_, i) => {
             if (this.faces_imgs[i]) return this.faces_imgs[i];
             return {};
         });
