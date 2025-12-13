@@ -2,17 +2,17 @@
 namespace Polymesh {
 
     export function updateMotion(motion: Motion3, delta: number) {
-        // Acceleration angle of camera
+        // Acceleration of motion
         if (motion.ax !== 0) motion.vx += motion.ax * delta
         if (motion.ay !== 0) motion.vy += motion.ay * delta
         if (motion.az !== 0) motion.vz += motion.az * delta
 
-        // Friction angle of camera
+        // Friction of motion
         if (motion.fx !== 0) motion.vx *= (1 - motion.fx) * delta
         if (motion.fy !== 0) motion.vy *= (1 - motion.fy) * delta
         if (motion.fz !== 0) motion.vz *= (1 - motion.fz) * delta
 
-        // Velocity angle of camera
+        // Velocity of motion
         if (motion.vx !== 0) motion.x += motion.vx * delta
         if (motion.vy !== 0) motion.y += motion.vy * delta
         if (motion.vz !== 0) motion.z += motion.vz * delta
