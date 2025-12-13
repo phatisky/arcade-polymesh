@@ -3,7 +3,6 @@ class polymesh {
 
     data: {[id: string]: any};
     protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; idx: number;
-    private zeroF: Fx8 = Fx8(0); private oneF: Fx8 = Fx8(1);
 
     //% blockId=poly_kind_set
     //% blockNamespace=Polymesh
@@ -162,36 +161,38 @@ class polymesh {
     }
 
     protected motionUpdatePos(delta: Fx8) {
+        const zeroF = Fx8(0), oneF = Fx8(1)
         // Acceleration of position
-        if (this.pos_ax !== Fx8(0)) this.pos_vx = Fx.add(this.pos_vx, Fx.mul(this.pos_ax, delta))
-        if (this.pos_ay !== Fx8(0)) this.pos_vy = Fx.add(this.pos_vy, Fx.mul(this.pos_ay, delta))
-        if (this.pos_az !== Fx8(0)) this.pos_vz = Fx.add(this.pos_vz, Fx.mul(this.pos_az, delta))
+        if (this.pos_ax !== zeroF) this.pos_vx = Fx.add(this.pos_vx, Fx.mul(this.pos_ax, delta))
+        if (this.pos_ay !== zeroF) this.pos_vy = Fx.add(this.pos_vy, Fx.mul(this.pos_ay, delta))
+        if (this.pos_az !== zeroF) this.pos_vz = Fx.add(this.pos_vz, Fx.mul(this.pos_az, delta))
 
         // Friction of position
-        if (this.pos_fx !== Fx8(0)) this.pos_vx = Fx.mul(this.pos_vx, Fx.mul(Fx.sub(Fx8(1), this.pos_fx), delta))
-        if (this.pos_fy !== Fx8(0)) this.pos_vy = Fx.mul(this.pos_vy, Fx.mul(Fx.sub(Fx8(1), this.pos_fy), delta))
-        if (this.pos_fz !== Fx8(0)) this.pos_vz = Fx.mul(this.pos_vz, Fx.mul(Fx.sub(Fx8(1), this.pos_fz), delta))
+        if (this.pos_fx !== zeroF) this.pos_vx = Fx.mul(this.pos_vx, Fx.mul(Fx.sub(oneF, this.pos_fx), delta))
+        if (this.pos_fy !== zeroF) this.pos_vy = Fx.mul(this.pos_vy, Fx.mul(Fx.sub(oneF, this.pos_fy), delta))
+        if (this.pos_fz !== zeroF) this.pos_vz = Fx.mul(this.pos_vz, Fx.mul(Fx.sub(oneF, this.pos_fz), delta))
 
         // Velocity of position
-        if (this.pos_vx !== Fx8(0)) this.pos_x = Fx.add(this.pos_x, Fx.mul(this.pos_vx, delta))
-        if (this.pos_vy !== Fx8(0)) this.pos_y = Fx.add(this.pos_y, Fx.mul(this.pos_vy, delta))
-        if (this.pos_vz !== Fx8(0)) this.pos_z = Fx.add(this.pos_z, Fx.mul(this.pos_vz, delta))
+        if (this.pos_vx !== zeroF) this.pos_x = Fx.add(this.pos_x, Fx.mul(this.pos_vx, delta))
+        if (this.pos_vy !== zeroF) this.pos_y = Fx.add(this.pos_y, Fx.mul(this.pos_vy, delta))
+        if (this.pos_vz !== zeroF) this.pos_z = Fx.add(this.pos_z, Fx.mul(this.pos_vz, delta))
     }
     protected motionUpdateRot(delta: Fx8) {
+        const zeroF = Fx8(0), oneF = Fx8(1)
         // Acceleration of rotation
-        if (this.rot_ax !== Fx8(0)) this.rot_vx = Fx.add(this.rot_vx, Fx.mul(this.rot_ax, delta))
-        if (this.rot_ay !== Fx8(0)) this.rot_vy = Fx.add(this.rot_vy, Fx.mul(this.rot_ay, delta))
-        if (this.rot_az !== Fx8(0)) this.rot_vz = Fx.add(this.rot_vz, Fx.mul(this.rot_az, delta))
+        if (this.rot_ax !== zeroF) this.rot_vx = Fx.add(this.rot_vx, Fx.mul(this.rot_ax, delta))
+        if (this.rot_ay !== zeroF) this.rot_vy = Fx.add(this.rot_vy, Fx.mul(this.rot_ay, delta))
+        if (this.rot_az !== zeroF) this.rot_vz = Fx.add(this.rot_vz, Fx.mul(this.rot_az, delta))
 
         // Friction of rotation
-        if (this.rot_fx !== Fx8(0)) this.rot_vx = Fx.mul(this.rot_vx, Fx.mul(Fx.sub(Fx8(1), this.rot_fx), delta))
-        if (this.rot_fy !== Fx8(0)) this.rot_vy = Fx.mul(this.rot_vy, Fx.mul(Fx.sub(Fx8(1), this.rot_fy), delta))
-        if (this.rot_fz !== Fx8(0)) this.rot_vz = Fx.mul(this.rot_vz, Fx.mul(Fx.sub(Fx8(1), this.rot_fz), delta))
+        if (this.rot_fx !== zeroF) this.rot_vx = Fx.mul(this.rot_vx, Fx.mul(Fx.sub(oneF, this.rot_fx), delta))
+        if (this.rot_fy !== zeroF) this.rot_vy = Fx.mul(this.rot_vy, Fx.mul(Fx.sub(oneF, this.rot_fy), delta))
+        if (this.rot_fz !== zeroF) this.rot_vz = Fx.mul(this.rot_vz, Fx.mul(Fx.sub(oneF, this.rot_fz), delta))
 
         // Velocity of rotation
-        if (this.rot_vx !== Fx8(0)) this.rot_x = Fx.add(this.rot_x, Fx.mul(this.rot_vx, delta))
-        if (this.rot_vy !== Fx8(0)) this.rot_y = Fx.add(this.rot_y, Fx.mul(this.rot_vy, delta))
-        if (this.rot_vz !== Fx8(0)) this.rot_z = Fx.add(this.rot_z, Fx.mul(this.rot_vz, delta))
+        if (this.rot_vx !== zeroF) this.rot_x = Fx.add(this.rot_x, Fx.mul(this.rot_vx, delta))
+        if (this.rot_vy !== zeroF) this.rot_y = Fx.add(this.rot_y, Fx.mul(this.rot_vy, delta))
+        if (this.rot_vz !== zeroF) this.rot_z = Fx.add(this.rot_z, Fx.mul(this.rot_vz, delta))
     }
 
     loop() {
@@ -602,8 +603,21 @@ class polymesh {
     //% weight=100
     setAngle(choice: PolyAngle, x: number) {
         if (this.isDel()) return
-        const obj = this.rot
-        if (Polymesh.setMotion(obj, choice, x)) this.rot = obj
+        const xF = Fx8(x)
+        switch (choice) {
+            case 0x0: if (this.rot_x  !== xF) this.rot_x  = xF; break
+            case 0x1: if (this.rot_y  !== xF) this.rot_y  = xF; break
+            case 0x2: if (this.rot_z  !== xF) this.rot_z  = xF; break
+            case 0x3: if (this.rot_vx !== xF) this.rot_vx = xF; break
+            case 0x4: if (this.rot_vy !== xF) this.rot_vy = xF; break
+            case 0x5: if (this.rot_vz !== xF) this.rot_vz = xF; break
+            case 0x6: if (this.rot_ax !== xF) this.rot_ax = xF; break
+            case 0x7: if (this.rot_ay !== xF) this.rot_ay = xF; break
+            case 0x8: if (this.rot_az !== xF) this.rot_az = xF; break
+            case 0x9: if (this.rot_fx !== xF) this.rot_fx = xF; break
+            case 0xA: if (this.rot_fy !== xF) this.rot_fy = xF; break
+            case 0xB: if (this.rot_fz !== xF) this.rot_fz = xF; break
+        }
     }
 
     //% blockId=poly_mesh_rot_change
@@ -614,8 +628,21 @@ class polymesh {
     //% weight=5
     changeAngle(choice: PolyAngle, x: number) {
         if (this.isDel()) return
-        const obj = this.rot
-        if (Polymesh.changeMotion(obj, choice, x)) this.rot = obj
+        const xF = Fx8(x)
+        switch (choice) {
+            case 0x0: if (this.rot_x  !== Fx.add(this.rot_x,  xF)) this.rot_x  = Fx.add(this.rot_x,  xF); break
+            case 0x1: if (this.rot_y  !== Fx.add(this.rot_y,  xF)) this.rot_y  = Fx.add(this.rot_y,  xF); break
+            case 0x2: if (this.rot_z  !== Fx.add(this.rot_z,  xF)) this.rot_z  = Fx.add(this.rot_z,  xF); break
+            case 0x3: if (this.rot_vx !== Fx.add(this.rot_vx, xF)) this.rot_vx = Fx.add(this.rot_vx, xF); break
+            case 0x4: if (this.rot_vy !== Fx.add(this.rot_vy, xF)) this.rot_vy = Fx.add(this.rot_vy, xF); break
+            case 0x5: if (this.rot_vz !== Fx.add(this.rot_vz, xF)) this.rot_vz = Fx.add(this.rot_vz, xF); break
+            case 0x6: if (this.rot_ax !== Fx.add(this.rot_ax, xF)) this.rot_ax = Fx.add(this.rot_ax, xF); break
+            case 0x7: if (this.rot_ay !== Fx.add(this.rot_ay, xF)) this.rot_ay = Fx.add(this.rot_ay, xF); break
+            case 0x8: if (this.rot_az !== Fx.add(this.rot_az, xF)) this.rot_az = Fx.add(this.rot_az, xF); break
+            case 0x9: if (this.rot_fx !== Fx.add(this.rot_fx, xF)) this.rot_fx = Fx.add(this.rot_fx, xF); break
+            case 0xA: if (this.rot_fy !== Fx.add(this.rot_fy, xF)) this.rot_fy = Fx.add(this.rot_fy, xF); break
+            case 0xB: if (this.rot_fz !== Fx.add(this.rot_fz, xF)) this.rot_fz = Fx.add(this.rot_fz, xF); break
+        }
     }
 
     //% blockId=poly_mesh_rot_get
@@ -626,7 +653,20 @@ class polymesh {
     //% weight=4
     getAngle(choice: PolyAngle) {
         if (this.isDel()) return NaN
-        return Polymesh.getMotion(this.rot, choice)
+        switch (choice) {
+            case 0x0: return Fx.toFloat(this.rot_x);
+            case 0x1: return Fx.toFloat(this.rot_y);
+            case 0x2: return Fx.toFloat(this.rot_z);
+            case 0x3: return Fx.toFloat(this.rot_vx);
+            case 0x4: return Fx.toFloat(this.rot_vy);
+            case 0x5: return Fx.toFloat(this.rot_vz);
+            case 0x6: return Fx.toFloat(this.rot_ax);
+            case 0x7: return Fx.toFloat(this.rot_ay);
+            case 0x8: return Fx.toFloat(this.rot_az);
+            case 0x9: return Fx.toFloat(this.rot_fx);
+            case 0xA: return Fx.toFloat(this.rot_fy);
+            case 0xB: return Fx.toFloat(this.rot_fz);
+        } return NaN
     }
 
     //% blockId=poly_mesh_pos_set
@@ -637,8 +677,21 @@ class polymesh {
     //% weight=10
     setPos(choice: PolyPos, x: number) {
         if (this.isDel()) return
-        const obj = this.pos
-        if (Polymesh.setMotion(obj, choice, x)) this.pos = obj
+        const xF = Fx8(x)
+        switch (choice) {
+            case 0x0: if (this.pos_x  !== xF) this.pos_x  = xF; break
+            case 0x1: if (this.pos_y  !== xF) this.pos_y  = xF; break
+            case 0x2: if (this.pos_z  !== xF) this.pos_z  = xF; break
+            case 0x3: if (this.pos_vx !== xF) this.pos_vx = xF; break
+            case 0x4: if (this.pos_vy !== xF) this.pos_vy = xF; break
+            case 0x5: if (this.pos_vz !== xF) this.pos_vz = xF; break
+            case 0x6: if (this.pos_ax !== xF) this.pos_ax = xF; break
+            case 0x7: if (this.pos_ay !== xF) this.pos_ay = xF; break
+            case 0x8: if (this.pos_az !== xF) this.pos_az = xF; break
+            case 0x9: if (this.pos_fx !== xF) this.pos_fx = xF; break
+            case 0xA: if (this.pos_fy !== xF) this.pos_fy = xF; break
+            case 0xB: if (this.pos_fz !== xF) this.pos_fz = xF; break
+        }
     }
 
     //% blockId=poly_mesh_pos_change
@@ -649,8 +702,21 @@ class polymesh {
     //% weight=9
     changePos(choice: PolyPos, x: number) {
         if (this.isDel()) return
-        const obj = this.pos
-        if (Polymesh.changeMotion(obj, choice, x)) this.pos = obj
+        const xF = Fx8(x)
+        switch (choice) {
+            case 0x0: if (this.pos_x  !== Fx.add(this.pos_x,  xF)) this.pos_x  = Fx.add(this.pos_x,  xF); break
+            case 0x1: if (this.pos_y  !== Fx.add(this.pos_y,  xF)) this.pos_y  = Fx.add(this.pos_y,  xF); break
+            case 0x2: if (this.pos_z  !== Fx.add(this.pos_z,  xF)) this.pos_z  = Fx.add(this.pos_z,  xF); break
+            case 0x3: if (this.pos_vx !== Fx.add(this.pos_vx, xF)) this.pos_vx = Fx.add(this.pos_vx, xF); break
+            case 0x4: if (this.pos_vy !== Fx.add(this.pos_vy, xF)) this.pos_vy = Fx.add(this.pos_vy, xF); break
+            case 0x5: if (this.pos_vz !== Fx.add(this.pos_vz, xF)) this.pos_vz = Fx.add(this.pos_vz, xF); break
+            case 0x6: if (this.pos_ax !== Fx.add(this.pos_ax, xF)) this.pos_ax = Fx.add(this.pos_ax, xF); break
+            case 0x7: if (this.pos_ay !== Fx.add(this.pos_ay, xF)) this.pos_ay = Fx.add(this.pos_ay, xF); break
+            case 0x8: if (this.pos_az !== Fx.add(this.pos_az, xF)) this.pos_az = Fx.add(this.pos_az, xF); break
+            case 0x9: if (this.pos_fx !== Fx.add(this.pos_fx, xF)) this.pos_fx = Fx.add(this.pos_fx, xF); break
+            case 0xA: if (this.pos_fy !== Fx.add(this.pos_fy, xF)) this.pos_fy = Fx.add(this.pos_fy, xF); break
+            case 0xB: if (this.pos_fz !== Fx.add(this.pos_fz, xF)) this.pos_fz = Fx.add(this.pos_fz, xF); break
+        }
     }
 
     //% blockId=poly_mesh_pos_get
@@ -661,7 +727,20 @@ class polymesh {
     //% weight=8
     getPos(choice: PolyPos) {
         if (this.isDel()) return NaN
-        return Polymesh.getMotion(this.pos, choice)
+        switch (choice) {
+            case 0x0: return Fx.toFloat(this.pos_x);
+            case 0x1: return Fx.toFloat(this.pos_y);
+            case 0x2: return Fx.toFloat(this.pos_z);
+            case 0x3: return Fx.toFloat(this.pos_vx);
+            case 0x4: return Fx.toFloat(this.pos_vy);
+            case 0x5: return Fx.toFloat(this.pos_vz);
+            case 0x6: return Fx.toFloat(this.pos_ax);
+            case 0x7: return Fx.toFloat(this.pos_ay);
+            case 0x8: return Fx.toFloat(this.pos_az);
+            case 0x9: return Fx.toFloat(this.pos_fx);
+            case 0xA: return Fx.toFloat(this.pos_fy);
+            case 0xB: return Fx.toFloat(this.pos_fz);
+        } return NaN
     }
 
 }
