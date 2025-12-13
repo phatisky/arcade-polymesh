@@ -3,6 +3,7 @@ class polymesh {
 
     data: {[id: string]: any};
     protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; idx: number;
+    private zeroF: Fx8 = Fx8(0); private oneF: Fx8 = Fx8(1);
 
     //% blockId=poly_kind_set
     //% blockNamespace=Polymesh
@@ -94,7 +95,63 @@ class polymesh {
         })
     }
 
-    points: Polymesh.Vector3[]; pivot: Polymesh.Vector3; rot: Polymesh.Motion3; pos: Polymesh.Motion3; flag: { invisible: boolean, noncull: boolean, lod: boolean }
+    points: Polymesh.Vector3[]; pivot: Polymesh.Vector3; flag: { invisible: boolean, noncull: boolean, lod: boolean }
+
+    protected rot_x:  Fx8; protected rot_y:  Fx8; protected rot_z:  Fx8;
+    protected rot_vx: Fx8; protected rot_vy: Fx8; protected rot_vz: Fx8;
+    protected rot_ax: Fx8; protected rot_ay: Fx8; protected rot_az: Fx8;
+    protected rot_fx: Fx8; protected rot_fy: Fx8; protected rot_fz: Fx8;
+
+    set rot(v: Polymesh.Motion3) {
+        if (!v || v == null) {
+            this.rot_x  = null; this.rot_y  = null; this.rot_z  = null;
+            this.rot_vx = null; this.rot_vy = null; this.rot_vz = null;
+            this.rot_ax = null; this.rot_ay = null; this.rot_az = null;
+            this.rot_fx = null; this.rot_fy = null; this.rot_fz = null;
+            return
+        }
+        this.rot_x  = Fx8(v.x) ; this.rot_y  = Fx8(v.y) ; this.rot_z  = Fx8(v.z) ;
+        this.rot_vx = Fx8(v.vx); this.rot_vy = Fx8(v.vy); this.rot_vz = Fx8(v.vz);
+        this.rot_ax = Fx8(v.vx); this.rot_ay = Fx8(v.vy); this.rot_az = Fx8(v.vz);
+        this.rot_fx = Fx8(v.vx); this.rot_fy = Fx8(v.vy); this.rot_fz = Fx8(v.vz);
+    }
+
+    get rot(): Polymesh.Motion3 {
+        return {
+            x:  Fx.toFloat(this.rot_x) , y:  Fx.toFloat(this.rot_y) , z:  Fx.toFloat(this.rot_z) ,
+            vx: Fx.toFloat(this.rot_vx), vy: Fx.toFloat(this.rot_vy), vz: Fx.toFloat(this.rot_vz),
+            ax: Fx.toFloat(this.rot_ax), ay: Fx.toFloat(this.rot_ay), az: Fx.toFloat(this.rot_az),
+            fx: Fx.toFloat(this.rot_fx), fy: Fx.toFloat(this.rot_fy), fz: Fx.toFloat(this.rot_fz),
+        }
+    }
+
+    protected pos_x:  Fx8; protected pos_y:  Fx8; protected pos_z:  Fx8;
+    protected pos_vx: Fx8; protected pos_vy: Fx8; protected pos_vz: Fx8;
+    protected pos_ax: Fx8; protected pos_ay: Fx8; protected pos_az: Fx8;
+    protected pos_fx: Fx8; protected pos_fy: Fx8; protected pos_fz: Fx8;
+
+    set pos(v: Polymesh.Motion3) {
+        if (!v || v == null) {
+            this.pos_x  = null; this.pos_y  = null; this.pos_z  = null;
+            this.pos_vx = null; this.pos_vy = null; this.pos_vz = null;
+            this.pos_ax = null; this.pos_ay = null; this.pos_az = null;
+            this.pos_fx = null; this.pos_fy = null; this.pos_fz = null;
+            return
+        }
+        this.pos_x  = Fx8(v.x) ; this.pos_y  = Fx8(v.y) ; this.pos_z  = Fx8(v.z) ;
+        this.pos_vx = Fx8(v.vx); this.pos_vy = Fx8(v.vy); this.pos_vz = Fx8(v.vz);
+        this.pos_ax = Fx8(v.vx); this.pos_ay = Fx8(v.vy); this.pos_az = Fx8(v.vz);
+        this.pos_fx = Fx8(v.vx); this.pos_fy = Fx8(v.vy); this.pos_fz = Fx8(v.vz);
+    }
+
+    get pos(): Polymesh.Motion3 {
+        return {
+            x:  Fx.toFloat(this.pos_x) , y:  Fx.toFloat(this.pos_y) , z:  Fx.toFloat(this.pos_z) ,
+            vx: Fx.toFloat(this.pos_vx), vy: Fx.toFloat(this.pos_vy), vz: Fx.toFloat(this.pos_vz),
+            ax: Fx.toFloat(this.pos_ax), ay: Fx.toFloat(this.pos_ay), az: Fx.toFloat(this.pos_az),
+            fx: Fx.toFloat(this.pos_fx), fy: Fx.toFloat(this.pos_fy), fz: Fx.toFloat(this.pos_fz),
+        }
+    }
 
     pointCam<T>(f: (v: Polymesh.Vector3) => T|Polymesh.Vector3) {
         return this.points.map(v => {
@@ -103,10 +160,44 @@ class polymesh {
             return f(Polymesh.rotatePoint3D(vpoint, vpivot, this.rot));
         })
     }
+
+    protected motionUpdatePos(delta: Fx8) {
+        // Acceleration of position
+        if (this.pos_ax !== Fx8(0)) this.pos_vx = Fx.add(this.pos_vx, Fx.mul(this.pos_ax, delta))
+        if (this.pos_ay !== Fx8(0)) this.pos_vy = Fx.add(this.pos_vy, Fx.mul(this.pos_ay, delta))
+        if (this.pos_az !== Fx8(0)) this.pos_vz = Fx.add(this.pos_vz, Fx.mul(this.pos_az, delta))
+
+        // Friction of position
+        if (this.pos_fx !== Fx8(0)) this.pos_vx = Fx.mul(this.pos_vx, Fx.mul(Fx.sub(Fx8(1), this.pos_fx), delta))
+        if (this.pos_fy !== Fx8(0)) this.pos_vy = Fx.mul(this.pos_vy, Fx.mul(Fx.sub(Fx8(1), this.pos_fy), delta))
+        if (this.pos_fz !== Fx8(0)) this.pos_vz = Fx.mul(this.pos_vz, Fx.mul(Fx.sub(Fx8(1), this.pos_fz), delta))
+
+        // Velocity of position
+        if (this.pos_vx !== Fx8(0)) this.pos_x = Fx.add(this.pos_x, Fx.mul(this.pos_vx, delta))
+        if (this.pos_vy !== Fx8(0)) this.pos_y = Fx.add(this.pos_y, Fx.mul(this.pos_vy, delta))
+        if (this.pos_vz !== Fx8(0)) this.pos_z = Fx.add(this.pos_z, Fx.mul(this.pos_vz, delta))
+    }
+    protected motionUpdateRot(delta: Fx8) {
+        // Acceleration of rotation
+        if (this.rot_ax !== Fx8(0)) this.rot_vx = Fx.add(this.rot_vx, Fx.mul(this.rot_ax, delta))
+        if (this.rot_ay !== Fx8(0)) this.rot_vy = Fx.add(this.rot_vy, Fx.mul(this.rot_ay, delta))
+        if (this.rot_az !== Fx8(0)) this.rot_vz = Fx.add(this.rot_vz, Fx.mul(this.rot_az, delta))
+
+        // Friction of rotation
+        if (this.rot_fx !== Fx8(0)) this.rot_vx = Fx.mul(this.rot_vx, Fx.mul(Fx.sub(Fx8(1), this.rot_fx), delta))
+        if (this.rot_fy !== Fx8(0)) this.rot_vy = Fx.mul(this.rot_vy, Fx.mul(Fx.sub(Fx8(1), this.rot_fy), delta))
+        if (this.rot_fz !== Fx8(0)) this.rot_vz = Fx.mul(this.rot_vz, Fx.mul(Fx.sub(Fx8(1), this.rot_fz), delta))
+
+        // Velocity of rotation
+        if (this.rot_vx !== Fx8(0)) this.rot_x = Fx.add(this.rot_x, Fx.mul(this.rot_vx, delta))
+        if (this.rot_vy !== Fx8(0)) this.rot_y = Fx.add(this.rot_y, Fx.mul(this.rot_vy, delta))
+        if (this.rot_vz !== Fx8(0)) this.rot_z = Fx.add(this.rot_z, Fx.mul(this.rot_vz, delta))
+    }
+
     loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
-            const delta = control.eventContext().deltaTime
-            Polymesh.updateMotion(this.pos, delta); Polymesh.updateMotion(this.rot, delta);
+            const delta = Fx8(control.eventContext().deltaTime)
+            this.motionUpdateRot(delta), this.motionUpdatePos(delta);
             this.updImgLodCacheSlot();
             this.updImgLodCache();
         });
@@ -511,7 +602,8 @@ class polymesh {
     //% weight=100
     setAngle(choice: PolyAngle, x: number) {
         if (this.isDel()) return
-        Polymesh.setMotion(this.rot, choice, x)
+        const obj = this.rot
+        if (Polymesh.setMotion(obj, choice, x)) this.rot = obj
     }
 
     //% blockId=poly_mesh_rot_change
@@ -522,7 +614,8 @@ class polymesh {
     //% weight=5
     changeAngle(choice: PolyAngle, x: number) {
         if (this.isDel()) return
-        Polymesh.changeMotion(this.rot, choice, x)
+        const obj = this.rot
+        if (Polymesh.changeMotion(obj, choice, x)) this.rot = obj
     }
 
     //% blockId=poly_mesh_rot_get
@@ -544,7 +637,8 @@ class polymesh {
     //% weight=10
     setPos(choice: PolyPos, x: number) {
         if (this.isDel()) return
-        Polymesh.setMotion(this.pos, choice, x)
+        const obj = this.pos
+        if (Polymesh.setMotion(obj, choice, x)) this.pos = obj
     }
 
     //% blockId=poly_mesh_pos_change
@@ -555,7 +649,8 @@ class polymesh {
     //% weight=9
     changePos(choice: PolyPos, x: number) {
         if (this.isDel()) return
-        Polymesh.changeMotion(this.pos, choice, x)
+        const obj = this.pos
+        if (Polymesh.changeMotion(obj, choice, x)) this.pos = obj
     }
 
     //% blockId=poly_mesh_pos_get

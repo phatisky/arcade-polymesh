@@ -2,17 +2,17 @@
 namespace Polymesh {
 
     export function updateMotion(motion: Motion3, delta: number) {
-        // Acceleration angle of camera
+        // Acceleration of motion
         if (motion.ax !== 0) motion.vx += motion.ax * delta
         if (motion.ay !== 0) motion.vy += motion.ay * delta
         if (motion.az !== 0) motion.vz += motion.az * delta
 
-        // Friction angle of camera
+        // Friction of motion
         if (motion.fx !== 0) motion.vx *= (1 - motion.fx) * delta
         if (motion.fy !== 0) motion.vy *= (1 - motion.fy) * delta
         if (motion.fz !== 0) motion.vz *= (1 - motion.fz) * delta
 
-        // Velocity angle of camera
+        // Velocity of motion
         if (motion.vx !== 0) motion.x += motion.vx * delta
         if (motion.vy !== 0) motion.y += motion.vy * delta
         if (motion.vz !== 0) motion.z += motion.vz * delta
@@ -20,36 +20,38 @@ namespace Polymesh {
 
     export function changeMotion(motion: Motion3, choice: number, x: number) {
         switch (choice) {
-            case 0x0: if (motion.x  !== motion.x  + x) motion.x  += x; break
-            case 0x1: if (motion.y  !== motion.y  + x) motion.y  += x; break
-            case 0x2: if (motion.z  !== motion.z  + x) motion.z  += x; break
-            case 0x3: if (motion.vx !== motion.vx + x) motion.vx += x; break
-            case 0x4: if (motion.vy !== motion.vy + x) motion.vy += x; break
-            case 0x5: if (motion.vz !== motion.vz + x) motion.vz += x; break
-            case 0x6: if (motion.ax !== motion.ax + x) motion.ax += x; break
-            case 0x7: if (motion.ay !== motion.ay + x) motion.ay += x; break
-            case 0x8: if (motion.az !== motion.az + x) motion.az += x; break
-            case 0x9: if (motion.fx !== motion.fx + x) motion.fx += x; break
-            case 0xA: if (motion.fy !== motion.fy + x) motion.fy += x; break
-            case 0xB: if (motion.fz !== motion.fz + x) motion.fz += x; break
+            case 0x0: if (motion.x  !== motion.x  + x) { motion.x  += x; return true; }; break
+            case 0x1: if (motion.y  !== motion.y  + x) { motion.y  += x; return true; }; break
+            case 0x2: if (motion.z  !== motion.z  + x) { motion.z  += x; return true; }; break
+            case 0x3: if (motion.vx !== motion.vx + x) { motion.vx += x; return true; }; break
+            case 0x4: if (motion.vy !== motion.vy + x) { motion.vy += x; return true; }; break
+            case 0x5: if (motion.vz !== motion.vz + x) { motion.vz += x; return true; }; break
+            case 0x6: if (motion.ax !== motion.ax + x) { motion.ax += x; return true; }; break
+            case 0x7: if (motion.ay !== motion.ay + x) { motion.ay += x; return true; }; break
+            case 0x8: if (motion.az !== motion.az + x) { motion.az += x; return true; }; break
+            case 0x9: if (motion.fx !== motion.fx + x) { motion.fx += x; return true; }; break
+            case 0xA: if (motion.fy !== motion.fy + x) { motion.fy += x; return true; }; break
+            case 0xB: if (motion.fz !== motion.fz + x) { motion.fz += x; return true; }; break
         }
+        return false
     }
 
     export function setMotion(motion: Motion3, choice: number, x: number) {
         switch (choice) {
-            case 0x0: if (motion.x  !== x) motion.x  = x; break
-            case 0x1: if (motion.y  !== x) motion.y  = x; break
-            case 0x2: if (motion.z  !== x) motion.z  = x; break
-            case 0x3: if (motion.vx !== x) motion.vx = x; break
-            case 0x4: if (motion.vy !== x) motion.vy = x; break
-            case 0x5: if (motion.vz !== x) motion.vz = x; break
-            case 0x6: if (motion.ax !== x) motion.ax = x; break
-            case 0x7: if (motion.ay !== x) motion.ay = x; break
-            case 0x8: if (motion.az !== x) motion.az = x; break
-            case 0x9: if (motion.fx !== x) motion.fx = x; break
-            case 0xA: if (motion.fy !== x) motion.fy = x; break
-            case 0xB: if (motion.fz !== x) motion.fz = x; break
+            case 0x0: if (motion.x  !== x) { motion.x  = x; return true; }; break
+            case 0x1: if (motion.y  !== x) { motion.y  = x; return true; }; break
+            case 0x2: if (motion.z  !== x) { motion.z  = x; return true; }; break
+            case 0x3: if (motion.vx !== x) { motion.vx = x; return true; }; break
+            case 0x4: if (motion.vy !== x) { motion.vy = x; return true; }; break
+            case 0x5: if (motion.vz !== x) { motion.vz = x; return true; }; break
+            case 0x6: if (motion.ax !== x) { motion.ax = x; return true; }; break
+            case 0x7: if (motion.ay !== x) { motion.ay = x; return true; }; break
+            case 0x8: if (motion.az !== x) { motion.az = x; return true; }; break
+            case 0x9: if (motion.fx !== x) { motion.fx = x; return true; }; break
+            case 0xA: if (motion.fy !== x) { motion.fy = x; return true; }; break
+            case 0xB: if (motion.fz !== x) { motion.fz = x; return true; }; break
         }
+        return false
     }
 
     export function getMotion(motion: Motion3, choice: number) {
