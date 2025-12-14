@@ -55,9 +55,9 @@ namespace Polymesh {
         const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
 
         // Transform vertices
-        let x = v.x - cam.x;
-        let y = v.y - cam.y;
-        let z = v.z - cam.z;
+        let x = point.x - cam.x;
+        let y = point.y - cam.y;
+        let z = point.z - cam.z;
         tmp = x * cosY + z * sinY, z = -x * sinY + z * cosY, x = tmp; // --- rotate around y ---
         tmp = y * cosX - z * sinX, z =  y * sinX + z * cosX, y = tmp; // --- rotate around x ---
         tmp = x * cosZ - y * sinZ, y =  x * sinZ + y * cosZ, x = tmp; // --- rotate around z ---
