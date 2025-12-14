@@ -39,15 +39,15 @@ namespace Polymesh {
         const centerX = Math.idiv(output.width, 2), centerY = Math.idiv(output.height, 2);
 
         let tmp = 0
-        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
-        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
-        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
+        const cosX = Math.cos(camRot.x), sinX = Math.sin(camRot.x);
+        const cosY = Math.cos(camRot.y), sinY = Math.sin(camRot.y);
+        const cosZ = Math.cos(camRot.z), sinZ = Math.sin(camRot.z);
 
         // Transform vertices
         const rotated = msh.pointCam((v) => {
-            let x = v.x - cam.x;
-            let y = v.y - cam.y;
-            let z = v.z - cam.z;
+            let x = v.x - camPos.x;
+            let y = v.y - camPos.y;
+            let z = v.z - camPos.z;
             tmp = x * cosY + z * sinY, z = -x * sinY + z * cosY, x = tmp; // --- rotate around y ---
             tmp = y * cosX - z * sinX, z =  y * sinX + z * cosX, y = tmp; // --- rotate around x ---
             tmp = x * cosZ - y * sinZ, y =  x * sinZ + y * cosZ, x = tmp; // --- rotate around z ---
@@ -138,8 +138,8 @@ namespace Polymesh {
 
             // Backface culling
             if (culling)
-                if ((inds_[0] && !shouldRenderFace(rotated, inds_[0], cam, t.offset)) &&
-                    (inds_[1] && !shouldRenderFace(rotated, inds_[1], cam, t.offset))) continue;
+                if ((inds_[0] && !shouldRenderFace(rotated, inds_[0], camPos, t.offset)) &&
+                    (inds_[1] && !shouldRenderFace(rotated, inds_[1], camPos, t.offset))) continue;
 
             const idx = t.indices[0];
             const pt = rotated[idx];

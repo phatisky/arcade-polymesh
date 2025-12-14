@@ -156,7 +156,7 @@ class polymesh {
         return this.points.map(v => {
             const vpoint = { x: this.pos.x + v.x, y: this.pos.y + v.y, z: this.pos.z + v.z };
             const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z };
-            return f(Polymesh.rotatePoint3D(vpoint, vpivot, this.rot));
+            return f(Polymesh.rotatePoint3Dxyz(vpoint, vpivot, this.rot));
         })
     }
 
@@ -275,7 +275,7 @@ class polymesh {
     //% weight=8
     distFromCamera() {
         if (this.isDel()) return NaN
-        const distPos = { x: Polymesh.cam.x - this.pos.x, y: Polymesh.cam.y - this.pos.y, z: Polymesh.cam.z - this.pos.z }
+        const distPos = { x: Polymesh.camPos.x - this.pos.x, y: Polymesh.camPos.y - this.pos.y, z: Polymesh.camPos.z - this.pos.z }
         const distSum = (distPos.x * distPos.x) + (distPos.y * distPos.y) + (distPos.z * distPos.z)
         return Math.sqrt(distSum)
     }

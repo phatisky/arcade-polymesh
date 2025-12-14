@@ -71,21 +71,21 @@ namespace Polymesh {
 
     control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
         const delta = control.eventContext().deltaTime
-        updateMotion(angle, delta); updateMotion(cam, delta);
+        updateMotion(camRot, delta); updateMotion(camPos, delta);
     })
 
     //% blockId=poly_camera_setpos
     //% block="set camera position to x: $x y: $y z: $z"
     //% group="main camera"
     //% weight=3
-    export function setCamPosition(x: number, y: number, z: number) { [cam.x, cam.y, cam.z] = [x, y, z] }
+    export function setCamPosition(x: number, y: number, z: number) { [camPos.x, camPos.y, camPos.z] = [x, y, z] }
 
     //% blockId=poly_angle_change
     //% block="change $choice by $x"
     //% group="main angle"
     //% weight=5
     export function changeAngle(choice: PolyAngle, x: number) {
-        changeMotion(angle, choice, x)
+        changeMotion(camRot, choice, x)
     }
     //% blockId=poly_camera_change
     //% block="change $choice by $x"
@@ -97,14 +97,14 @@ namespace Polymesh {
             case 0xD: if (dist    !== dist    + x) dist    += x; return
             case 0xE: if (fardist !== fardist + x) fardist += x; return
         }
-        changeMotion(cam, choice, x)
+        changeMotion(camPos, choice, x)
     }
     //% blockId=poly_angle_set
     //% block="set $choice to $x"
     //% group="main angle"
     //% weight=10
     export function setAngle(choice: PolyAngle, x: number) {
-        setMotion(angle, choice, x)
+        setMotion(camRot, choice, x)
     }
     //% blockId=poly_camera_set
     //% block="set $choice to $x"
@@ -116,7 +116,7 @@ namespace Polymesh {
             case 0xD: if (dist    !== x) dist    = x; return
             case 0xE: if (fardist !== x) fardist = x; return
         }
-        setMotion(cam, choice, x)
+        setMotion(camPos, choice, x)
     }
 
     //% blockId=poly_angle_get
@@ -124,7 +124,7 @@ namespace Polymesh {
     //% group="main angle"
     //% weight=4
     export function getAngle(choice: PolyAngle) {
-        return getMotion(angle, choice)
+        return getMotion(camRot, choice)
     }
 
     //% blockId=poly_camera_get
@@ -137,7 +137,7 @@ namespace Polymesh {
             case 0xD: return dist
             case 0xE: return fardist
         }
-        return getMotion(cam, choice)
+        return getMotion(camPos, choice)
     }
 
 }
