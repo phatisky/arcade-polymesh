@@ -48,6 +48,27 @@ namespace Polymesh {
         };
     };
 
+    export const rotatePoint3dToCamera = (point: Vector3) => {
+        let tmp = 0
+        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
+        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
+        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
+
+        // Transform vertices
+        let x = v.x - cam.x;
+        let y = v.y - cam.y;
+        let z = v.z - cam.z;
+        tmp = x * cosY + z * sinY, z = -x * sinY + z * cosY, x = tmp; // --- rotate around y ---
+        tmp = y * cosX - z * sinX, z =  y * sinX + z * cosX, y = tmp; // --- rotate around x ---
+        tmp = x * cosZ - y * sinZ, y =  x * sinZ + y * cosZ, x = tmp; // --- rotate around z ---
+        
+        return {
+            x:  x,
+            y:  y,
+            z:  z,
+        };
+    }
+
     const normalLen3 = (n: number) => Math.sqrt((n * n) + (n * n) + (n * n))
 
     export const rotatePointLen3D = (len: number, pivot: Vector3, angle: Vector3, code: Buffer): Vector3 =>
@@ -124,17 +145,17 @@ namespace Polymesh {
     export function resizeImage(from: Image, to: Image, center?: boolean) {
         if (isEmptyImage(from)) return;
 
-        // ถ้าขนาดเท่ากันก็ copy ตรง ๆ
+        // when size is equled use copy
         if (from.width === to.width && from.height === to.height) {
             to.drawTransparentImage(from.clone(), 0, 0);
             return;
         }
 
-        // คำนวณอัตราส่วนการขยาย
+        // calculate size ratio
         const scaleX = from.width  / to.width;
         const scaleY = from.height / to.height;
 
-        // คำนวณ offset ถ้าต้องการให้อยู่ตรงกลาง
+        // calculatr offset when set to center
         let H_scroll = 0;
         let V_scroll = 0;
         if (center) {
@@ -142,8 +163,8 @@ namespace Polymesh {
             V_scroll = ((to.height - from.height) * scaleY) / 2;
         }
 
-        // เรียก mode7img โดยใช้ scale factor
-        // A = scaleX * 256, D = scaleY * 256 (เพราะใน mode7img มีตัวหาร 1/256)
+        // call mode7img using scale factor
+        // A = scaleX * 256, D = scaleY * 256 (in mode7img have divisor as 1/256)
         mode7img(from, to, -H_scroll, -V_scroll, scaleX * 256, 0, 0, scaleY * 256);
     }
 
@@ -234,11 +255,11 @@ namespace Polymesh {
         dest.drawTransparentImage(src, x - r, y - r)
     }
 
-    export const meshDepthZ = (plm: polymesh) => {
-        if (plm.isDel()) return NaN;
-        return rotatePoint3D(plm.pos, cam, angle).z;
+    export const meshDepthZ = (msh: polymesh) => {
+        if (msh.isDel()) return NaN;
+        return rotatePoint3dToCamera(msh.pos).z;
     }
 
-    export const meshDistZ = (plm: polymesh) => (Math.abs(dist) / (Math.abs(dist) + meshDepthZ(plm)))
+    export const meshDistZ = (msh: polymesh) => (Math.abs(dist) / (Math.abs(dist) + meshDepthZ(msh)))
 
 }
