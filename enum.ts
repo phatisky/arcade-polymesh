@@ -99,11 +99,11 @@ enum PolySort {
     //% block="quick"
     quick    = 0x2,
 }
-enum MeshFlags {
+enum PolyFlags {
     //% block="Invisible"
     invisible = 0x0,
     //% block="non Culling"
     noncull   = 0x1,
-    //% block="Level of detail"
-    lod       = 0x2,
+    //% block="texture streaming"
+    texstream = 0x2,
 }
