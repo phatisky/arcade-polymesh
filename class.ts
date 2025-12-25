@@ -314,7 +314,7 @@ class polymesh {
     //% this.shadow=variables_get this.defl=myMesh
     //% group="Flag mesh"
     //% weight=10
-    setFlag(flag: PolyFlags, ok: boolean) {
+    setFlag(flag: MeshFlags, ok: boolean) {
         if (this.isDel()) return
         switch (flag) {
             case 0x0: default: this.flag.invisible = ok; break;
@@ -329,7 +329,7 @@ class polymesh {
     //% this.shadow=variables_get this.defl=myMesh
     //% group="Flag mesh"
     //% weight=5
-    getFlag(flag: PolyFlags) {
+    getFlag(flag: MeshFlags) {
         if (this.isDel()) return null
         switch (flag) {
             case 0x0: default: return this.flag.invisible;
