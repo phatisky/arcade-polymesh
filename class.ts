@@ -1,8 +1,39 @@
 
 class polymesh {
 
+    compute: {[id: string]: any};
     data: {[id: string]: any};
     protected __del: boolean; protected __prop_upd: control.FrameCallback; kind: number; idx: number;
+
+    isStaticInView() {
+        const MSHmotion: number[] = ((this.compute["motion"] as number[]) ? this.compute["motion"] : []);
+        if (MSHmotion == null) {
+            MSHmotion[0] = Polymesh.camPos.x - this.pos.x;
+            MSHmotion[1] = Polymesh.camPos.y - this.pos.y;
+            MSHmotion[2] = Polymesh.camPos.z - this.pos.z;
+            MSHmotion[3] = Polymesh.camRot.x - this.rot.x;
+            MSHmotion[4] = Polymesh.camRot.y - this.rot.y;
+            MSHmotion[5] = Polymesh.camRot.z - this.rot.z;
+            this.compute["motion"] = MSHmotion as number[];
+            return false
+        }
+        if (MSHmotion[0] != Polymesh.camPos.x - this.pos.x ||
+            MSHmotion[1] != Polymesh.camPos.y - this.pos.y ||
+            MSHmotion[2] != Polymesh.camPos.z - this.pos.z ||
+            MSHmotion[3] != Polymesh.camRot.x - this.rot.x ||
+            MSHmotion[4] != Polymesh.camRot.y - this.rot.y ||
+            MSHmotion[5] != Polymesh.camRot.z - this.rot.z) {
+            MSHmotion[0] = Polymesh.camPos.x - this.pos.x;
+            MSHmotion[1] = Polymesh.camPos.y - this.pos.y;
+            MSHmotion[2] = Polymesh.camPos.z - this.pos.z;
+            MSHmotion[3] = Polymesh.camRot.x - this.rot.x;
+            MSHmotion[4] = Polymesh.camRot.y - this.rot.y;
+            MSHmotion[5] = Polymesh.camRot.z - this.rot.z;
+            this.compute["motion"] = MSHmotion as number[];
+            return false
+        }
+        return true
+    }
 
     //% blockId=poly_kind_set
     //% blockNamespace=Polymesh
@@ -205,6 +236,7 @@ class polymesh {
     }
 
     init() {
+        this.compute = {};
         this.data = {};
         this.faces = [];
         this.points = [];

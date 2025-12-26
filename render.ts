@@ -36,6 +36,16 @@ namespace Polymesh {
         if (!msh || !output || msh.points.length <= 0 || msh.faces.length <= 0) return;
         if (msh.flag.invisible) return;
 
+        if (msh.isStaticInView()) {
+            const preoutput = msh.compute["preren"] as Image;
+            if (preoutput) if (preoutput.width === output.width && preoutput.height === output.height) {
+                output = preoutput.clone();
+                return;
+            }
+        }
+
+        const inoutput = image.create(output.width, output.height);
+
         const centerX = Math.idiv(output.width, 2), centerY = Math.idiv(output.height, 2);
 
         let tmp = 0
@@ -61,7 +71,7 @@ namespace Polymesh {
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
                 x:  centerX + x * scale * zoom,
-                y:  centerY + y * scale * zoom,
+                y:  centerY + (-y) * scale * zoom,
                 z:  z,
                 x_: v.x,
                 y_: v.y,
@@ -167,10 +177,10 @@ namespace Polymesh {
                 if (pt.z < -Math.abs(dist)) continue;
 
                 // when no image
-                if (!t.img) { fillCircleImage(output, cx, cy, square, t.color); continue; }
+                if (!t.img) { fillCircleImage(inoutput, cx, cy, square, t.color); continue; }
 
                 // fill circle if image is empty
-                if (isEmptyImage(t.img)) { fillCircleImage(output, cx, cy, square, t.color); continue; }
+                if (isEmptyImage(t.img)) { fillCircleImage(inoutput, cx, cy, square, t.color); continue; }
 
                 halfW /= 1.5;
                 halfH /= 1.5;
@@ -178,7 +188,7 @@ namespace Polymesh {
                 // Draw Simple 2D image (billboard) as quad pixel on image
                 // use distortImage or drawing without perspective distortion
                 // I will use distortImage draw as vertex quad
-                distortImage(im, output,
+                distortImage(im, inoutput,
                     cx + halfW, cy - halfH,
                     cx - halfW, cy - halfH,
                     cx - halfW, cy + halfH,
@@ -190,17 +200,17 @@ namespace Polymesh {
             if (inds.length < 2) continue;
             // Draw line canvas when have line color index
             if (lineren) {
-                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, t.color);
+                helpers.imageDrawLine(inoutput, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[1]].x, rotated[inds[1]].y, t.color);
                 if (inds.length < 3) continue;
-                helpers.imageDrawLine(output, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
-                if (inds.length > 3) helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, t.color), helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
-                else helpers.imageDrawLine(output, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
+                helpers.imageDrawLine(inoutput, rotated[inds[0]].x, rotated[inds[0]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
+                if (inds.length > 3) helpers.imageDrawLine(inoutput, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[1]].x, rotated[inds[1]].y, t.color), helpers.imageDrawLine(output, rotated[inds[3]].x, rotated[inds[3]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
+                else helpers.imageDrawLine(inoutput, rotated[inds[1]].x, rotated[inds[1]].y, rotated[inds[2]].x, rotated[inds[2]].y, t.color);
                 continue;
             }
             if (t.color > 0) {
                 // Draw line when no shape
                 if (inds.length < 3) {
-                    helpers.imageDrawLine(output,
+                    helpers.imageDrawLine(inoutput,
                         rotated[inds[0]].x, rotated[inds[0]].y,
                         rotated[inds[1]].x, rotated[inds[1]].y,
                         t.color
@@ -208,14 +218,14 @@ namespace Polymesh {
                 }
                 if (inds.length > 2) {
                     // Draw solid when is vertice shape
-                    helpers.imageFillTriangle(output,
+                    helpers.imageFillTriangle(inoutput,
                         rotated[inds[0]].x, rotated[inds[0]].y,
                         rotated[inds[1]].x, rotated[inds[1]].y,
                         rotated[inds[2]].x, rotated[inds[2]].y,
                         t.color
                     );
                     if (inds.length > 3) {
-                        helpers.imageFillTriangle(output,
+                        helpers.imageFillTriangle(inoutput,
                             rotated[inds[3]].x, rotated[inds[3]].y,
                             rotated[inds[1]].x, rotated[inds[1]].y,
                             rotated[inds[2]].x, rotated[inds[2]].y,
@@ -229,14 +239,14 @@ namespace Polymesh {
 
             // Draw texture over
             if (inds.length > 2) {
-                distortImage(im, output,
+                distortImage(im, inoutput,
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[0]].x, rotated[inds[0]].y,
                     rotated[inds[1]].x, rotated[inds[1]].y
                 );
             } else if (inds.length > 3) {
-                distortImage(im, output,
+                distortImage(im, inoutput,
                     rotated[inds[3]].x, rotated[inds[3]].y,
                     rotated[inds[2]].x, rotated[inds[2]].y,
                     rotated[inds[0]].x, rotated[inds[0]].y,
@@ -245,6 +255,9 @@ namespace Polymesh {
             }
 
         }
+
+        msh.compute["preren"] = inoutput.clone() as Image;
+        output.drawTransparentImage(inoutput, 0, 0);
 
     }
 
