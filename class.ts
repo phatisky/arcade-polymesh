@@ -347,8 +347,6 @@ class polymesh extends polyview {
         this.faces = [];
         this.points = [];
         this.pivot = { x: 0, y: 0, z: 0 };
-        this.rot = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
-        this.pos = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, ax: 0, ay: 0, az: 0, fx: 0, fy: 0, fz: 0 };
         this.flag = { invisible: false, noncull: false, lod: false };
         this.createFacesImgLODcache();
     }
