@@ -1,16 +1,16 @@
 
 class polyview {
-    __prop_upd: control.FrameCallback; __del: boolean; protected __unDel: boolean;
+    protected __prop_upd: control.FrameCallback; __del: boolean; protected __unDel: boolean;
 
     public init() { }
 
-    public __loopCore() { }
+    public __onLoop() { }
 
     public loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = Fx8(control.eventContext().deltaTime)
             this.motionUpdateRot(delta), this.motionUpdatePos(delta);
-            this.__loopCore();
+            this.__onLoop();
         });
     }
 
@@ -27,12 +27,12 @@ class polyview {
         return this.__del
     }
 
-    public __delDo() { }
+    public __onDel() { }
 
     del() {
         if (this.__unDel) return;
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
-        this.__delDo();
+        this.__onDel();
     }
 
     protected rot_x: Fx8;  protected rot_y: Fx8;  protected rot_z: Fx8;
@@ -337,13 +337,9 @@ class polymesh extends polyview {
         })
     };
 
-    __loopCore() {
+    __onLoop() {
         this.updImgLodCacheSlot();
         this.updImgLodCache();
-    }
-
-    loop() {
-        super.loop()
     }
 
     init() {
@@ -363,7 +359,7 @@ class polymesh extends polyview {
         this.idx = (idx | 0);
     }
 
-    __delDo() {
+    __onDel() {
         this.faces_imgs_cache_ref = null, this.faces_imgs = null, this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
         Polymesh.__meshes_del(this);
     }
