@@ -257,7 +257,7 @@ namespace Polymesh {
 
     export const meshDepthZ = (msh: polymesh) => {
         if (msh.isDel()) return NaN;
-        return rotatePoint3Dyxz(msh.pos, camPos, camRot).z;
+        return rotatePoint3Dyxz(msh.pos, Polymesh.camview.pos, Polymesh.camview.rot).z;
     }
 
     export const meshDistZ = (msh: polymesh) => (Math.abs(dist) / (Math.abs(dist) + meshDepthZ(msh)))
