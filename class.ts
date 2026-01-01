@@ -6,7 +6,7 @@ class polyview {
 
     public __onLoop() { }
 
-    public loop() {
+    loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = Fx8(control.eventContext().deltaTime)
             this.motionUpdateRot(delta), this.motionUpdatePos(delta);
@@ -32,6 +32,7 @@ class polyview {
     del() {
         if (this.__unDel) return;
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
+        this.rot = null, this.pos = null;
         this.__onDel();
     }
 
@@ -355,7 +356,7 @@ class polymesh extends polyview {
     }
 
     __onDel() {
-        this.faces_imgs_cache_ref = null, this.faces_imgs = null, this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
+        this.faces_imgs_cache_ref = null, this.faces_imgs = null, this.faces = null, this.points = null, this.pivot = null, this.flag = null, this.data = null;
         Polymesh.__meshes_del(this);
     }
 
