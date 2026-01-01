@@ -26,28 +26,19 @@ namespace Polymesh {
         return htxt;
     }
 
-    export const makeWave = (angle: Vector3): Wave3 => ({
-        cosX: Math.cos(angle.x), sinX: Math.sin(angle.x),
-        cosY: Math.cos(angle.y), sinY: Math.sin(angle.y),
-        cosZ: Math.cos(angle.z), sinZ: Math.sin(angle.z),
-    })
-
-    export const rotatePoint3Dxyz = (point: Vector3, pivot: Vector3, wave: Wave3): Vector3 => {
+    export const rotatePoint3Dxyz = (point: Vector3, pivot: Vector3, angle: Vector3): Vector3 => {
         let tmp = 0
+        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
+        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
+        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
         // move point with pivot to 1st place
         let dx = point.x - pivot.x;
         let dy = point.y - pivot.y;
         let dz = point.z - pivot.z;
 
-        tmp = dy * wave.cosX - dz * wave.sinX; dz =  dy * wave.sinX + dz * wave.cosX; dy = tmp; // --- rotate around x ---
-        tmp = dx * wave.cosY + dz * wave.sinY; dz = -dx * wave.sinY + dz * wave.cosY; dx = tmp; // --- rotate around y ---
-        tmp = dx * wave.cosZ - dy * wave.sinZ; dy =  dx * wave.sinZ + dy * wave.cosZ; dx = tmp; // --- rotate around z ---
-
-        const normalv = 0.1 / Math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
-        // normal vector
-        dx += (dx === 0 ? 0 : normalv);
-        dy += (dy === 0 ? 0 : normalv);
-        dz += (dz === 0 ? 0 : normalv);
+        tmp = dy * cosX - dz * sinX; dz =  dy * sinX + dz * cosX; dy = tmp; // --- rotate around x ---
+        tmp = dx * cosY + dz * sinY; dz = -dx * sinY + dz * cosY; dx = tmp; // --- rotate around y ---
+        tmp = dx * cosZ - dy * sinZ; dy =  dx * sinZ + dy * cosZ; dx = tmp; // --- rotate around z ---
 
         // move back to real position
         return {
@@ -57,22 +48,19 @@ namespace Polymesh {
         };
     };
 
-    export const rotatePoint3Dyxz = (point: Vector3, pivot: Vector3, wave: Wave3) => {
+    export const rotatePoint3Dyxz = (point: Vector3, pivot: Vector3, angle: Vector3) => {
         let tmp = 0
+        const cosX = Math.cos(angle.x), sinX = Math.sin(angle.x);
+        const cosY = Math.cos(angle.y), sinY = Math.sin(angle.y);
+        const cosZ = Math.cos(angle.z), sinZ = Math.sin(angle.z);
 
         // Transform vertices
         let dx = point.x - pivot.x;
         let dy = point.y - pivot.y;
         let dz = point.z - pivot.z;
-        tmp = dx * wave.cosY + dz * wave.sinY, dz = -dx * wave.sinY + dz * wave.cosY, dx = tmp; // --- rotate around y ---
-        tmp = dy * wave.cosX - dz * wave.sinX, dz =  dy * wave.sinX + dz * wave.cosX, dy = tmp; // --- rotate around x ---
-        tmp = dx * wave.cosZ - dy * wave.sinZ, dy =  dx * wave.sinZ + dy * wave.cosZ, dx = tmp; // --- rotate around z ---
-
-        const normalv = 0.1 / Math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
-        // normal vector
-        dx += (dx === 0 ? 0 : normalv);
-        dy += (dy === 0 ? 0 : normalv);
-        dz += (dz === 0 ? 0 : normalv);
+        tmp = dx * cosY + dz * sinY, dz = -dx * sinY + dz * cosY, dx = tmp; // --- rotate around y ---
+        tmp = dy * cosX - dz * sinX, dz =  dy * sinX + dz * cosX, dy = tmp; // --- rotate around x ---
+        tmp = dx * cosZ - dy * sinZ, dy =  dx * sinZ + dy * cosZ, dx = tmp; // --- rotate around z ---
         
         return {
             x:  dx + pivot.x,
@@ -82,6 +70,9 @@ namespace Polymesh {
     }
 
     const normalLen3 = (n: number) => Math.sqrt((n * n) + (n * n) + (n * n))
+
+    export const rotatePointLen3D = (len: number, pivot: Vector3, angle: Vector3, code: Buffer): Vector3 =>
+        rotatePoint3Dxyz({ x: pivot.x + (code[0] ? normalLen3(len) : 0), y: pivot.y + (code[1] ? -normalLen3(len) : 0), z: pivot.z + (code[2] ? normalLen3(len) : 0)}, pivot, angle);
 
     const computeNormal = (v0: Vector3_, v1: Vector3_, v2: Vector3_): Vector3 => {
         // make vector from triangle
@@ -266,7 +257,7 @@ namespace Polymesh {
 
     export const meshDepthZ = (msh: polymesh) => {
         if (msh.isDel()) return NaN;
-        return rotatePoint3Dyxz(msh.pos, camview.pos, camview.wave).z;
+        return rotatePoint3Dyxz(msh.pos, Polymesh.camview.pos, Polymesh.camview.rot).z;
     }
 
     export const meshDistZ = (msh: polymesh) => (Math.abs(dist) / (Math.abs(dist) + meshDepthZ(msh)))

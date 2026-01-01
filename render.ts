@@ -38,11 +38,10 @@ namespace Polymesh {
 
         const centerX = Math.idiv(output.width, 2), centerY = Math.idiv(output.height, 2);
 
-        const cosX = camview.wave.cosY, sinX = camview.wave.sinY;
-        const cosY = camview.wave.cosX, sinY = camview.wave.sinX;
-        const cosZ = camview.wave.cosZ, sinZ = camview.wave.sinZ;
-
         let tmp = 0
+        const cosX = Math.cos(camview.rot.x), sinX = Math.sin(camview.rot.x);
+        const cosY = Math.cos(camview.rot.y), sinY = Math.sin(camview.rot.y);
+        const cosZ = Math.cos(camview.rot.z), sinZ = Math.sin(camview.rot.z);
 
         // Transform vertices
         const rotated = msh.pointCam((v) => {
@@ -53,11 +52,11 @@ namespace Polymesh {
             tmp = y * cosX - z * sinX, z =  y * sinX + z * cosX, y = tmp; // --- rotate around x ---
             tmp = x * cosZ - y * sinZ, y =  x * sinZ + y * cosZ, x = tmp; // --- rotate around z ---
 
-            const normalv = 0.1 / Math.sqrt((x * x) + (y * y) + (z * z))
+            const vsum = 0.1 / Math.sqrt((x * x) + (y * y) + (z * z))
             // camera offset
-            x += (x === 0 ? 0 : normalv);
-            y += (y === 0 ? 0 : normalv);
-            z += (z === 0 ? 0 : normalv);
+            x += (x === 0 ? 0 : vsum);
+            y += (y === 0 ? 0 : vsum);
+            z += (z === 0 ? 0 : vsum);
             // Perspective
             const scale = Math.abs(dist) / (Math.abs(dist) + z);
             return {
