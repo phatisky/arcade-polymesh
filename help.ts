@@ -186,6 +186,8 @@ namespace Polymesh {
 
     export function avgZ(rot: Vector3[], inds: number[]) { return (inds.reduce((s, i) => s + rot[i].z, 0) / inds.length); }
 
+    export function farZ(rot: Vector3[], inds: number[]) { return (inds.reduce((s, i) => Math.max(s, rot[i].z), rot[0].z)); }
+
     export function avgZs(rot: Vector3[][], n: number, inds: number[]) { return (inds.reduce((s, i) => s + rot[i][n].z, 0) / inds.length); }
 
     export function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)); }
@@ -266,7 +268,7 @@ namespace Polymesh {
 
     export const meshDepthZ = (msh: polymesh) => {
         if (msh.isDel()) return NaN;
-        return rotatePoint3Dyxz(msh.pos, camview.pos, camview.wave).z;
+        return rotatePoint3Dxyz(msh.pos, camview.pos, camview.wave).z;
     }
 
     export const meshDistZ = (msh: polymesh) => (Math.abs(dist) / (Math.abs(dist) + meshDepthZ(msh)))
