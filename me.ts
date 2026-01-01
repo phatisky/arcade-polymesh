@@ -16,7 +16,7 @@ namespace Polymesh {
     export interface Wave3 {
         sinX:   number, sinY:   number, sinZ:   number,
         cosX:   number, cosY:   number, cosZ:   number,
-        //sqrtX?: number, sqrtY?: number, sqrtZ?: number,
+        sqrtX?: number, sqrtY?: number, sqrtZ?: number,
     }
 
     const __meshes: polymesh[] = [];
@@ -24,7 +24,7 @@ namespace Polymesh {
     const __meshes_null_refs: number[] = [];
     const __meshes_null_refh: {[id: number]: boolean} = {};
     const __meshes_kinds: {[kind: number]: polymesh[]} = {};
-    export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2, REDUSPOWER = ((PHI - 1) * Math.PI)
+    export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2, REDUSPOWER = (PHI - 1) * Math.PI
 
     export const camview = new polyview(true);
     export let zoom = 1, sort = 0x0, dist = 150, fardist = 0;

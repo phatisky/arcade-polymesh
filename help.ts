@@ -43,6 +43,12 @@ namespace Polymesh {
         tmp = dx * wave.cosY + dz * wave.sinY; dz = -dx * wave.sinY + dz * wave.cosY; dx = tmp; // --- rotate around y ---
         tmp = dx * wave.cosZ - dy * wave.sinZ; dy =  dx * wave.sinZ + dy * wave.cosZ; dx = tmp; // --- rotate around z ---
 
+        const normalv = 0.1 / Math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
+        // normal vector
+        dx += (dx === 0 ? 0 : normalv);
+        dy += (dy === 0 ? 0 : normalv);
+        dz += (dz === 0 ? 0 : normalv);
+
         // move back to real position
         return {
             x: dx + pivot.x,
@@ -61,6 +67,12 @@ namespace Polymesh {
         tmp = dx * wave.cosY + dz * wave.sinY, dz = -dx * wave.sinY + dz * wave.cosY, dx = tmp; // --- rotate around y ---
         tmp = dy * wave.cosX - dz * wave.sinX, dz =  dy * wave.sinX + dz * wave.cosX, dy = tmp; // --- rotate around x ---
         tmp = dx * wave.cosZ - dy * wave.sinZ, dy =  dx * wave.sinZ + dy * wave.cosZ, dx = tmp; // --- rotate around z ---
+
+        const normalv = 0.1 / Math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
+        // normal vector
+        dx += (dx === 0 ? 0 : normalv);
+        dy += (dy === 0 ? 0 : normalv);
+        dz += (dz === 0 ? 0 : normalv);
         
         return {
             x:  dx + pivot.x,
@@ -254,7 +266,7 @@ namespace Polymesh {
 
     export const meshDepthZ = (msh: polymesh) => {
         if (msh.isDel()) return NaN;
-        return rotatePoint3Dyxz(msh.pos, Polymesh.camview.pos, Polymesh.camview.wave).z;
+        return rotatePoint3Dyxz(msh.pos, camview.pos, camview.wave).z;
     }
 
     export const meshDistZ = (msh: polymesh) => (Math.abs(dist) / (Math.abs(dist) + meshDepthZ(msh)))
