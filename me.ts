@@ -5,10 +5,19 @@ namespace Polymesh {
     export interface Face { indices: number[], color: number, offset?: number, scale?: number, img?: Image }
     export interface FaceLOD { indices: number[], color: number, offset?: number, scale?: number, img?: Image, imgs?: Image[] }
 
-    export interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
+    export interface Motion3 {
+        x:  number, y:  number, z: number,
+        vx: number, vy: number, vz: number,
+        ax: number, ay: number, az: number,
+        fx: number, fy: number, fz: number,
+    }
     export interface Vector3 { x: number, y: number, z: number }
     export interface Vector3_ { x: number, y: number, z: number, x_: number, y_: number, z_: number }
-    export interface Wave3 { sinX: number, sinY: number, sinZ: number, cosX: number, cosY: number, cosZ: number }
+    export interface Wave3 {
+        sinX:   number, sinY:   number, sinZ:   number,
+        cosX:   number, cosY:   number, cosZ:   number,
+        //sqrtX?: number, sqrtY?: number, sqrtZ?: number,
+    }
 
     const __meshes: polymesh[] = [];
     const __meshes_refs: {[id: number]: number[]} = {};

@@ -8,6 +8,11 @@ namespace Fx {
     export function icos(theta: Fx8) {
         return (Math.isin((theta as any as number * 0.2 + 64) & 0xff) - 128) as any as Fx8;
     }
+
+    export function sqrt(x: Fx8): Fx8 {
+        return add(106 as any as Fx8, mul(151 as any as Fx8, x));
+    }
+
 }
 
 class polyview {
@@ -47,12 +52,12 @@ class polyview {
         this.__onDel();
     }
 
-    protected wave_sinX: Fx8; protected wave_sinY: Fx8; protected wave_sinZ: Fx8;
-    protected wave_cosX: Fx8; protected wave_cosY: Fx8; protected wave_cosZ: Fx8;
+    protected wave_sinX:  Fx8; protected wave_sinY:  Fx8; protected wave_sinZ:  Fx8;
+    protected wave_cosX:  Fx8; protected wave_cosY:  Fx8; protected wave_cosZ:  Fx8;
     set wave(v: Polymesh.Wave3) {
         if (!v || v == null) {
-            this.wave_sinX = null; this.wave_sinY = null; this.wave_sinZ = null;
-            this.wave_cosX = null; this.wave_cosY = null; this.wave_cosZ = null;
+            this.wave_sinX  = null; this.wave_sinY  = null; this.wave_sinZ  = null;
+            this.wave_cosX  = null; this.wave_cosY  = null; this.wave_cosZ  = null;
             return
         }
         this.wave_sinX = Fx8(v.sinX); this.wave_sinY = Fx8(v.sinY); this.wave_sinZ = Fx8(v.sinZ);
@@ -120,6 +125,9 @@ class polyview {
     protected motionUpdateWave() {
         this.wave_sinX = Fx.isin(this.rot_x), this.wave_sinY = Fx.isin(this.rot_y), this.wave_sinZ = Fx.isin(this.rot_z)
         this.wave_cosX = Fx.icos(this.rot_x), this.wave_cosY = Fx.icos(this.rot_y), this.wave_cosZ = Fx.icos(this.rot_z)
+        //this.wave_sqrtX = Fx.sqrt(Fx.add(Fx.mul(this.wave_sinX, this.wave_sinX), Fx.mul(this.wave_cosX, this.wave_cosX)));
+        //this.wave_sqrtY = Fx.sqrt(Fx.add(Fx.mul(this.wave_sinY, this.wave_sinY), Fx.mul(this.wave_cosY, this.wave_cosY)));
+        //this.wave_sqrtZ = Fx.sqrt(Fx.add(Fx.mul(this.wave_sinZ, this.wave_sinZ), Fx.mul(this.wave_cosZ, this.wave_cosZ)));
     }
     protected motionUpdatePos(delta: Fx8) {
         const zeroF = Fx8(0), oneF = Fx8(1)
