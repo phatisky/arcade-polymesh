@@ -60,8 +60,8 @@ class polyview {
     }
     get wave(): Polymesh.Wave3 {
         return {
-            sinX: Fx.toFloat(this.wave_sinX) * Polymesh.THETA2RADIAN, sinY: Fx.toFloat(this.wave_sinY) * Polymesh.THETA2RADIAN, sinZ: Fx.toFloat(this.wave_sinZ) * Polymesh.THETA2RADIAN,
-            cosX: Fx.toFloat(this.wave_cosX) * Polymesh.THETA2RADIAN, cosY: Fx.toFloat(this.wave_cosY) * Polymesh.THETA2RADIAN, cosZ: Fx.toFloat(this.wave_cosZ) * Polymesh.THETA2RADIAN,
+            sinX: Fx.toFloat(this.wave_sinX) * Polymesh.REDUSPOWER, sinY: Fx.toFloat(this.wave_sinY) * Polymesh.REDUSPOWER, sinZ: Fx.toFloat(this.wave_sinZ) * Polymesh.REDUSPOWER,
+            cosX: Fx.toFloat(this.wave_cosX) * Polymesh.REDUSPOWER, cosY: Fx.toFloat(this.wave_cosY) * Polymesh.REDUSPOWER, cosZ: Fx.toFloat(this.wave_cosZ) * Polymesh.REDUSPOWER,
         }
     }
 
