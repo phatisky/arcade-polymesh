@@ -177,6 +177,8 @@ namespace Polymesh {
 
     export function avgZ(rot: Vector3[], inds: number[]) { return (inds.reduce((s, i) => s + rot[i].z, 0) / inds.length); }
 
+    export function farZ(rot: Vector3[], inds: number[]) { return (inds.reduce((s, i) => Math.max(s, rot[i].z), rot[0].z)) * inds.length; }
+
     export function avgZs(rot: Vector3[][], n: number, inds: number[]) { return (inds.reduce((s, i) => s + rot[i][n].z, 0) / inds.length); }
 
     export function isEmptyImage(img: Image) { return img.equals(image.create(img.width, img.height)); }

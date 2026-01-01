@@ -70,12 +70,13 @@ namespace Polymesh {
         }) as Vector3_[];
 
         // Sort triangles
+        const trisCMP = (a: Polymesh.FaceLOD, b: Polymesh.FaceLOD) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)
         const tris = msh.vfaces.slice();
         switch (sort) {
-            case 0x0: tris.sort((a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
-            case 0x1: quickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
+            case 0x0: tris.sort((a, b) => trisCMP(a, b)); break;
+            case 0x1: quickSort(tris, (a, b) => trisCMP(a, b)); break;
             case 0x2:
-            default: duoQuickSort(tris, (a, b) => avgZ(rotated, b.indices) - avgZ(rotated, a.indices)); break;
+            default: duoQuickSort(tris, (a, b) => trisCMP(a, b)); break;
         }
 
         // Render
