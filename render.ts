@@ -135,7 +135,7 @@ namespace Polymesh {
                 }
             } else if (isOutOfAreaOnFace(rotated, inds, output.width, output.height)) if (inds.every(i => isOutOfArea(rotated[i].x, rotated[i].y, output.width, output.height))) continue;
 
-            const culling = (!msh.flag.noncull || t.offset !== 0)
+            const culling = msh.flag.cull
 
             // Backface culling
             //if (culling)
