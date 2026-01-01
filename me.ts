@@ -8,13 +8,14 @@ namespace Polymesh {
     export interface Motion3 { x: number, y: number, z: number, vx: number, vy: number, vz: number, ax: number, ay: number, az: number, fx: number, fy: number, fz: number }
     export interface Vector3 { x: number, y: number, z: number }
     export interface Vector3_ { x: number, y: number, z: number, x_: number, y_: number, z_: number }
+    export interface Wave3 { sinX: number, sinY: number, sinZ: number, cosX: number, cosY: number, cosZ: number }
 
     const __meshes: polymesh[] = [];
     const __meshes_refs: {[id: number]: number[]} = {};
     const __meshes_null_refs: number[] = [];
     const __meshes_null_refh: {[id: number]: boolean} = {};
     const __meshes_kinds: {[kind: number]: polymesh[]} = {};
-    export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2
+    export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2, THETA2RADIAN = ((PHI - 1) * Math.PI)
 
     export const camview = new polyview(true);
     export let zoom = 1, sort = 0x0, dist = 150, fardist = 0;

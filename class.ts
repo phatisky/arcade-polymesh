@@ -1,4 +1,15 @@
 
+namespace Fx {
+    
+    export function isin(theta: Fx8) {
+        return (Math.isin((theta as any as number * 0.2) & 0xff) - 128) as any as Fx8;
+    }
+
+    export function icos(theta: Fx8) {
+        return (Math.isin((theta as any as number * 0.2 + 64) & 0xff) - 128) as any as Fx8;
+    }
+}
+
 class polyview {
     protected __prop_upd: control.FrameCallback; __del: boolean; protected __unDel: boolean;
 
@@ -9,7 +20,7 @@ class polyview {
     public loop() {
         this.__prop_upd = control.eventContext().registerFrameHandler(scene.PRE_RENDER_UPDATE_PRIORITY, () => {
             const delta = Fx8(control.eventContext().deltaTime)
-            this.motionUpdateRot(delta), this.motionUpdatePos(delta);
+            this.motionUpdateRot(delta), this.motionUpdatePos(delta), this.motionUpdateWave();
             this.__onLoop();
         });
     }
@@ -32,7 +43,26 @@ class polyview {
     del() {
         if (this.__unDel) return;
         this.__del = true; control.eventContext().unregisterFrameHandler(this.__prop_upd);
+        this.pos = null, this.rot = null, this.wave = null;
         this.__onDel();
+    }
+
+    protected wave_sinX: Fx8; protected wave_sinY: Fx8; protected wave_sinZ: Fx8;
+    protected wave_cosX: Fx8; protected wave_cosY: Fx8; protected wave_cosZ: Fx8;
+    set wave(v: Polymesh.Wave3) {
+        if (!v || v == null) {
+            this.wave_sinX = null; this.wave_sinY = null; this.wave_sinZ = null;
+            this.wave_cosX = null; this.wave_cosY = null; this.wave_cosZ = null;
+            return
+        }
+        this.wave_sinX = Fx8(v.sinX); this.wave_sinY = Fx8(v.sinY); this.wave_sinZ = Fx8(v.sinZ);
+        this.wave_cosX = Fx8(v.cosX); this.wave_cosY = Fx8(v.cosY); this.wave_cosZ = Fx8(v.cosZ);
+    }
+    get wave(): Polymesh.Wave3 {
+        return {
+            sinX: Fx.toFloat(this.wave_sinX) * Polymesh.THETA2RADIAN, sinY: Fx.toFloat(this.wave_sinY) * Polymesh.THETA2RADIAN, sinZ: Fx.toFloat(this.wave_sinZ) * Polymesh.THETA2RADIAN,
+            cosX: Fx.toFloat(this.wave_cosX) * Polymesh.THETA2RADIAN, cosY: Fx.toFloat(this.wave_cosY) * Polymesh.THETA2RADIAN, cosZ: Fx.toFloat(this.wave_cosZ) * Polymesh.THETA2RADIAN,
+        }
     }
 
     protected rot_x: Fx8;  protected rot_y: Fx8;  protected rot_z: Fx8;
@@ -87,6 +117,10 @@ class polyview {
         }
     }
 
+    protected motionUpdateWave() {
+        this.wave_sinX = Fx.isin(this.rot_x), this.wave_sinY = Fx.isin(this.rot_y), this.wave_sinZ = Fx.isin(this.rot_z)
+        this.wave_cosX = Fx.icos(this.rot_x), this.wave_cosY = Fx.icos(this.rot_y), this.wave_cosZ = Fx.icos(this.rot_z)
+    }
     protected motionUpdatePos(delta: Fx8) {
         const zeroF = Fx8(0), oneF = Fx8(1)
         // Acceleration of position
@@ -333,7 +367,7 @@ class polymesh extends polyview {
         return this.points.map(v => {
             const vpoint = { x: this.pos.x + v.x, y: this.pos.y + v.y, z: this.pos.z + v.z };
             const vpivot = { x: this.pos.x + this.pivot.x, y: this.pos.y + this.pivot.y, z: this.pos.z + this.pivot.z };
-            return f(Polymesh.rotatePoint3Dxyz(vpoint, vpivot, this.rot));
+            return f(Polymesh.rotatePoint3Dxyz(vpoint, vpivot, this.wave));
         })
     };
 
@@ -358,7 +392,7 @@ class polymesh extends polyview {
     }
 
     __onDel() {
-        this.faces_imgs_cache_ref = null, this.faces_imgs = null, this.faces = null, this.points = null, this.pivot = null, this.rot = null, this.pos = null, this.flag = null, this.data = null;
+        this.faces_imgs_cache_ref = null, this.faces_imgs = null, this.faces = null, this.points = null, this.pivot = null, this.flag = null, this.data = null;
         Polymesh.__meshes_del(this);
     }
 
