@@ -15,15 +15,15 @@ namespace Polymesh {
     const __meshes_null_refs: number[] = [];
     const __meshes_null_refh: {[id: number]: boolean} = {};
     const __meshes_kinds: {[kind: number]: polymesh[]} = {};
-    export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2, THETA2RADIAN = ((PHI - 1) * Math.PI)
+    export const PHI = 1.6180339887, NORMAL_DIST = 1.665, LOD_DIST = 1.2, REDUSPOWER = ((PHI - 1) * Math.PI)
 
     export const camview = new polyview(true);
     export let zoom = 1, sort = 0x0, dist = 150, fardist = 0;
 
     export function __meshes_upd_kind(msh: polymesh, kind: number) {
         if (msh.kind === (kind | 0)) return;
-        __meshes_kinds[msh.kind] = __meshes_refs[msh.kind].map(i => __meshes[i]);
         __meshes_refs[msh.kind] = __meshes_refs[msh.kind].filter(idx => idx !== msh.idx);
+        __meshes_kinds[msh.kind] = __meshes_refs[msh.kind].map(i => __meshes[i]);
         msh.kind = kind | 0;
         if (!__meshes_refs[msh.kind]) __meshes_refs[msh.kind] = [];
         if (!__meshes_kinds[kind]) __meshes_kinds[kind] = [];
@@ -32,8 +32,8 @@ namespace Polymesh {
     }
 
     export function __meshes_del(msh: polymesh) {
-        __meshes_kinds[msh.kind] = __meshes_kinds[msh.kind].filter(m => m !== msh);
         __meshes_refs[msh.kind] = __meshes_refs[msh.kind].filter(idx => idx !== msh.idx);
+        __meshes_kinds[msh.kind] = __meshes_refs[msh.kind].map(i => __meshes[i]);
         __meshes[msh.idx] = null;
         __meshes_null_refs.push(msh.idx);
         __meshes_null_refh[msh.idx] = true;
@@ -53,7 +53,7 @@ namespace Polymesh {
     //% group="create"
     //% weight=10
     export function create(kind: number) {
-        if (!__meshes_refs[kind]) __meshes_refs[kind] = []
+        if (!__meshes_refs[kind]) __meshes_refs[kind] = [];
         let idx = -1
         if (__meshes_null_refs.length > 0) {
             idx = __meshes_null_refs.pop()
