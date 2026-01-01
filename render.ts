@@ -138,9 +138,11 @@ namespace Polymesh {
             const culling = (!msh.flag.noncull || t.offset !== 0)
 
             // Backface culling
-            if (culling)
-                if ((inds_[0] && !shouldRenderFace(rotated, inds_[0], camview.pos, t.offset)) &&
-                    (inds_[1] && !shouldRenderFace(rotated, inds_[1], camview.pos, t.offset))) continue;
+            //if (culling)
+            //    if ((inds_[0] && !shouldRenderFace(rotated, inds_[0], camview.pos, t.offset)) &&
+            //        (inds_[1] && !shouldRenderFace(rotated, inds_[1], camview.pos, t.offset))) continue;
+
+            if (culling) if (shouldCull(avgXYZ(rotated, inds), t.offset)) continue;
 
             const idx = t.indices[0];
             const pt = rotated[idx];

@@ -128,6 +128,23 @@ namespace Polymesh {
         return true;
     }
 
+    export function shouldCull(rotatedNormal: Vector3, faceOffset: number): boolean {
+        // สมมติ view direction คือ (0, 0, 1) หรือ (0, 0, -1) ขึ้นกับ convention ของคุณ
+        // ที่นี่สมมติว่ามองไปทาง +Z → normal ชี้มาหากล้อง = dot > 0 = visible
+        if (faceOffset === 0) return false
+        const dot = rotatedNormal.z; // หรือ rotatedNormal.x / y ขึ้นกับแกนมอง
+
+        // เพิ่ม bias จาก faceOffset
+        // ค่า faceOffset > 0 = ผ่อนปรนมากขึ้น (ยาก cull)
+        // ค่า faceOffset < 0 = เข้มงวดขึ้น (ง่าย cull)
+
+        const GLOBAL_CULL_BIAS = 0.01; // หรือ 0.0001 ขึ้นกับ scale ของคุณ
+
+        const CULLED = dot <= (GLOBAL_CULL_BIAS + (faceOffset || 0));
+        if (faceOffset > 0) return !CULLED
+        return CULLED
+    }
+
     const calcMode7 = (a: number, b: number) => a + 0.5 * b
 
     const mode7img = (from: Image, to: Image, H_scroll: number, V_scroll: number, A: number, B: number, C: number, D: number) => {
@@ -176,6 +193,13 @@ namespace Polymesh {
     export function isOutOfArea(x: number, y: number, width: number, height: number, scale?: number) { return (isOutOfRange(x, width, scale) || isOutOfRange(y, height, scale)); }
 
     export function avgZ(rot: Vector3[], inds: number[]) { return (inds.reduce((s, i) => s + rot[i].z, 0) / inds.length); }
+
+    export function avgXYZ(rot: Vector3[], inds: number[]) { return {
+        x: (inds.reduce((s, i) => s + rot[i].x, 0) / inds.length),
+        y: (inds.reduce((s, i) => s + rot[i].y, 0) / inds.length),
+        z: (inds.reduce((s, i) => s + rot[i].z, 0) / inds.length),
+        }; 
+    }
 
     export function farZ(rot: Vector3[], inds: number[]) { return (inds.reduce((s, i) => Math.max(s, rot[i].z), rot[0].z)) * inds.length; }
 

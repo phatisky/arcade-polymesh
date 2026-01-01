@@ -264,7 +264,7 @@ class polymesh extends polyview {
     }
 
     protected updImgLodCache() {
-        if (!this.flag.lod) return;
+        if (!this.flag.texStream) return;
         const imgNewData = this.faces_imgs.filter((v, i) => {
             const cimg = this.faces[i].img
             if (!cimg) return false;
@@ -277,7 +277,7 @@ class polymesh extends polyview {
     }
 
     protected updImgLodCacheSlot() {
-        if (!this.flag.lod) return;
+        if (!this.flag.texStream) return;
         if (this.faces_imgs.length === this.faces.length) return;
         const newLODcache = this.faces.map((v, i) => {
             if (!v.img) return {};
@@ -327,7 +327,7 @@ class polymesh extends polyview {
         })
     }
 
-    points: Polymesh.Vector3[]; pivot: Polymesh.Vector3; flag: { invisible: boolean, noncull: boolean, lod: boolean }
+    points: Polymesh.Vector3[]; pivot: Polymesh.Vector3; flag: { invisible: boolean, noncull: boolean, lod: boolean, texStream: boolean }
 
     pointCam<T>(f: (v: Polymesh.Vector3) => T|Polymesh.Vector3) {
         return this.points.map(v => {
@@ -347,7 +347,7 @@ class polymesh extends polyview {
         this.faces = [];
         this.points = [];
         this.pivot = { x: 0, y: 0, z: 0 };
-        this.flag = { invisible: false, noncull: false, lod: false };
+        this.flag = { invisible: false, noncull: false, lod: false, texStream: false };
         this.createFacesImgLODcache();
     }
 
@@ -456,7 +456,8 @@ class polymesh extends polyview {
         switch (flag) {
             case 0x0: default: this.flag.invisible = ok; break;
             case 0x1:          this.flag.noncull   = ok; break;
-            case 0x2:          this.flag.lod       = ok; break;
+            case 0x2:          this.flag.texStream = ok; break;
+            case 0x3:          this.flag.lod       = ok; break;
         }
     }
 
@@ -471,7 +472,8 @@ class polymesh extends polyview {
         switch (flag) {
             case 0x0: default: return this.flag.invisible;
             case 0x1:          return this.flag.noncull;
-            case 0x2:          return this.flag.lod;
+            case 0x2:          return this.flag.texStream;
+            case 0x3:          return this.flag.lod;
         }
         return false
     }
