@@ -36,7 +36,7 @@ class polyview {
         this.__onDel();
     }
 
-    protected rot_x: Fx8;  protected rot_y: Fx8;  protected rot_z: Fx8;
+    protected rot_x:  Fx8; protected rot_y:  Fx8; protected rot_z:  Fx8;
     protected rot_vx: Fx8; protected rot_vy: Fx8; protected rot_vz: Fx8;
     protected rot_ax: Fx8; protected rot_ay: Fx8; protected rot_az: Fx8;
     protected rot_fx: Fx8; protected rot_fy: Fx8; protected rot_fz: Fx8;
