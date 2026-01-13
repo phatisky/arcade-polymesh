@@ -261,8 +261,23 @@ class polymesh extends polyview {
         return Math.floor(this.kind);
     }
 
+    protected makeFaceImgStack(idx: number, img: Image) {
+        this.faces_imgs_cache_stack[idx].unshift(img);
+        if (this.faces_imgs_cache_stack[idx].length > 8) {
+            const oldImg = this.faces_imgs_cache_stack[idx].pop();
+            const oldImgh = Polymesh.hashImage(oldImg);
+            delete this.faces_imgs[idx][oldImgh]
+        }
+    }
+
     protected createFacesImgLODcache() {
         this.faces_imgs = this.faces.map(_ => ({}))
+        this.faces_imgs_cache_stack = this.faces.map(_ => ([]))
+    }
+
+    protected resetFacesImgLODcache(idx: number) {
+        this.faces_imgs[idx] = {}
+        this.faces_imgs_cache_stack[idx] = []
     }
 
     protected updImgLodCache() {
@@ -270,23 +285,38 @@ class polymesh extends polyview {
         const imgNewData = this.faces_imgs.filter((v, i) => {
             const cimg = this.faces[i].img
             if (!cimg) return false;
+            this.makeFaceImgStack(i, cimg)
             const imgh = Polymesh.hashImage(cimg)
             return !v[imgh];
         })
         if (imgNewData.length <= 0) return;
         const imgNewDataInds = imgNewData.map((_, i) => i)
-        while (imgNewDataInds.length > 0) this.updFaceImg(imgNewDataInds.pop());
+        while (imgNewDataInds.length > 0) {
+            const idx = imgNewDataInds.pop()
+            this.updFaceImg(idx)
+        };
     }
 
     protected updImgLodCacheSlot() {
         if (!this.flag.texStream) return;
         if (this.faces_imgs.length === this.faces.length) return;
+        if (this.faces.length > this.faces_imgs.length) {
+            while (this.faces.length > this.faces_imgs.length) {
+                this.faces_imgs.push({})
+            }
+        } else if (this.faces.length < this.faces_imgs.length) {
+            while (this.faces.length < this.faces_imgs.length) {
+                this.faces_imgs.pop()
+            }
+        }
+        /*
         const newLODcache = this.faces.map((v, i) => {
             if (!v.img) return {};
             if (this.faces_imgs[i]) return this.faces_imgs[i];
             return {};
         });
         this.faces_imgs = newLODcache
+        */
     }
 
     protected updFaceImg(idx: number, im?: Image) {
@@ -311,7 +341,7 @@ class polymesh extends polyview {
         } this.faces_imgs[idx][imgh].push(cimg.clone());
     }
 
-    protected faces_imgs: {[imgh: string]: Image[]}[]; protected faces_imgs_cache_ref: {[imgh: string]: number};
+    protected faces_imgs: {[imgh: string]: Image[]}[]; protected faces_imgs_cache_stack: Image[][];
     get vfaces(): Polymesh.FaceLOD[] {
         if (this.isDel()) return null
         return this.faces.map((v, i) => {
@@ -356,7 +386,7 @@ class polymesh extends polyview {
     }
 
     __onDel() {
-        this.faces_imgs_cache_ref = null, this.faces_imgs = null, this.faces = null, this.points = null, this.pivot = null, this.flag = null, this.data = null;
+        this.faces_imgs_cache_stack = null, this.faces_imgs = null, this.faces = null, this.points = null, this.pivot = null, this.flag = null, this.data = null;
         Polymesh.__meshes_del(this);
     }
 
@@ -620,6 +650,7 @@ class polymesh extends polyview {
             else this.faces_imgs[idx] = {};
             this.faces_imgs[idx][imgh] = imgs.slice();
             if (this.faces_imgs[idx][imgh][this.faces_imgs[idx][imgh].length - 1]) this.faces_imgs[idx][imgh][this.faces_imgs[idx][imgh].length - 1] = img.clone();
+            this.makeFaceImgStack(idx, img)
         } else this.updFaceImg(idx)
     }
 
@@ -633,7 +664,7 @@ class polymesh extends polyview {
         if (this.isDel()) return
         if (!this.faces[idx].img) return;
         this.faces[idx].img = null
-        this.createFacesImgLODcache();
+        this.resetFacesImgLODcache(idx);
     }
 
     //% blockId=poly_getfaceoffset
